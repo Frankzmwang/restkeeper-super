@@ -20,7 +20,7 @@ public interface AffixFace {
      * @return
      */
     AffixVo upLoad(UploadMultipartFile multipartFile,
-                   AffixVo affixVo) throws IOException;
+                   AffixVo affixVo) ;
 
     /**
      * @Description 为上传绑定对应的业务Id

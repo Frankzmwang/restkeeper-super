@@ -49,21 +49,17 @@ public class AffixController {
     })
     public ResponseWrap<AffixVo> upLoad(
             @RequestParam("file")MultipartFile file,
-            AffixVo affixVo)
-            throws ProjectException {
-        AffixVo affixVoResult = null;
-        try {
-            UploadMultipartFile uploadMultipartFile = UploadMultipartFile
-                    .builder()
-                    .originalFilename(file.getOriginalFilename())
-                    .fileByte(IOUtils.toByteArray(file.getInputStream()))
-                    .build();
-            affixVoResult = affixFace.upLoad(uploadMultipartFile, affixVo);
-            return ResponseWrapBuild.build(AffixEnum.SUCCEED,affixVoResult);
-        } catch (IOException e) {
-            log.error("文件上传异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(AffixEnum.UPLOAD_FAIL);
-        }
+            AffixVo affixVo) throws IOException {
+        //构建文件上次对象
+        UploadMultipartFile uploadMultipartFile = UploadMultipartFile
+                .builder()
+                .originalFilename(file.getOriginalFilename())
+                .fileByte(IOUtils.toByteArray(file.getInputStream()))
+                .build();
+        //执行文件上传
+        AffixVo affixVoResult = affixFace.upLoad(uploadMultipartFile, affixVo);
+        return ResponseWrapBuild.build(AffixEnum.SUCCEED,affixVoResult);
+
     }
 
 
@@ -75,14 +71,10 @@ public class AffixController {
     @PostMapping("/select-by-businessId")
     @ApiOperation(value = "查询业务对应附件",notes = "查询业务对应附件")
     @ApiImplicitParam(name = "affixVo",value = "附件对象",required = true,dataType = "AffixVo")
-    public ResponseWrap<List<AffixVo>> findAffixVoByBusinessId(@RequestBody AffixVo affixVo) throws ProjectException {
-        try {
-            List<AffixVo> AffixVoList = affixFace.findAffixVoByBusinessId(affixVo.getBusinessId());
-            return ResponseWrapBuild.build(AffixEnum.SUCCEED,AffixVoList);
-        }catch (Exception e){
-            log.error("查询业务对应附件：{}",ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(AffixEnum.SELECT_AFFIX_BUSINESSID_FAIL);
-        }
+    public ResponseWrap<List<AffixVo>> findAffixVoByBusinessId(@RequestBody AffixVo affixVo)  {
+        //查询所有有效状态的附件
+        List<AffixVo> AffixVoList = affixFace.findAffixVoByBusinessId(affixVo.getBusinessId());
+        return ResponseWrapBuild.build(AffixEnum.SUCCEED,AffixVoList);
     }
 
     /**
@@ -93,14 +85,10 @@ public class AffixController {
     @DeleteMapping("/delete-by-businessId")
     @ApiOperation(value = "删除业务对应附件",notes = "删除业务对应附件")
     @ApiImplicitParam(name = "affixVo",value = "附件对象",required = true,dataType = "AffixVo")
-    public ResponseWrap<Boolean> deleteAffixVoByBusinessId(@RequestBody AffixVo affixVo) throws ProjectException {
-        try {
-            Boolean flag = affixFace.deleteAffixVoByBusinessId(affixVo.getBusinessId());
-            return ResponseWrapBuild.build(AffixEnum.SUCCEED,flag);
-        }catch (Exception e){
-            log.error("删除业务对应附件：{}",ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(AffixEnum.DELETE_AFFIX_BUSINESSID_FAIL);
-        }
+    public ResponseWrap<Boolean> deleteAffixVoByBusinessId(@RequestBody AffixVo affixVo) {
+        //删除业务对应的所有附件信息
+        Boolean flag = affixFace.deleteAffixVoByBusinessId(affixVo.getBusinessId());
+        return ResponseWrapBuild.build(AffixEnum.SUCCEED,flag);
     }
 
     /***
@@ -114,21 +102,17 @@ public class AffixController {
     @PostMapping("page/{pageNum}/{pageSize}")
     @ApiOperation(value = "查询图片分页",notes = "查询图片分页")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "affixVo",value = "图片查询对象",required = false,dataType = "AffixVo"),
-            @ApiImplicitParam(paramType = "path",name = "pageNum",value = "页码",example = "1",dataType = "Integer"),
-            @ApiImplicitParam(paramType = "path",name = "pageSize",value = "每页条数",example = "10",dataType = "Integer")
+        @ApiImplicitParam(name = "affixVo",value = "图片查询对象",required = false,dataType = "AffixVo"),
+        @ApiImplicitParam(paramType = "path",name = "pageNum",value = "页码",example = "1",dataType = "Integer"),
+        @ApiImplicitParam(paramType = "path",name = "pageSize",value = "每页条数",example = "10",dataType = "Integer")
     })
     public ResponseWrap<Page<AffixVo>> findAffixVoPage(
-            @RequestBody AffixVo affixVo,
-            @PathVariable("pageNum") int pageNum,
-            @PathVariable("pageSize") int pageSize)throws ProjectException {
-        try {
-            Page<AffixVo> affixVoPage = affixFace.findAffixVoPage(affixVo, pageNum, pageSize);
-            return ResponseWrapBuild.build(AffixEnum.SUCCEED,affixVoPage);
-        } catch (Exception e) {
-            log.error("查询附件列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(AffixEnum.PAGE_FAIL);
-        }
+        @RequestBody AffixVo affixVo,
+        @PathVariable("pageNum") int pageNum,
+        @PathVariable("pageSize") int pageSize) {
+        //查询附件分页信息
+        Page<AffixVo> affixVoPage = affixFace.findAffixVoPage(affixVo, pageNum, pageSize);
+        return ResponseWrapBuild.build(AffixEnum.SUCCEED,affixVoPage);
     }
 
     /**
@@ -139,14 +123,10 @@ public class AffixController {
     @DeleteMapping("/delete-by-affixId")
     @ApiOperation(value = "删除图片",notes = "删除图片")
     @ApiImplicitParam(name = "affixVo",value = "附件对象",required = true,dataType = "AffixVo")
-    public ResponseWrap<Boolean> deleteAffix(@RequestBody AffixVo affixVo) throws ProjectException {
-        try {
-            Boolean flag = affixFace.deleteAffix(affixVo.getCheckedIds());
-            return ResponseWrapBuild.build(AffixEnum.SUCCEED,flag);
-        }catch (Exception e){
-            log.error("删除业务对应附件：{}",ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(AffixEnum.DELETE_AFFIX_FAIL);
-        }
+    public ResponseWrap<Boolean> deleteAffix(@RequestBody AffixVo affixVo) {
+        //删除图片信息
+        Boolean flag = affixFace.deleteAffix(affixVo.getCheckedIds());
+        return ResponseWrapBuild.build(AffixEnum.SUCCEED,flag);
     }
 
 }

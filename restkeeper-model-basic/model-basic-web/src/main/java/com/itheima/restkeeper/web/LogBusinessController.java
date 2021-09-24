@@ -37,14 +37,14 @@ public class LogBusinessController {
     @PostMapping("page/{pageNum}/{pageSize}")
     @ApiOperation(value = "查询日志分页",notes = "查询日志分页")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "logBusinessVo",value = "日志查询对象",required = false,dataType = "LogBusinessVo"),
-            @ApiImplicitParam(paramType = "path",name = "pageNum",value = "页码",example = "1",dataType = "Integer"),
-            @ApiImplicitParam(paramType = "path",name = "pageSize",value = "每页条数",example = "10",dataType = "Integer")
+        @ApiImplicitParam(name = "logBusinessVo",value = "日志查询对象",required = false,dataType = "LogBusinessVo"),
+        @ApiImplicitParam(paramType = "path",name = "pageNum",value = "页码",example = "1",dataType = "Integer"),
+        @ApiImplicitParam(paramType = "path",name = "pageSize",value = "每页条数",example = "10",dataType = "Integer")
     })
     public ResponseWrap<Page<LogBusinessVo>> findLogBusinessVoPage(
-            @RequestBody LogBusinessVo logBusinessVo,
-            @PathVariable("pageNum") int pageNum,
-            @PathVariable("pageSize") int pageSize) throws ProjectException {
+        @RequestBody LogBusinessVo logBusinessVo,
+        @PathVariable("pageNum") int pageNum,
+        @PathVariable("pageSize") int pageSize){
         try {
             Page<LogBusinessVo> logBusinessVoPage = logBusinessFace.findLogBusinessVoPage(logBusinessVo, pageNum, pageSize);
             return ResponseWrapBuild.build(LogBusinessEnum.SUCCEED,logBusinessVoPage);

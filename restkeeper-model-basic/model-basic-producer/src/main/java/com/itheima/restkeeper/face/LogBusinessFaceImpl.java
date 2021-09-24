@@ -2,10 +2,15 @@ package com.itheima.restkeeper.face;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.LogBusinessFace;
+import com.itheima.restkeeper.enums.LogBusinessEnum;
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.LogBusiness;
 import com.itheima.restkeeper.req.LogBusinessVo;
 import com.itheima.restkeeper.service.ILogBusinessService;
 import com.itheima.restkeeper.utils.BeanConv;
+import com.itheima.restkeeper.utils.ExceptionsUtil;
+import com.itheima.restkeeper.utils.ResponseWrapBuild;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,6 +20,7 @@ import java.util.List;
  * @Description：日志查询
  */
 @DubboService(version = "${dubbo.application.version}",retries = 0,timeout = 5000)
+@Slf4j
 public class LogBusinessFaceImpl implements LogBusinessFace {
 
     @Autowired

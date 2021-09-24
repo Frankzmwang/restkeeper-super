@@ -37,7 +37,7 @@ public class PlacesController {
     @GetMapping("{parentId}")
     @ApiOperation(value = "查询省市区",notes = "查询省市区")
     @ApiImplicitParam(paramType = "path",name = "parentId",value = "父ID",example = "10",dataType = "Integer")
-    public ResponseWrap<List<PlacesVo>> findPlacesVoListByParentId(@PathVariable("parentId") Long parentId) throws ProjectException {
+    public ResponseWrap<List<PlacesVo>> findPlacesVoListByParentId(@PathVariable("parentId") Long parentId){
         try {
             List<PlacesVo> list = placesFace.findPlacesVoListByParentId(parentId);
             return ResponseWrapBuild.build(PlacesEnum.SUCCEED,list);

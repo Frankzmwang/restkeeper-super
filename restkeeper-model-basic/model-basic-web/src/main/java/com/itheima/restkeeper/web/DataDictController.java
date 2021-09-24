@@ -45,16 +45,12 @@ public class DataDictController {
         @ApiImplicitParam(paramType = "path",name = "pageNum",value = "页码",example = "1",dataType = "Integer"),
         @ApiImplicitParam(paramType = "path",name = "pageSize",value = "每页条数",example = "10",dataType = "Integer")
     })
-    ResponseWrap<Page<DataDictVo>> findDataDictVoPage(@RequestBody DataDictVo dataDictVo,
-                                                      @PathVariable("pageNum") int pageNum,
-                                                      @PathVariable("pageSize") int pageSize) throws ProjectException {
-        try {
-            Page<DataDictVo> dataDictVoPage = dataDictFace.findDataDictVoPage(dataDictVo, pageNum, pageSize);
-            return ResponseWrapBuild.build(DataDictEnum.SUCCEED,dataDictVoPage);
-        } catch (Exception e) {
-            log.error("查询数据字典列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(DataDictEnum.PAGE_FAIL);
-        }
+    ResponseWrap<Page<DataDictVo>> findDataDictVoPage(
+        @RequestBody DataDictVo dataDictVo,
+        @PathVariable("pageNum") int pageNum,
+        @PathVariable("pageSize") int pageSize) {
+        Page<DataDictVo> dataDictVoPage = dataDictFace.findDataDictVoPage(dataDictVo, pageNum, pageSize);
+        return ResponseWrapBuild.build(DataDictEnum.SUCCEED,dataDictVoPage);
     }
 
     /**
@@ -64,14 +60,9 @@ public class DataDictController {
     @PostMapping
     @ApiOperation(value = "添加字典",notes = "添加字典")
     @ApiImplicitParam(name = "dataDictVo",value = "字典信息",required = true,dataType = "DataDictVo")
-    public ResponseWrap<DataDictVo> saveDataDict(@RequestBody DataDictVo dataDictVo) throws ProjectException {
-        try {
-            DataDictVo dataDictVoResult = dataDictFace.saveDataDict(dataDictVo);
-            return ResponseWrapBuild.build(DataDictEnum.SUCCEED,dataDictVoResult);
-        } catch (Exception e) {
-            log.error("查询数据字典列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(DataDictEnum.SAVE_FAIL);
-        }
+    public ResponseWrap<DataDictVo> saveDataDict(@RequestBody DataDictVo dataDictVo) {
+        DataDictVo dataDictVoResult = dataDictFace.saveDataDict(dataDictVo);
+        return ResponseWrapBuild.build(DataDictEnum.SUCCEED,dataDictVoResult);
     }
 
     /**
@@ -81,14 +72,9 @@ public class DataDictController {
     @PatchMapping
     @ApiOperation(value = "修改字典",notes = "修改典")
     @ApiImplicitParam(name = "dataDictVo",value = "字典信息",required = true,dataType = "DataDictVo")
-    public ResponseWrap<Boolean> updateDataDict(@RequestBody DataDictVo dataDictVo) throws ProjectException {
-        try {
-            Boolean flag = dataDictFace.updateDataDict(dataDictVo);
-            return ResponseWrapBuild.build(DataDictEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("查询数据字典列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(DataDictEnum.UPDATE_FAIL);
-        }
+    public ResponseWrap<Boolean> updateDataDict(@RequestBody DataDictVo dataDictVo) {
+        Boolean flag = dataDictFace.updateDataDict(dataDictVo);
+        return ResponseWrapBuild.build(DataDictEnum.SUCCEED,flag);
     }
 
     /**
@@ -98,14 +84,9 @@ public class DataDictController {
     @GetMapping("{dataDictId}")
     @ApiOperation(value = "根ID查询数据字典",notes = "根ID查询数据字典")
     @ApiImplicitParam(paramType = "path",name = "dataDictId",value = "字典ID",example = "1",dataType = "Integer")
-    ResponseWrap<DataDictVo> findDataDictVoById(@PathVariable("dataDictId") String dataDictId) throws ProjectException {
-        try {
-            DataDictVo dataDictVo = dataDictFace.findDataDictVoById(dataDictId);
-            return ResponseWrapBuild.build(DataDictEnum.SUCCEED,dataDictVo);
-        } catch (Exception e) {
-            log.error("查询数据字典列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(DataDictEnum.SELECT_DATAKEY_FAIL);
-        }
+    ResponseWrap<DataDictVo> findDataDictVoById(@PathVariable("dataDictId") String dataDictId) {
+        DataDictVo dataDictVo = dataDictFace.findDataDictVoById(dataDictId);
+        return ResponseWrapBuild.build(DataDictEnum.SUCCEED,dataDictVo);
     }
 
     /**
@@ -116,14 +97,9 @@ public class DataDictController {
     @ApiOperation(value = "修改字典状态",notes = "修改字典状态")
     @ApiImplicitParam(paramType = "path",name = "enableFlag",value = "状态",example = "YES",dataType = "String")
     ResponseWrap<Boolean> updateByDataKey(@RequestParam(value = "dataKeys") List<String> dataKeys,
-                            @PathVariable("enableFlag") String enableFlag) throws ProjectException {
-        try {
-            Boolean flag = dataDictFace.updateByDataKey(dataKeys, enableFlag);
-            return ResponseWrapBuild.build(DataDictEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("查询数据字典列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(DataDictEnum.UPDATE_DATAKEY_ENABLEFLAG_FAIL);
-        }
+                            @PathVariable("enableFlag") String enableFlag) {
+        Boolean flag = dataDictFace.updateByDataKey(dataKeys, enableFlag);
+        return ResponseWrapBuild.build(DataDictEnum.SUCCEED,flag);
     }
 
     /**
@@ -133,14 +109,9 @@ public class DataDictController {
     @GetMapping("data-key/{dataKey}")
     @ApiOperation(value = "根据dataKey获取value",notes = "根据dataKey获取value")
     @ApiImplicitParam(paramType = "path",name = "dataKey",value = "字典dataKey",example = "URGE_TYPE0",dataType = "String")
-    ResponseWrap<String> findValueByDataKey(@PathVariable("dataKey") String dataKey) throws ProjectException {
-        try {
-            String valueByDataKey = dataDictFace.findValueByDataKey(dataKey);
-            return ResponseWrapBuild.build(DataDictEnum.SUCCEED,valueByDataKey);
-        } catch (Exception e) {
-            log.error("查询数据字典列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(DataDictEnum.SELECT_DATAKEY_FAIL);
-        }
+    ResponseWrap<String> findValueByDataKey(@PathVariable("dataKey") String dataKey) {
+        String valueByDataKey = dataDictFace.findValueByDataKey(dataKey);
+        return ResponseWrapBuild.build(DataDictEnum.SUCCEED,valueByDataKey);
     }
 
 
@@ -151,27 +122,17 @@ public class DataDictController {
     @GetMapping("parent-key/{parentKey}")
     @ApiOperation(value = "根据parentKey获取value",notes = "根据parentKey获取value")
     @ApiImplicitParam(paramType = "path",name = "parentKey",value = "字典parentKey",example = "URGE_TYPE",dataType = "String")
-    ResponseWrap<List<DataDictVo>> findDataDictVoByParentKey(@PathVariable("parentKey") String parentKey) throws ProjectException {
-        try {
-            List<DataDictVo> list = dataDictFace.findDataDictVoByParentKey(parentKey);
-            return ResponseWrapBuild.build(DataDictEnum.SUCCEED,list);
-        } catch (Exception e) {
-            log.error("查询数据字典列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(DataDictEnum.SELECT_PARENTKEY_FAIL);
-        }
+    ResponseWrap<List<DataDictVo>> findDataDictVoByParentKey(@PathVariable("parentKey") String parentKey) {
+        List<DataDictVo> list = dataDictFace.findDataDictVoByParentKey(parentKey);
+        return ResponseWrapBuild.build(DataDictEnum.SUCCEED,list);
     }
 
     @PostMapping("update-dataDict-enableFlag")
     @ApiOperation(value = "修改数字字典状态",notes = "修改数字字典状态")
     @ApiImplicitParam(name = "dataDictVo",value = "字典信息",required = true,dataType = "DataDictVo")
-    ResponseWrap<Boolean> updateDataDictEnableFlag(@RequestBody DataDictVo dataDictVo) throws ProjectException {
-        try {
-            Boolean flag = dataDictFace.updateDataDict(dataDictVo);
-            return ResponseWrapBuild.build(DataDictEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("修改数字字典状态：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(DataDictEnum.UPDATE_FAIL);
-        }
+    ResponseWrap<Boolean> updateDataDictEnableFlag(@RequestBody DataDictVo dataDictVo) {
+        Boolean flag = dataDictFace.updateDataDict(dataDictVo);
+        return ResponseWrapBuild.build(DataDictEnum.SUCCEED,flag);
     }
 }
 

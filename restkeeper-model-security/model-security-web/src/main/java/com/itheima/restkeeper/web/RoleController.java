@@ -40,21 +40,16 @@ public class RoleController {
     @PostMapping("page/{pageNum}/{pageSize}")
     @ApiOperation(value = "查询角色分页",notes = "查询角色分页")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "roleVo",value = "角色查询对象",required = false,dataType = "RoleVo"),
-            @ApiImplicitParam(paramType = "path",name = "pageNum",value = "页码",example = "1",dataType = "Integer"),
-            @ApiImplicitParam(paramType = "path",name = "pageSize",value = "每页条数",example = "10",dataType = "Integer")
+        @ApiImplicitParam(name = "roleVo",value = "角色查询对象",required = false,dataType = "RoleVo"),
+        @ApiImplicitParam(paramType = "path",name = "pageNum",value = "页码",example = "1",dataType = "Integer"),
+        @ApiImplicitParam(paramType = "path",name = "pageSize",value = "每页条数",example = "10",dataType = "Integer")
     })
     public ResponseWrap<Page<RoleVo>> findRoleVoPage(
-            @RequestBody RoleVo roleVo,
-            @PathVariable("pageNum") int pageNum,
-            @PathVariable("pageSize") int pageSize) throws ProjectException {
-        try {
-            Page<RoleVo> roleVoPage = roleFace.findRoleVoPage(roleVo, pageNum, pageSize);
-            return ResponseWrapBuild.build(RoleEnum.SUCCEED,roleVoPage);
-        } catch (Exception e) {
-            log.error("查询角色列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(RoleEnum.PAGE_FAIL);
-        }
+        @RequestBody RoleVo roleVo,
+        @PathVariable("pageNum") int pageNum,
+        @PathVariable("pageSize") int pageSize)  {
+        Page<RoleVo> roleVoPage = roleFace.findRoleVoPage(roleVo, pageNum, pageSize);
+        return ResponseWrapBuild.build(RoleEnum.SUCCEED,roleVoPage);
     }
 
 
@@ -66,14 +61,9 @@ public class RoleController {
     @PostMapping
     @ApiOperation(value = "保存角色",notes = "保存角色")
     @ApiImplicitParam(name = "roleVo",value = "角色对象",required = true,dataType = "RoleVo")
-    ResponseWrap<RoleVo> createRole(@RequestBody RoleVo roleVo) throws ProjectException {
-        try {
-            RoleVo roleVoResult = roleFace.createRole(roleVo);
-            return ResponseWrapBuild.build(RoleEnum.SUCCEED,roleVoResult);
-        } catch (Exception e) {
-            log.error("保存角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(RoleEnum.CREATE_FAIL);
-        }
+    ResponseWrap<RoleVo> createRole(@RequestBody RoleVo roleVo)  {
+        RoleVo roleVoResult = roleFace.createRole(roleVo);
+        return ResponseWrapBuild.build(RoleEnum.SUCCEED,roleVoResult);
     }
 
     /**
@@ -84,17 +74,9 @@ public class RoleController {
     @PatchMapping
     @ApiOperation(value = "修改角色",notes = "修改角色")
     @ApiImplicitParam(name = "roleVo",value = "角色对象",required = true,dataType = "RoleVo")
-    ResponseWrap<Boolean> updateRole(@RequestBody RoleVo roleVo) throws ProjectException {
-        if (EmptyUtil.isNullOrEmpty(roleVo.getId())){
-            throw new ProjectException(RoleEnum.UPDATE_FAIL);
-        }
-        try {
-            Boolean flag = roleFace.updateRole(roleVo);
-            return ResponseWrapBuild.build(RoleEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("修改角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(RoleEnum.UPDATE_FAIL);
-        }
+    ResponseWrap<Boolean> updateRole(@RequestBody RoleVo roleVo)  {
+        Boolean flag = roleFace.updateRole(roleVo);
+        return ResponseWrapBuild.build(RoleEnum.SUCCEED,flag);
     }
 
     /**
@@ -105,18 +87,10 @@ public class RoleController {
     @DeleteMapping
     @ApiOperation(value = "删除角色",notes = "删除角色")
     @ApiImplicitParam(name = "roleVo",value = "角色查询对象",required = true,dataType = "RoleVo")
-    ResponseWrap<Boolean> deleteRole(@RequestBody RoleVo roleVo )throws ProjectException {
+    ResponseWrap<Boolean> deleteRole(@RequestBody RoleVo roleVo ) {
         String[] checkedIds = roleVo.getCheckedIds();
-        if (EmptyUtil.isNullOrEmpty(checkedIds)){
-            throw new ProjectException(RoleEnum.DELETE_FAIL);
-        }
-        try {
-            Boolean flag = roleFace.deleteRole(checkedIds);
-            return ResponseWrapBuild.build(RoleEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("删除角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(RoleEnum.DELETE_FAIL);
-        }
+        Boolean flag = roleFace.deleteRole(checkedIds);
+        return ResponseWrapBuild.build(RoleEnum.SUCCEED,flag);
     }
 
     /**
@@ -125,26 +99,16 @@ public class RoleController {
      */
     @PostMapping("init-roleid-options")
     @ApiOperation(value = "角色下拉框",notes = "删除角色")
-    ResponseWrap<List<RoleVo>> initRoleIdOptions( )throws ProjectException {
-        try {
-            List<RoleVo> roleVoResult = roleFace.initRoleIdOptions();
-            return ResponseWrapBuild.build(RoleEnum.SUCCEED,roleVoResult);
-        } catch (Exception e) {
-            log.error("删除角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(RoleEnum.INIT_ROLEID_OPTIONS_FAIL);
-        }
+    ResponseWrap<List<RoleVo>> initRoleIdOptions( ) {
+        List<RoleVo> roleVoResult = roleFace.initRoleIdOptions();
+        return ResponseWrapBuild.build(RoleEnum.SUCCEED,roleVoResult);
     }
 
     @PostMapping("update-role-enableFlag")
     @ApiOperation(value = "修改角色状态",notes = "修改角色状态")
     @ApiImplicitParam(name = "roleVo",value = "角色对象",required = true,dataType = "RoleVo")
-    ResponseWrap<Boolean> updateRoleEnableFlag(@RequestBody RoleVo roleVo) throws ProjectException {
-        try {
-            Boolean flag = roleFace.updateRole(roleVo);
-            return ResponseWrapBuild.build(RoleEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("修改角色状态异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(RoleEnum.UPDATE_FAIL);
-        }
+    ResponseWrap<Boolean> updateRoleEnableFlag(@RequestBody RoleVo roleVo)  {
+        Boolean flag = roleFace.updateRole(roleVo);
+        return ResponseWrapBuild.build(RoleEnum.SUCCEED,flag);
     }
 }

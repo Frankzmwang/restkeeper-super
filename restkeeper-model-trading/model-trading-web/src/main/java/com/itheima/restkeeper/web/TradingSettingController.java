@@ -36,15 +36,10 @@ public class TradingSettingController {
     @ApiOperation(value = "保存或修改支付配置",notes = "保存或修改配置")
     @ApiImplicitParam(name = "tradingSettingVo",value = "支付配置对象",required = true,dataType = "TradingSettingVo")
     ResponseWrap<TradingSettingVo> saveOrUpdateTradingSetting(
-            @RequestBody TradingSettingVo tradingSettingVo) throws ProjectException {
-        try {
-            TradingSettingVo tradingSettingVoResult = tradingSettingFace
-                    .saveOrUpdateTradingSetting(tradingSettingVo);
-            return ResponseWrapBuild.build(TradingSettingEnum.SUCCEED,tradingSettingVoResult);
-        } catch (Exception e) {
-            log.error("修改支付配置异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TradingSettingEnum.UPDATE_FAIL);
-        }
+        @RequestBody TradingSettingVo tradingSettingVo) {
+        TradingSettingVo tradingSettingVoResult =
+                tradingSettingFace.saveOrUpdateTradingSetting(tradingSettingVo);
+        return ResponseWrapBuild.build(TradingSettingEnum.SUCCEED,tradingSettingVoResult);
     }
 
     /**
@@ -53,15 +48,10 @@ public class TradingSettingController {
      */
     @GetMapping
     @ApiOperation(value = "查询支付配置",notes = "查询配置")
-    ResponseWrap<TradingSettingVo> findTradingSettingByEnterpriseId() throws ProjectException {
-        try {
-            TradingSettingVo tradingSettingVoResult = tradingSettingFace
-                    .findTradingSettingByEnterpriseId();
+    ResponseWrap<TradingSettingVo> findTradingSettingByEnterpriseId() {
+            TradingSettingVo tradingSettingVoResult =
+                    tradingSettingFace.findTradingSettingByEnterpriseId();
             return ResponseWrapBuild.build(TradingSettingEnum.SUCCEED,tradingSettingVoResult);
-        } catch (Exception e) {
-            log.error("查询支付配置异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TradingSettingEnum.SELECT_FAIL);
-        }
     }
 
 }

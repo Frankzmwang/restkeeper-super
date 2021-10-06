@@ -45,13 +45,8 @@ public class LogBusinessController {
         @RequestBody LogBusinessVo logBusinessVo,
         @PathVariable("pageNum") int pageNum,
         @PathVariable("pageSize") int pageSize){
-        try {
             Page<LogBusinessVo> logBusinessVoPage = logBusinessFace.findLogBusinessVoPage(logBusinessVo, pageNum, pageSize);
             return ResponseWrapBuild.build(LogBusinessEnum.SUCCEED,logBusinessVoPage);
-        } catch (Exception e) {
-            log.error("查询日志列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(LogBusinessEnum.PAGE_FAIL);
-        }
     }
     
 }

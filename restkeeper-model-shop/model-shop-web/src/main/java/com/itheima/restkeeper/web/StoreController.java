@@ -33,9 +33,6 @@ public class StoreController {
     @DubboReference(version = "${dubbo.application.version}",check = false)
     StoreFace storeFace;
 
-    @DubboReference(version = "${dubbo.application.version}",check = false)
-    AffixFace affixFace;
-
     /**
      * @Description 门店列表
      * @param storeVo 查询条件
@@ -49,34 +46,24 @@ public class StoreController {
        @ApiImplicitParam(paramType = "path",name = "pageSize",value = "每页条数",dataType = "Integer")
     })
     public ResponseWrap<Page<StoreVo>> findStoreVoPage(
-            @RequestBody StoreVo storeVo,
-            @PathVariable("pageNum") int pageNum,
-            @PathVariable("pageSize") int pageSize) throws ProjectException {
-        try {
-            Page<StoreVo> storeVoPage = storeFace.findStoreVoPage(storeVo, pageNum, pageSize);
-            return ResponseWrapBuild.build(StoreEnum.SUCCEED,storeVoPage);
-        } catch (Exception e) {
-            log.error("查询门店列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(StoreEnum.PAGE_FAIL);
-        }
+        @RequestBody StoreVo storeVo,
+        @PathVariable("pageNum") int pageNum,
+        @PathVariable("pageSize") int pageSize) {
+        Page<StoreVo> storeVoPage = storeFace.findStoreVoPage(storeVo, pageNum, pageSize);
+        return ResponseWrapBuild.build(StoreEnum.SUCCEED,storeVoPage);
     }
 
     /**
-     * @Description 注册门店
+     * @Description 添加门店
      * @param storeVo 对象信息
      * @return
      */
     @PostMapping
-    @ApiOperation(value = "注册门店",notes = "注册门店")
+    @ApiOperation(value = "添加门店",notes = "添加门店")
     @ApiImplicitParam(name = "storeVo",value = "门店对象",required = true,dataType = "StoreVo")
-    ResponseWrap<StoreVo> createStore(@RequestBody StoreVo storeVo) throws ProjectException {
-        try {
-            StoreVo storeVoResult = storeFace.createStore(storeVo);
-            return ResponseWrapBuild.build(StoreEnum.SUCCEED,storeVoResult);
-        } catch (Exception e) {
-            log.error("保存门店异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(StoreEnum.CREATE_FAIL);
-        }
+    ResponseWrap<StoreVo> createStore(@RequestBody StoreVo storeVo) {
+        StoreVo storeVoResult = storeFace.createStore(storeVo);
+        return ResponseWrapBuild.build(StoreEnum.SUCCEED,storeVoResult);
     }
 
     /**
@@ -87,17 +74,9 @@ public class StoreController {
     @PatchMapping
     @ApiOperation(value = "修改门店",notes = "修改门店")
     @ApiImplicitParam(name = "storeVo",value = "门店对象",required = true,dataType = "StoreVo")
-    ResponseWrap<Boolean> updateStore(@RequestBody StoreVo storeVo) throws ProjectException {
-        if (EmptyUtil.isNullOrEmpty(storeVo.getId())){
-            throw new ProjectException(StoreEnum.UPDATE_FAIL);
-        }
-        try {
-            Boolean flag = storeFace.updateStore(storeVo);
-            return ResponseWrapBuild.build(StoreEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("保存门店异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(StoreEnum.UPDATE_FAIL);
-        }
+    ResponseWrap<Boolean> updateStore(@RequestBody StoreVo storeVo) {
+        Boolean flag = storeFace.updateStore(storeVo);
+        return ResponseWrapBuild.build(StoreEnum.SUCCEED,flag);
     }
 
     /**
@@ -108,22 +87,10 @@ public class StoreController {
     @DeleteMapping
     @ApiOperation(value = "删除门店",notes = "删除门店")
     @ApiImplicitParam(name = "storeVo",value = "门店查询对象",required = true,dataType = "StoreVo")
-    ResponseWrap<Boolean> deleteStore(@RequestBody StoreVo storeVo ) throws ProjectException {
+    ResponseWrap<Boolean> deleteStore(@RequestBody StoreVo storeVo ) {
         String[] checkedIds = storeVo.getCheckedIds();
-        if (EmptyUtil.isNullOrEmpty(checkedIds)){
-            throw new ProjectException(StoreEnum.DELETE_FAIL);
-        }
-        try {
-            Boolean flag = storeFace.deleteStore(checkedIds);
-            //删除图片
-            for (String checkedId : checkedIds) {
-                affixFace.deleteAffixVoByBusinessId(Long.valueOf(checkedId));
-            }
-            return ResponseWrapBuild.build(StoreEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("删除门店异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(StoreEnum.DELETE_FAIL);
-        }
+        Boolean flag = storeFace.deleteStore(checkedIds);
+        return ResponseWrapBuild.build(StoreEnum.SUCCEED,flag);
     }
 
     /**
@@ -134,18 +101,9 @@ public class StoreController {
     @GetMapping("{storeId}")
     @ApiOperation(value = "查找门店",notes = "查找门店")
     @ApiImplicitParam(paramType = "path",name = "storeId",value = "门店Id",dataType = "Long")
-    ResponseWrap<StoreVo> findStoreByStoreId(@PathVariable("storeId") Long storeId) throws ProjectException {
-
-        if (EmptyUtil.isNullOrEmpty(storeId)){
-            throw new ProjectException(StoreEnum.SELECT_STORE_FAIL);
-        }
-        try {
-            StoreVo storeVo = storeFace.findStoreByStoreId(storeId);
-            return ResponseWrapBuild.build(StoreEnum.SUCCEED,storeVo);
-        } catch (Exception e) {
-            log.error("查找门店所有门店异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(StoreEnum.SELECT_STORE_FAIL);
-        }
+    ResponseWrap<StoreVo> findStoreByStoreId(@PathVariable("storeId") Long storeId) {
+        StoreVo storeVo = storeFace.findStoreByStoreId(storeId);
+        return ResponseWrapBuild.build(StoreEnum.SUCCEED,storeVo);
     }
 
     /**
@@ -154,26 +112,20 @@ public class StoreController {
      */
     @GetMapping("list")
     @ApiOperation(value = "查找门店列表",notes = "查找门店列表")
-    ResponseWrap<List<StoreVo>> findStoreVoList() throws ProjectException {
-        try {
-            List<StoreVo> list = storeFace.findStoreVoList();
-            return ResponseWrapBuild.build(StoreEnum.SUCCEED,list);
-        } catch (Exception e) {
-            log.error("查找门店所有门店异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(StoreEnum.SELECT_STORE_LIST_FAIL);
-        }
+    ResponseWrap<List<StoreVo>> findStoreVoList() {
+        List<StoreVo> list = storeFace.findStoreVoList();
+        return ResponseWrapBuild.build(StoreEnum.SUCCEED,list);
     }
 
+    /**
+     * @Description 修改门店状态
+     * @return
+     */
     @PostMapping("update-store-enableFlag")
     @ApiOperation(value = "修改门店状态",notes = "修改门店状态")
-    ResponseWrap<Boolean> updateStoreEnableFlag(@RequestBody StoreVo storeVo) throws ProjectException {
-        try {
-            Boolean flag = storeFace.updateStore(storeVo);
-            return ResponseWrapBuild.build(StoreEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("修改门店状态：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(StoreEnum.UPDATE_FAIL);
-        }
+    ResponseWrap<Boolean> updateStoreEnableFlag(@RequestBody StoreVo storeVo) {
+        Boolean flag = storeFace.updateStore(storeVo);
+        return ResponseWrapBuild.build(StoreEnum.SUCCEED,flag);
     }
 
 }

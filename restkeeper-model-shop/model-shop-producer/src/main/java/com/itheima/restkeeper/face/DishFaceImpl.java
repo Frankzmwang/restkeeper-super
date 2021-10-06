@@ -1,18 +1,22 @@
 package com.itheima.restkeeper.face;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.restkeeper.AffixFace;
 import com.itheima.restkeeper.DishFace;
 import com.itheima.restkeeper.constant.AppletCacheConstant;
 import com.itheima.restkeeper.enums.DishEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.Dish;
 import com.itheima.restkeeper.pojo.DishFlavor;
+import com.itheima.restkeeper.req.AffixVo;
 import com.itheima.restkeeper.req.DishVo;
 import com.itheima.restkeeper.service.IDishFlavorService;
 import com.itheima.restkeeper.service.IDishService;
 import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.EmptyUtil;
+import com.itheima.restkeeper.utils.ExceptionsUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
 import org.redisson.api.RAtomicLong;
@@ -23,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName DishFaceImpl.java
@@ -47,54 +52,101 @@ public class DishFaceImpl implements DishFace {
     @Autowired
     RedissonClient redissonClient;
 
+    @DubboReference(version = "${dubbo.application.version}",check = false)
+    AffixFace affixFace;
 
     @Override
     public Page<DishVo> findDishVoPage(DishVo dishVo, int pageNum, int pageSize) {
-        Page<Dish> page = dishService.findDishVoPage(dishVo, pageNum, pageSize);
-        Page<DishVo> pageVo = new Page<>();
-        BeanConv.toBean(page,pageVo);
-        //结果集转换
-        List<Dish> dishList = page.getRecords();
-        List<DishVo> dishVoList = BeanConv.toBeanList(dishList,DishVo.class);
-        if (!EmptyUtil.isNullOrEmpty(dishVoList)){
-            dishVoList.forEach(n->{
-                List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(n.getId());
-                List<String> dishFavorList = new ArrayList<>();
-                for (DishFlavor dishFlavor : dishFlavors) {
-                    dishFavorList.add(String.valueOf(dishFlavor.getDataKey()));
-                }
-                String[] dishFlavorDataKey = new String[dishFavorList.size()];
-                dishFavorList.toArray(dishFlavorDataKey);
-                n.setHasDishFlavor(dishFlavorDataKey);
-            });
+        try {
+            Page<Dish> page = dishService.findDishVoPage(dishVo, pageNum, pageSize);
+            Page<DishVo> pageVo = new Page<>();
+            BeanConv.toBean(page,pageVo);
+            //结果集转换
+            List<Dish> dishList = page.getRecords();
+            List<DishVo> dishVoList = BeanConv.toBeanList(dishList,DishVo.class);
+            if (!EmptyUtil.isNullOrEmpty(dishVoList)){
+                dishVoList.forEach(n->{
+                    //处理附件
+                    List<AffixVo> affixVoList = affixFace.findAffixVoByBusinessId(n.getId());
+                    if (!EmptyUtil.isNullOrEmpty(affixVoList)){
+                        n.setAffixVo(affixVoList.get(0));
+                    }
+                    //处理口味
+                    List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(n.getId());
+                    List<String> dishFavorList = new ArrayList<>();
+                    for (DishFlavor dishFlavor : dishFlavors) {
+                        dishFavorList.add(String.valueOf(dishFlavor.getDataKey()));
+                    }
+                    String[] dishFlavorDataKey = new String[dishFavorList.size()];
+                    dishFavorList.toArray(dishFlavorDataKey);
+                    n.setHasDishFlavor(dishFlavorDataKey);
+                });
+            }
+            pageVo.setRecords(dishVoList);
+            return pageVo;
+        } catch (Exception e) {
+            log.error("查询菜品列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(DishEnum.PAGE_FAIL);
         }
-        pageVo.setRecords(dishVoList);
-        return pageVo;
     }
 
     @Override
     public DishVo createDish(DishVo dishVo) {
-        DishVo dishVoResult = BeanConv.toBean(dishService.createDish(dishVo), DishVo.class);
-        dishVoResult.setHasDishFlavor(dishVo.getHasDishFlavor());
-        //构建初始化库存
-        String key = AppletCacheConstant.REPERTORY_DISH+dishVoResult.getId();
-        RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
-        atomicLong.set(dishVoResult.getDishNumber());
-        return  dishVoResult;
+        try {
+            DishVo dishVoResult = BeanConv.toBean(dishService.createDish(dishVo), DishVo.class);
+            dishVoResult.setHasDishFlavor(dishVo.getHasDishFlavor());
+            //构建初始化库存
+            String key = AppletCacheConstant.REPERTORY_DISH+dishVoResult.getId();
+            RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
+            atomicLong.set(dishVoResult.getDishNumber());
+            //绑定附件
+            if (!EmptyUtil.isNullOrEmpty(dishVoResult)){
+                affixFace.bindBusinessId(AffixVo.builder()
+                        .businessId(dishVoResult.getId())
+                        .id(dishVo.getAffixVo().getId())
+                        .build());
+            }
+            dishVoResult.setAffixVo(AffixVo.builder()
+                    .pathUrl(dishVo.getAffixVo().getPathUrl())
+                    .businessId(dishVoResult.getId())
+                    .id(dishVo.getAffixVo().getId()).build());
+            return  dishVoResult;
+        } catch (Exception e) {
+            log.error("保存菜品异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(DishEnum.CREATE_FAIL);
+        }
     }
 
     @Override
     public Boolean updateDish(DishVo dishVo) throws ProjectException {
-        Boolean flag = dishService.updateDish(dishVo);
+        Boolean flag = false;
         //菜品库存锁，前段小程序点餐或后台修改订单项都需要加锁
         String keyLock = AppletCacheConstant.REPERTORY_DISH_LOCK+dishVo.getId();
         RLock lock = redissonClient.getLock(keyLock);
         //添加可重入锁
         try {
             if (lock.tryLock(
-                    AppletCacheConstant.REDIS_LEASETIME,
-                    AppletCacheConstant.REDIS_WAIT_TIME,
-                    TimeUnit.SECONDS)){
+                AppletCacheConstant.REDIS_WAIT_TIME,
+                AppletCacheConstant.REDIS_LEASETIME,
+                TimeUnit.SECONDS)){
+                //修改菜品
+                flag = dishService.updateDish(dishVo);
+                //次欧冠菜品图片
+                if (flag){
+                    List<AffixVo> affixVoList = affixFace.findAffixVoByBusinessId(dishVo.getId());
+                    List<Long> affixIds = affixVoList.stream()
+                            .map(AffixVo::getId)
+                            .collect(Collectors.toList());
+                    if (!affixIds.contains(dishVo.getAffixVo().getId())){
+                        //删除图片
+                        flag = affixFace.deleteAffixVoByBusinessId(dishVo.getId());
+                        //绑定新图片
+                        affixFace.bindBusinessId(AffixVo.builder()
+                                .businessId(dishVo.getId())
+                                .id(dishVo.getAffixVo().getId())
+                                .build());
+                    }
+                }
                 //构建redis库存
                 String key = AppletCacheConstant.REPERTORY_DISH+dishVo.getId();
                 RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
@@ -112,22 +164,35 @@ public class DishFaceImpl implements DishFace {
 
     @Override
     public Boolean deleteDish(String[] checkedIds) {
-        Boolean flag = dishService.deleteDish(checkedIds);
-        for (String checkedId : checkedIds) {
-            String key = AppletCacheConstant.REPERTORY_DISH+checkedId;
-            RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
-            atomicLong.delete();
+        try {
+            Boolean flag = dishService.deleteDish(checkedIds);
+            for (String checkedId : checkedIds) {
+                //删除菜品库存
+                String key = AppletCacheConstant.REPERTORY_DISH+checkedId;
+                RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
+                atomicLong.delete();
+                //删除图片
+                affixFace.deleteAffixVoByBusinessId(Long.valueOf(checkedId));
+            }
+            return flag;
+        } catch (Exception e) {
+            log.error("删除菜品异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(DishEnum.DELETE_FAIL);
         }
-        return flag;
     }
 
     @Override
     public DishVo findDishByDishId(Long dishId) {
-        Dish dish = dishService.getById(dishId);
-        if (!EmptyUtil.isNullOrEmpty(dish)){
-            return BeanConv.toBean(dish,DishVo.class);
+        try {
+            Dish dish = dishService.getById(dishId);
+            if (!EmptyUtil.isNullOrEmpty(dish)){
+                return BeanConv.toBean(dish,DishVo.class);
+            }
+            return null;
+        } catch (Exception e) {
+            log.error("查找菜品所有菜品异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(DishEnum.SELECT_DISH_FAIL);
         }
-        return null;
     }
 
 }

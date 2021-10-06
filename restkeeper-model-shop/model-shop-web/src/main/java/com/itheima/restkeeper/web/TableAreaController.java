@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,27 +46,22 @@ public class TableAreaController {
        @ApiImplicitParam(paramType = "path",name = "pageSize",value = "每页条数",dataType = "Integer")
     })
     public ResponseWrap<Page<TableAreaVo>> findTableAreaVoPage(
-            @RequestBody TableAreaVo tableAreaVo,
-            @PathVariable("pageNum") int pageNum,
-            @PathVariable("pageSize") int pageSize) throws ProjectException {
-        try {
-            Page<TableAreaVo> tableAreaVoPage = tableAreaFace.findTableAreaVoPage(tableAreaVo, pageNum, pageSize);
-            return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,tableAreaVoPage);
-        } catch (Exception e) {
-            log.error("查询区域列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TableAreaEnum.PAGE_FAIL);
-        }
+        @RequestBody TableAreaVo tableAreaVo,
+        @PathVariable("pageNum") int pageNum,
+        @PathVariable("pageSize") int pageSize) {
+        Page<TableAreaVo> tableAreaVoPage = tableAreaFace.findTableAreaVoPage(tableAreaVo, pageNum, pageSize);
+        return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,tableAreaVoPage);
     }
 
     /**
-     * @Description 注册区域
+     * @Description 添加区域
      * @param tableAreaVo 对象信息
      * @return
      */
     @PostMapping
-    @ApiOperation(value = "注册区域",notes = "注册区域")
+    @ApiOperation(value = "添加区域",notes = "添加区域")
     @ApiImplicitParam(name = "tableAreaVo",value = "区域对象",required = true,dataType = "TableAreaVo")
-    ResponseWrap<TableAreaVo> createTableArea(@RequestBody TableAreaVo tableAreaVo) throws ProjectException {
+    ResponseWrap<TableAreaVo> createTableArea(@RequestBody TableAreaVo tableAreaVo) {
         try {
             TableAreaVo tableAreaVoResult = tableAreaFace.createTableArea(tableAreaVo);
             return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,tableAreaVoResult);
@@ -83,17 +79,9 @@ public class TableAreaController {
     @PatchMapping
     @ApiOperation(value = "修改区域",notes = "修改区域")
     @ApiImplicitParam(name = "tableAreaVo",value = "区域对象",required = true,dataType = "TableAreaVo")
-    ResponseWrap<Boolean> updateTableArea(@RequestBody TableAreaVo tableAreaVo) throws ProjectException {
-        if (EmptyUtil.isNullOrEmpty(tableAreaVo.getId())){
-            throw new ProjectException(TableAreaEnum.UPDATE_FAIL);
-        }
-        try {
-            Boolean flag = tableAreaFace.updateTableArea(tableAreaVo);
-            return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("保存区域异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TableAreaEnum.UPDATE_FAIL);
-        }
+    ResponseWrap<Boolean> updateTableArea(@RequestBody TableAreaVo tableAreaVo) {
+        Boolean flag = tableAreaFace.updateTableArea(tableAreaVo);
+        return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,flag);
     }
 
     /**
@@ -104,18 +92,10 @@ public class TableAreaController {
     @DeleteMapping
     @ApiOperation(value = "删除区域",notes = "删除区域")
     @ApiImplicitParam(name = "tableAreaVo",value = "区域查询对象",required = true,dataType = "TableAreaVo")
-    ResponseWrap<Boolean> deleteTableArea(@RequestBody TableAreaVo tableAreaVo ) throws ProjectException {
+    ResponseWrap<Boolean> deleteTableArea(@RequestBody TableAreaVo tableAreaVo ) {
         String[] checkedIds = tableAreaVo.getCheckedIds();
-        if (EmptyUtil.isNullOrEmpty(checkedIds)){
-            throw new ProjectException(TableAreaEnum.DELETE_FAIL);
-        }
-        try {
-            Boolean flag = tableAreaFace.deleteTableArea(checkedIds);
-            return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("删除区域异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TableAreaEnum.DELETE_FAIL);
-        }
+        Boolean flag = tableAreaFace.deleteTableArea(checkedIds);
+        return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,flag);
     }
 
     /**
@@ -126,18 +106,9 @@ public class TableAreaController {
     @GetMapping("{tableAreaId}")
     @ApiOperation(value = "查找区域",notes = "查找区域")
     @ApiImplicitParam(paramType = "path",name = "tableAreaId",value = "区域Id",example = "1",dataType = "Long")
-    ResponseWrap<TableAreaVo> findTableAreaByTableAreaId(@PathVariable("tableAreaId") Long tableAreaId) throws ProjectException {
-
-        if (EmptyUtil.isNullOrEmpty(tableAreaId)){
-            throw new ProjectException(TableAreaEnum.SELECT_AREA_FAIL);
-        }
-        try {
-            TableAreaVo tableAreaVo = tableAreaFace.findTableAreaByTableAreaId(tableAreaId);
-            return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,tableAreaVo);
-        } catch (Exception e) {
-            log.error("查找区域所有区域异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TableAreaEnum.SELECT_AREA_FAIL);
-        }
+    ResponseWrap<TableAreaVo> findTableAreaByTableAreaId(@PathVariable("tableAreaId") Long tableAreaId) {
+        TableAreaVo tableAreaVo = tableAreaFace.findTableAreaByTableAreaId(tableAreaId);
+        return ResponseWrapBuild.build(TableAreaEnum.SUCCEED, tableAreaVo);
     }
 
     /**
@@ -146,25 +117,15 @@ public class TableAreaController {
      */
     @GetMapping("list")
     @ApiOperation(value = "查找区域列表",notes = "查找区域列表")
-    ResponseWrap<List<TableAreaVo>> findTableAreaVoList() throws ProjectException {
-        try {
-            List<TableAreaVo> list = tableAreaFace.findTableAreaVoList();
-            return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,list);
-        } catch (Exception e) {
-            log.error("查找区域所有区域异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TableAreaEnum.SELECT_AREA_LIST_FAIL);
-        }
+    ResponseWrap<List<TableAreaVo>> findTableAreaVoList() {
+        List<TableAreaVo> list = tableAreaFace.findTableAreaVoList();
+        return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,list);
     }
 
     @PostMapping("update-tableArea-enableFlag")
     @ApiOperation(value = "修改区域状态",notes = "修改区域状态")
-    ResponseWrap<Boolean> updateTableAreaEnableFlag(@RequestBody TableAreaVo tableAreaVo) throws ProjectException {
-        try {
-            Boolean flag = tableAreaFace.updateTableArea(tableAreaVo);
-            return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,flag);
-        } catch (Exception e) {
-            log.error("修改区域状态：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TableAreaEnum.UPDATE_FAIL);
-        }
+    ResponseWrap<Boolean> updateTableAreaEnableFlag(@RequestBody TableAreaVo tableAreaVo) {
+        Boolean flag = tableAreaFace.updateTableArea(tableAreaVo);
+        return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,flag);
     }
 }

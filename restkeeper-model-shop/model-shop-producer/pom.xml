@@ -28,6 +28,16 @@
 
         <dependency>
             <groupId>com.itheima.restkeeper</groupId>
+            <artifactId>model-trading-interface</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.itheima.restkeeper</groupId>
+            <artifactId>model-basic-interface</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.itheima.restkeeper</groupId>
             <artifactId>model-shop-service</artifactId>
         </dependency>
 

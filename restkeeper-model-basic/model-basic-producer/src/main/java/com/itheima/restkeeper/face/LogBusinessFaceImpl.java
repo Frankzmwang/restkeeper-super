@@ -28,13 +28,19 @@ public class LogBusinessFaceImpl implements LogBusinessFace {
 
     @Override
     public Page<LogBusinessVo> findLogBusinessVoPage(LogBusinessVo logBusinessVo, int pageNum, int pageSize) {
-        Page<LogBusiness> page = logBusinessService.findLogBusinessVoPage(logBusinessVo, pageNum, pageSize);
-        Page<LogBusinessVo> pageVo = new Page<>();
-        BeanConv.toBean(page,pageVo);
-        //结果集转换
-        List<LogBusiness> routeList = page.getRecords();
-        List<LogBusinessVo> routeVoList = BeanConv.toBeanList(routeList,LogBusinessVo.class);
-        pageVo.setRecords(routeVoList);
-        return pageVo;
+        try {
+            Page<LogBusiness> page = logBusinessService.findLogBusinessVoPage(logBusinessVo, pageNum, pageSize);
+            Page<LogBusinessVo> pageVo = new Page<>();
+            BeanConv.toBean(page,pageVo);
+            //结果集转换
+            List<LogBusiness> routeList = page.getRecords();
+            List<LogBusinessVo> routeVoList = BeanConv.toBeanList(routeList,LogBusinessVo.class);
+            pageVo.setRecords(routeVoList);
+            return pageVo;
+        } catch (Exception e) {
+            log.error("查询日志列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(LogBusinessEnum.PAGE_FAIL);
+        }
+
     }
 }

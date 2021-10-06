@@ -1,6 +1,8 @@
 package com.itheima.restkeeper.face;
 
 import com.itheima.restkeeper.UserAdapterFace;
+import com.itheima.restkeeper.enums.UserEnum;
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.Resource;
 import com.itheima.restkeeper.pojo.Role;
 import com.itheima.restkeeper.pojo.User;
@@ -9,6 +11,7 @@ import com.itheima.restkeeper.req.RoleVo;
 import com.itheima.restkeeper.req.UserVo;
 import com.itheima.restkeeper.service.IUserAdapterService;
 import com.itheima.restkeeper.utils.BeanConv;
+import com.itheima.restkeeper.utils.ExceptionsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +31,36 @@ public class UserAdapterFaceImpl implements UserAdapterFace {
 
     @Override
     public UserVo findUserByUsernameAndEnterpriseId(String username,Long enterpriseId) {
-        User user = userAdapterService.findUserByUsernameAndEnterpriseId(username,enterpriseId);
-        return BeanConv.toBean(user,UserVo.class);
+        try {
+            User user = userAdapterService.findUserByUsernameAndEnterpriseId(username,enterpriseId);
+            return BeanConv.toBean(user,UserVo.class);
+        } catch (Exception e) {
+            log.error("查找用户有角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(UserEnum.SELECT_USER_FAIL);
+        }
     }
 
     @Override
     public List<RoleVo> findRoleByUserId(Long userId) {
-        List<Role> roles = userAdapterService.findRoleByUserId(userId);
-        return BeanConv.toBeanList(roles,RoleVo.class);
+        try {
+            List<Role> roles = userAdapterService.findRoleByUserId(userId);
+            return BeanConv.toBeanList(roles,RoleVo.class);
+        } catch (Exception e) {
+            log.error("查找用户有角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(UserEnum.SELECT_ROLE_FAIL);
+        }
+
     }
 
     @Override
     public List<ResourceVo> findResourceByUserId(Long userId) {
-        List<Resource> resources = userAdapterService.findResourceByUserId(userId);
-        return BeanConv.toBeanList(resources,ResourceVo.class);
+        try {
+            List<Resource> resources = userAdapterService.findResourceByUserId(userId);
+            return BeanConv.toBeanList(resources,ResourceVo.class);
+        } catch (Exception e) {
+            log.error("查询用户有资源异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(UserEnum.SELECT_RESOURCE_FAIL);
+        }
+
     }
 }

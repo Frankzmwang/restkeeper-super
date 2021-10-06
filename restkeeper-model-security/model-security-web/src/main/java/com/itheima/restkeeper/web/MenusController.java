@@ -40,14 +40,9 @@ public class MenusController {
     @GetMapping("select-by-systemCode/{systemCode}")
     @ApiOperation(value ="查询系统菜单",notes = "查询系统菜单")
     @ApiImplicitParam(paramType = "path",name = "systemCode",value = "系统编号",example = "应用systemCode",dataType = "String")
-    ResponseWrap<List<MenuVo>> findMenusBySystemCode(@PathVariable("systemCode") String systemCode) throws ProjectException {
-        try {
-            List<MenuVo> menus = menusFace.findMenusBySystemCode(systemCode);
-            return ResponseWrapBuild.build(MenusEnum.SUCCEED,menus);
-        } catch (Exception e) {
-            log.error("查询附件列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(MenusEnum.PAGE_FAIL);
-        }
+    ResponseWrap<List<MenuVo>> findMenusBySystemCode(@PathVariable("systemCode") String systemCode) {
+        List<MenuVo> menus = menusFace.findMenusBySystemCode(systemCode);
+        return ResponseWrapBuild.build(MenusEnum.SUCCEED,menus);
     }
 
 }

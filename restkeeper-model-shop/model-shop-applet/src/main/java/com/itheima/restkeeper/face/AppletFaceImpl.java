@@ -1,13 +1,12 @@
 package com.itheima.restkeeper.face;
 
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
+import com.itheima.restkeeper.AffixFace;
 import com.itheima.restkeeper.AppletFace;
+import com.itheima.restkeeper.DataDictFace;
 import com.itheima.restkeeper.constant.AppletCacheConstant;
 import com.itheima.restkeeper.constant.SuperConstant;
-import com.itheima.restkeeper.enums.OpenTableEnum;
-import com.itheima.restkeeper.enums.OrderItemEnum;
-import com.itheima.restkeeper.enums.RotaryTableEnum;
-import com.itheima.restkeeper.enums.ShoppingCartEnum;
+import com.itheima.restkeeper.enums.*;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.*;
 import com.itheima.restkeeper.req.*;
@@ -16,9 +15,9 @@ import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
-import org.redisson.RedissonMultiLock;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RLock;
 import org.redisson.api.RMapCache;
@@ -31,8 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static io.prometheus.client.Summary.build;
 
 /**
  * @ClassName AppletFaceImpl.java
@@ -55,6 +52,12 @@ import static io.prometheus.client.Summary.build;
     }
 )
 public class AppletFaceImpl implements AppletFace {
+
+    @DubboReference(version = "${dubbo.application.version}",check = false)
+    AffixFace affixFace;
+
+    @DubboReference(version = "${dubbo.application.version}",check = false)
+    DataDictFace dataDictFace;
 
     @Autowired
     RedissonClient redissonClient;
@@ -88,74 +91,96 @@ public class AppletFaceImpl implements AppletFace {
 
     @Override
     public Boolean isOpen(Long tableId) {
-        //1、查询桌台信息，是否为使用中
-        Table table = tableService.getById(tableId);
-        Boolean flagTableStatus = table.getTableStatus().equals(SuperConstant.USE);
-        //2、是否已经有【待支付、支付中】订单存在
-        OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
-        Boolean flagOrderVo = !EmptyUtil.isNullOrEmpty(orderVoResult);
-        if (flagTableStatus||flagOrderVo){
-            return true;
+        try {
+            //1、查询桌台信息，是否为使用中
+            Table table = tableService.getById(tableId);
+            Boolean flagTableStatus = table.getTableStatus().equals(SuperConstant.USE);
+            //2、是否已经有【待支付、支付中】订单存在
+            OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
+            Boolean flagOrderVo = !EmptyUtil.isNullOrEmpty(orderVoResult);
+            if (flagTableStatus||flagOrderVo){
+                return true;
+            }
+            return false;
+        }catch (Exception e){
+            log.error("查询桌台信息异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(TableEnum.SELECT_TABLE_FAIL);
         }
-        return false;
     }
 
     @Override
     public AppletInfoVo findAppletInfoVoByTableId(Long tableId) {
-        //1、查询桌台信息
-        Table table = tableService.getById(tableId);
-        TableVo tableVo = BeanConv.toBean(table, TableVo.class);
-        //2、查询门店
-        Store store = storeService.getById(table.getStoreId());
-        StoreVo storeVo = BeanConv.toBean(store, StoreVo.class);
-        //3、查询品牌
-        Brand brand = brandService.getById(store.getBrandId());
-        BrandVo brandVo = BeanConv.toBean(brand, BrandVo.class);
-        //4、查询分类
-        List<Category> categorys = categoryService.findCategoryVoByStoreId(table.getStoreId());
-        List<CategoryVo> categoryVoList = BeanConv.toBeanList(categorys, CategoryVo.class);
-        //5、查询菜品
-        List<Dish> dishs = dishService.findDishVoByStoreId(table.getStoreId());
-        List<DishVo> dishVos = BeanConv.toBeanList(dishs, DishVo.class);
-        //6、查询菜品口味
-        dishVos.forEach(dishVo -> {
-            List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(dishVo.getId());
-            List<DishFlavorVo> dishFlavorVos = BeanConv.toBeanList(dishFlavors, DishFlavorVo.class);
-            dishVo.setDishFlavorVos(dishFlavorVos);
-        });
-        //7、构建返回对象
-        AppletInfoVo appletInfoVo = AppletInfoVo.builder()
-                .tableVo(tableVo)
-                .storeVo(storeVo)
-                .brandVo(brandVo)
-                .categoryVos(categoryVoList)
-                .dishVos(dishVos)
-                .build();
-        return appletInfoVo;
+        try {
+            //1、查询桌台信息
+            Table table = tableService.getById(tableId);
+            TableVo tableVo = BeanConv.toBean(table, TableVo.class);
+            //2、查询门店
+            Store store = storeService.getById(table.getStoreId());
+            StoreVo storeVo = BeanConv.toBean(store, StoreVo.class);
+            //3、查询品牌
+            Brand brand = brandService.getById(store.getBrandId());
+            BrandVo brandVo = BeanConv.toBean(brand, BrandVo.class);
+            //3.1、处理品牌图片
+            List<AffixVo> affixVoListBrand = affixFace.findAffixVoByBusinessId(brandVo.getId());
+            brandVo.setAffixVo(affixVoListBrand.get(0));
+            //4、查询分类
+            List<Category> categorys = categoryService.findCategoryVoByStoreId(table.getStoreId());
+            List<CategoryVo> categoryVoList = BeanConv.toBeanList(categorys, CategoryVo.class);
+            //5、查询菜品
+            List<Dish> dishs = dishService.findDishVoByStoreId(table.getStoreId());
+            List<DishVo> dishVos = BeanConv.toBeanList(dishs, DishVo.class);
+            //6、查询菜品口味
+            dishVos.forEach(dishVo -> {
+                List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(dishVo.getId());
+                List<DishFlavorVo> dishFlavorVos = BeanConv.toBeanList(dishFlavors, DishFlavorVo.class);
+                dishVo.setDishFlavorVos(dishFlavorVos);
+            });
+            dishVos.forEach(dishVo->{
+                List<DishFlavorVo> dishFlavorVos = dishVo.getDishFlavorVos();
+                //6.1、构建数字字典dataKeys
+                List<String> dataKeys = dishFlavorVos.stream()
+                        .map(DishFlavorVo::getDataKey).collect(Collectors.toList());
+                //6.2、RPC查询数字字典口味信息
+                List<DataDictVo> valueByDataKeys = dataDictFace.findValueByDataKeys(dataKeys);
+                dishVo.setDataDictVos(valueByDataKeys);
+                //6.3、RPC查询附件信息
+                List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(dishVo.getId());
+                dishVo.setAffixVo(affixVoListDish.get(0));
+            });
+            //7、构建返回对象
+            AppletInfoVo appletInfoVo = AppletInfoVo.builder()
+                    .tableVo(tableVo)
+                    .storeVo(storeVo)
+                    .brandVo(brandVo)
+                    .categoryVos(categoryVoList)
+                    .dishVos(dishVos)
+                    .build();
+            return appletInfoVo;
+        } catch (Exception e) {
+            log.error("查询桌台相关主体信息异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(TableEnum.SELECT_TABLE_FAIL);
+        }
     }
 
     @Override
     @Transactional
-    public OrderVo openTable(Long tableId,Integer personNumbers) throws ProjectException {
-        //1、定义异常
-        ProjectException projectException = null;
-        //2、开台状态定义
+    public OrderVo openTable(Long tableId,Integer personNumbers)  {
+        //1、开台状态定义
         boolean flag = true;
-        //3、锁定桌台，防止并发重复创建订单
+        //2、锁定桌台，防止并发重复创建订单
         String key = AppletCacheConstant.OPEN_TABLE_LOCK+tableId;
         RLock lock = redissonClient.getLock(key);
         try {
             if(lock.tryLock(AppletCacheConstant.REDIS_WAIT_TIME,
                     AppletCacheConstant.REDIS_LEASETIME,
                     TimeUnit.SECONDS)){
-                //4、幂等性：再次查询桌台订单情况
+                //3、幂等性：再次查询桌台订单情况
                 OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
-                flag = EmptyUtil.isNullOrEmpty(orderVoResult);
-                //5、未开台,为桌台创建当订单
-                if (flag){
-                    //5.1、查询桌台信息
+                //4、未开台,为桌台创建当订单
+                if (EmptyUtil.isNullOrEmpty(orderVoResult)){
+                    //4.1、查询桌台信息
                     Table table = tableService.getById(tableId);
-                    //5.2、构建订单
+                    //4.2、构建订单
                     Order order = Order.builder()
                             .tableId(tableId)
                             .tableName(table.getTableName())
@@ -171,28 +196,47 @@ public class AppletFaceImpl implements AppletFace {
                             .reduce(new BigDecimal(0))
                             .build();
                     orderService.save(order);
-                    //6、修改桌台状态为使用中
+                    //5、修改桌台状态为使用中
                     TableVo tableVo = TableVo.builder()
                             .id(tableId)
                             .tableStatus(SuperConstant.USE).build();
                     tableService.updateTable(tableVo);
                 }
             }
-        } catch (InterruptedException e) {
-            log.error("桌台：{}开桌创建订单失败：{}",ExceptionsUtil.getStackTraceAsString(e));
-            projectException = new ProjectException(OpenTableEnum.TRY_LOCK_FAIL);
+            //6、订单处理：处理可核算订单项和购物车订单项，可调用桌台订单显示接口
+            return showOrderVoforTable(tableId);
+        }catch (Exception e){
+            log.error("开桌操作异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(TableEnum.OPEN_TABLE_FAIL);
+        }finally {
+            lock.unlock();
         }
-        if (!EmptyUtil.isNullOrEmpty(projectException)){
-            throw  projectException;
-        }
-        //7、订单处理：处理可核算订单项和购物车订单项，可调用桌台订单显示接口
-        return showOrderVoforTable(tableId);
     }
 
     @Override
-    public OrderVo showOrderVoforTable(Long tableId) throws ProjectException {
-        OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
-        return handlerOrderVo(orderVoResult);
+    public OrderVo showOrderVoforTable(Long tableId)  {
+        try {
+            //查询订单信息
+            OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
+            if (!EmptyUtil.isNullOrEmpty(orderVoResult)){
+                //订单项目[可核算订单项目]附件
+                List<OrderItemVo> orderItemVoStatisticsList = orderVoResult.getOrderItemVoStatisticsList();
+                orderItemVoStatisticsList.forEach(n->{
+                    List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(n.getDishId());
+                    n.setAffixVo(affixVoListDish.get(0));
+                });
+                //订单项目[购物车中订单项目]附件
+                List<OrderItemVo> orderItemVoTemporaryList = orderVoResult.getOrderItemVoTemporaryList();
+                orderItemVoTemporaryList.forEach(n->{
+                    List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(n.getDishId());
+                    n.setAffixVo(affixVoListDish.get(0));
+                });
+            }
+            return handlerOrderVo(orderVoResult);
+        }catch (Exception e){
+            log.error("查询桌台订单信息异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(OrderEnum.SELECT_TABLE_ORDER_FAIL);
+        }
     }
 
     /***
@@ -249,35 +293,37 @@ public class AppletFaceImpl implements AppletFace {
 
     @Override
     public DishVo findDishVoById(Long dishId) {
-        //查询菜品
+        //1、查询菜品
         Dish dish = dishService.getById(dishId);
-        //查询菜品口味
+        //2、查询菜品口味
         List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(dishId);
         DishVo dishVo = BeanConv.toBean(dish, DishVo.class);
-        dishVo.setDishFlavorVos(BeanConv.toBeanList(dishFlavors,DishFlavorVo.class));
+        //3、处理菜品口味
+        List<DishFlavorVo> dishFlavorVos = BeanConv.toBeanList(dishFlavors,DishFlavorVo.class);
+        List<String> DataKeys = dishFlavorVos.stream()
+                .map(DishFlavorVo::getDataKey).collect(Collectors.toList());
+        List<DataDictVo> valueByDataKeys = dataDictFace.findValueByDataKeys(DataKeys);
+        dishVo.setDataDictVos(valueByDataKeys);
+        //4、处理菜品图片
+        List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(dishVo.getId());
+        dishVo.setAffixVo(affixVoListDish.get(0));
         return dishVo ;
     }
 
     @Override
     @Transactional
-    public OrderVo opertionShoppingCart(Long dishId, Long orderNo,String dishFlavor, String opertionType) throws ProjectException {
-        //1.1、获得菜品加锁
-        String keyDish = AppletCacheConstant.REPERTORY_DISH_LOCK + dishId;
-        RLock lockDish = redissonClient.getLock(keyDish);
-        //1.2、获得订单加锁
+    public OrderVo opertionShoppingCart(Long dishId, Long orderNo,String dishFlavor, String opertionType)  {
+        //1、获得订单加锁
         String keyOrder = AppletCacheConstant.ADD_TO_ORDERITEM_LOCK + orderNo;
         RLock lockOrder = redissonClient.getLock(keyOrder);
-        //1.3、使用联锁
-        RLock multiLock = redissonClient.getMultiLock(lockDish, lockOrder);
-        ProjectException projectException = null;
         OrderVo orderVoResult = null;
         try {
             //2、是否获得到锁
-            if (multiLock.tryLock(
+            if (lockOrder.tryLock(
                     AppletCacheConstant.REDIS_WAIT_TIME,
                     AppletCacheConstant.REDIS_LEASETIME,
                     TimeUnit.SECONDS)) {
-                keyDish = AppletCacheConstant.REPERTORY_DISH + dishId;
+                String keyDish = AppletCacheConstant.REPERTORY_DISH + dishId;
                 RAtomicLong atomicLong = redissonClient.getAtomicLong(keyDish);
                 //3.1、添加到购物车订单项
                 if (opertionType.equals(SuperConstant.OPERTION_TYPE_ADD)) {
@@ -294,12 +340,9 @@ public class AppletFaceImpl implements AppletFace {
         } catch (InterruptedException e) {
             log.error("===编辑dishId：{}，orderNo：{}进入购物车加锁失败：{}",
                     dishId, orderNo, ExceptionsUtil.getStackTraceAsString(e));
-            projectException = new ProjectException(OpenTableEnum.TRY_LOCK_FAIL);
+            throw  new ProjectException(OpenTableEnum.TRY_LOCK_FAIL);
         } finally {
-            multiLock.unlock();
-        }
-        if (!EmptyUtil.isNullOrEmpty(projectException)) {
-            throw projectException;
+            lockOrder.unlock();
         }
         return orderVoResult;
     }
@@ -311,7 +354,7 @@ public class AppletFaceImpl implements AppletFace {
      * @return
      * @description 添加购物车订单项
      */
-    private void addToShoppingCart(Long dishId, Long orderNo,String dishFlavor, RAtomicLong atomicLong) throws ProjectException {
+    private void addToShoppingCart(Long dishId, Long orderNo,String dishFlavor, RAtomicLong atomicLong)  {
         //1、如果库存够，redis减库存
         if (atomicLong.decrementAndGet() >= 0) {
             //2、mysql菜品表库存
@@ -362,7 +405,7 @@ public class AppletFaceImpl implements AppletFace {
      * @return
      * @description 移除购物车订单项
      */
-    private void removeToShoppingCart(Long dishId, Long orderNo, RAtomicLong atomicLong) throws ProjectException {
+    private void removeToShoppingCart(Long dishId, Long orderNo, RAtomicLong atomicLong)  {
         boolean flag = true;
         //1、菜品库存增加
         flag = dishService.updateDishNumber(1L, dishId);
@@ -485,70 +528,74 @@ public class AppletFaceImpl implements AppletFace {
 
     @Override
     @Transactional
-    public OrderVo placeOrder(Long orderNo) throws ProjectException {
-        //1、锁定订单
-        String key = AppletCacheConstant.ADD_TO_ORDERITEM_LOCK + orderNo;
-        RLock lock = redissonClient.getLock(key);
-        OrderVo orderVoResult = null;
+    public OrderVo placeOrder(Long orderNo)  {
         try {
-            if (lock.tryLock(
-                    AppletCacheConstant.REDIS_WAIT_TIME,
-                    AppletCacheConstant.REDIS_LEASETIME,
-                    TimeUnit.SECONDS)) {
-                Boolean flag = true;
-                orderVoResult = orderService.findOrderByOrderNo(orderNo);
-                //2、查询可以核算订单项
-                List<OrderItem> orderItemList = orderItemService.findOrderItemByOrderNo(orderVoResult.getOrderNo());
-                List<OrderItemVo> orderItemVoStatisticsList = BeanConv.toBeanList(orderItemList, OrderItemVo.class);
-                if (EmptyUtil.isNullOrEmpty(orderItemVoStatisticsList)) {
-                    orderItemVoStatisticsList = new ArrayList<>();
+            //1、锁定订单
+            String key = AppletCacheConstant.ADD_TO_ORDERITEM_LOCK + orderNo;
+            RLock lock = redissonClient.getLock(key);
+            OrderVo orderVoResult = null;
+            try {
+                if (lock.tryLock(
+                        AppletCacheConstant.REDIS_WAIT_TIME,
+                        AppletCacheConstant.REDIS_LEASETIME,
+                        TimeUnit.SECONDS)) {
+                    Boolean flag = true;
+                    orderVoResult = orderService.findOrderByOrderNo(orderNo);
+                    //2、查询可以核算订单项
+                    List<OrderItem> orderItemList = orderItemService.findOrderItemByOrderNo(orderVoResult.getOrderNo());
+                    List<OrderItemVo> orderItemVoStatisticsList = BeanConv.toBeanList(orderItemList, OrderItemVo.class);
+                    if (EmptyUtil.isNullOrEmpty(orderItemVoStatisticsList)) {
+                        orderItemVoStatisticsList = new ArrayList<>();
+                    }
+                    //3、查询购物车订单项
+                    key = AppletCacheConstant.ORDERITEMVO_STATISTICS + orderNo;
+                    RMapCache<Long, OrderItemVo> orderItemVoRMap = redissonClient.getMapCache(key);
+                    List<OrderItemVo> orderItemVoTemporaryList = (List<OrderItemVo>)orderItemVoRMap.readAllValues();
+                    //4、购物车订单项不为空才合并
+                    if (!EmptyUtil.isNullOrEmpty(orderItemVoTemporaryList)) {
+                        //5、求交集:购物车订单项与核算订单项合并
+                        flag = this.intersection(flag,orderItemVoStatisticsList,orderItemVoTemporaryList);
+                        if (!flag) {
+                            throw new ProjectException(OrderItemEnum.UPDATE_ORDERITEM_FAIL);
+                        }
+                        //6、求差集:保存购物车订单项到可核算订单项
+                        flag = this.difference(flag,orderItemVoStatisticsList,orderItemVoTemporaryList);
+                        if (!flag) {
+                            throw new ProjectException(OrderItemEnum.UPDATE_ORDERITEM_FAIL);
+                        }
+                        //7、计算更新订单信息
+                        flag = this.calculateOrderAmount(orderNo,orderVoResult);
+                        if (!flag) {
+                            throw new ProjectException(OrderItemEnum.SAVE_ORDER_FAIL);
+                        }
+                        //8、清理redis购物车订单项目
+                        orderItemVoTemporaryList.forEach(n->{
+                            orderItemVoRMap.remove(n.getDishId());
+                        });
+                    }
                 }
-                //3、查询购物车订单项
-                key = AppletCacheConstant.ORDERITEMVO_STATISTICS + orderNo;
-                RMapCache<Long, OrderItemVo> orderItemVoRMap = redissonClient.getMapCache(key);
-                List<OrderItemVo> orderItemVoTemporaryList = (List<OrderItemVo>)orderItemVoRMap.readAllValues();
-                //4、购物车订单项不为空才合并
-                if (!EmptyUtil.isNullOrEmpty(orderItemVoTemporaryList)) {
-                    //5、求交集:购物车订单项与核算订单项合并
-                    flag = this.intersection(flag,orderItemVoStatisticsList,orderItemVoTemporaryList);
-                    if (!flag) {
-                        throw new ProjectException(OrderItemEnum.UPDATE_ORDERITEM_FAIL);
-                    }
-                    //6、求差集:保存购物车订单项到可核算订单项
-                    flag = this.difference(flag,orderItemVoStatisticsList,orderItemVoTemporaryList);
-                    if (!flag) {
-                        throw new ProjectException(OrderItemEnum.UPDATE_ORDERITEM_FAIL);
-                    }
-                    //7、计算更新订单信息
-                    flag = this.calculateOrderAmount(orderNo,orderVoResult);
-                    if (!flag) {
-                        throw new ProjectException(OrderItemEnum.SAVE_ORDER_FAIL);
-                    }
-                    //8、清理redis购物车订单项目
-                    orderItemVoTemporaryList.forEach(n->{
-                        orderItemVoRMap.remove(n.getDishId());
-                    });
-                }
+            } catch (InterruptedException e) {
+                log.error("合并订单出错：{}",ExceptionsUtil.getStackTraceAsString(e));
+                throw new ProjectException(OrderItemEnum.LOCK_ORDER_FAIL);
+            } finally {
+                lock.unlock();
             }
-        } catch (InterruptedException e) {
-            log.error("合并订单出错：{}",ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(OrderItemEnum.LOCK_ORDER_FAIL);
-        } finally {
-            lock.unlock();
+            //9、再次查询订单
+            return handlerOrderVo(orderVoResult);
+        }catch (Exception e){
+            log.error("下单操作异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(OrderEnum.PLACE_ORDER_FAIL);
         }
-        //9、再次查询订单
-        return handlerOrderVo(orderVoResult);
     }
 
     @Override
     @Transactional
-    public Boolean rotaryTable(Long sourceTableId, Long targetTableId, Long orderNo) throws ProjectException {
-        Boolean flag = true;
-        //1、锁定目标桌台
-        String keyTargetTableId = AppletCacheConstant.OPEN_TABLE_LOCK + targetTableId;
-        RLock lock = redissonClient.getLock(keyTargetTableId);
-        ProjectException projectException = null;
+    public Boolean rotaryTable(Long sourceTableId, Long targetTableId, Long orderNo)  {
         try {
+            Boolean flag = true;
+            //1、锁定目标桌台
+            String keyTargetTableId = AppletCacheConstant.OPEN_TABLE_LOCK + targetTableId;
+            RLock lock = redissonClient.getLock(keyTargetTableId);
             if (lock.tryLock(
                     AppletCacheConstant.REDIS_LEASETIME,
                     AppletCacheConstant.REDIS_WAIT_TIME,
@@ -562,50 +609,51 @@ public class AppletFaceImpl implements AppletFace {
                     if (flag) {
                         //4、修改桌台状态
                         tableService.updateTable(TableVo.builder()
-                            .id(targetTableId)
-                            .tableStatus(SuperConstant.USE)
-                            .build());
+                                .id(targetTableId)
+                                .tableStatus(SuperConstant.USE)
+                                .build());
                         tableService.updateTable(TableVo.builder()
-                            .id(sourceTableId)
-                            .tableStatus(SuperConstant.FREE)
-                            .build());
+                                .id(sourceTableId)
+                                .tableStatus(SuperConstant.FREE)
+                                .build());
                     } else {
-                        projectException = new ProjectException(RotaryTableEnum.ROTARY_TABLE_FAIL);
+                        throw new ProjectException(RotaryTableEnum.ROTARY_TABLE_FAIL);
                     }
+                //2.2桌台非空闲
                 } else {
-                    //2.2桌台非空闲
-                    projectException = new ProjectException(RotaryTableEnum.ROTARY_TABLE_FAIL);
+                    throw  new ProjectException(RotaryTableEnum.ROTARY_TABLE_FAIL);
                 }
             }
-        } catch (InterruptedException e) {
-            log.error("===转台加锁{}失败：{}", sourceTableId, ExceptionsUtil.getStackTraceAsString(e));
-            projectException = new ProjectException(OpenTableEnum.TRY_LOCK_FAIL);
-        } finally {
-            lock.unlock();
+            return flag;
         }
-        if (!EmptyUtil.isNullOrEmpty(projectException)) {
-            throw projectException;
+        catch (Exception e){
+            log.error("操作购物车详情异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(TableEnum.ROTARY_TABLE_FAIL);
         }
-        return flag;
     }
 
 
 
     @Override
     public Boolean clearShoppingCart(Long orderNo) {
-        String key = AppletCacheConstant.ORDERITEMVO_STATISTICS + orderNo;
-        RMapCache<Long, OrderItemVo> orderItemVoRMap = redissonClient.getMapCache(key);
-        //清理购物车归还库存
-        if (!EmptyUtil.isNullOrEmpty(orderItemVoRMap)){
-            List<OrderItemVo> orderItemVos = (List<OrderItemVo>) orderItemVoRMap.readAllValues();
-            orderItemVos.forEach(n->{
-                String keyDish = AppletCacheConstant.REPERTORY_DISH + n.getDishId();
-                RAtomicLong atomicLong = redissonClient.getAtomicLong(keyDish);
-                atomicLong.incrementAndGet();
-            });
+        try {
+            String key = AppletCacheConstant.ORDERITEMVO_STATISTICS + orderNo;
+            RMapCache<Long, OrderItemVo> orderItemVoRMap = redissonClient.getMapCache(key);
+            //清理购物车归还库存
+            if (!EmptyUtil.isNullOrEmpty(orderItemVoRMap)){
+                List<OrderItemVo> orderItemVos = (List<OrderItemVo>) orderItemVoRMap.readAllValues();
+                orderItemVos.forEach(n->{
+                    String keyDish = AppletCacheConstant.REPERTORY_DISH + n.getDishId();
+                    RAtomicLong atomicLong = redissonClient.getAtomicLong(keyDish);
+                    atomicLong.incrementAndGet();
+                });
+            }
+            orderItemVoRMap.clear();
+            return true;
+        }catch (Exception e){
+            log.error("操作购物车详情异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(OrderEnum.CLEAR_SHOPPING_CART_FAIL);
         }
-        orderItemVoRMap.clear();
-        return true;
     }
 
 

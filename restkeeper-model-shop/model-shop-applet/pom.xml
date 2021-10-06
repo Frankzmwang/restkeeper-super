@@ -15,6 +15,11 @@
     <dependencies>
         <dependency>
             <groupId>com.itheima.restkeeper</groupId>
+            <artifactId>model-basic-interface</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.itheima.restkeeper</groupId>
             <artifactId>model-security-service</artifactId>
         </dependency>
 

@@ -3,10 +3,14 @@ package com.itheima.restkeeper.face;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.TradingSettingFace;
+import com.itheima.restkeeper.enums.TradingSettingEnum;
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.TradingSetting;
 import com.itheima.restkeeper.req.TradingSettingVo;
 import com.itheima.restkeeper.service.ITradingSettingService;
 import com.itheima.restkeeper.utils.BeanConv;
+import com.itheima.restkeeper.utils.ExceptionsUtil;
+import com.itheima.restkeeper.utils.ResponseWrapBuild;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
@@ -63,14 +67,25 @@ public class TradingSettingFaceImpl implements TradingSettingFace {
 
     @Override
     public TradingSettingVo saveOrUpdateTradingSetting(TradingSettingVo tradingSettingVo) {
-        TradingSetting tradingSetting = BeanConv.toBean(tradingSettingVo, TradingSetting.class);
-        tradingSettingService.saveOrUpdate(tradingSetting);
-        return BeanConv.toBean(tradingSetting, TradingSettingVo.class);
+        try {
+            TradingSetting tradingSetting = BeanConv.toBean(tradingSettingVo, TradingSetting.class);
+            tradingSettingService.saveOrUpdate(tradingSetting);
+            return BeanConv.toBean(tradingSetting, TradingSettingVo.class);
+        } catch (Exception e) {
+            log.error("修改支付配置异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(TradingSettingEnum.UPDATE_FAIL);
+        }
+
     }
 
     @Override
     public TradingSettingVo findTradingSettingByEnterpriseId() {
-        TradingSetting tradingSetting = tradingSettingService.getOne(new QueryWrapper<>());
-        return BeanConv.toBean(tradingSetting, TradingSettingVo.class);
+        try {
+            TradingSetting tradingSetting = tradingSettingService.getOne(new QueryWrapper<>());
+            return BeanConv.toBean(tradingSetting, TradingSettingVo.class);
+        } catch (Exception e) {
+            log.error("查询支付配置异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(TradingSettingEnum.SELECT_FAIL);
+        }
     }
 }

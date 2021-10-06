@@ -29,10 +29,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.itheima.restkeeper</groupId>
-            <artifactId>model-basic-interface</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>

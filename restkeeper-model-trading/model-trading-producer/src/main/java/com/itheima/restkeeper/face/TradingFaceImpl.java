@@ -129,5 +129,4 @@ public class TradingFaceImpl implements TradingFace {
         return flag;
     }
 
-
 }

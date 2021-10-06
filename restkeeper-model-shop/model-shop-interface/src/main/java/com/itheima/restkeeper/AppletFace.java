@@ -32,14 +32,14 @@ public interface AppletFace {
      * @param personNumbers 就餐人数
      * @return Boolean
      */
-    OrderVo openTable(Long tableId,Integer personNumbers)throws ProjectException;
+    OrderVo openTable(Long tableId,Integer personNumbers);
 
     /***
      * @description 已开桌：查询当前桌台订单信息【包括可核算订单项和购物车订单项】
      * @param tableId 桌台ID
      * @return
      */
-    OrderVo showOrderVoforTable(Long tableId) throws ProjectException;
+    OrderVo showOrderVoforTable(Long tableId) ;
 
     /***
      * @description 处理当前订单中订单项
@@ -81,14 +81,14 @@ public interface AppletFace {
     OrderVo opertionShoppingCart(Long dishId,
                                  Long orderNo,
                                  String dishFlavor,
-                                 String opertionType) throws ProjectException;
+                                 String opertionType) ;
 
     /***
      * @description 下单操作：添加购物车订单项到可结算订单项
      * @param orderNo 订单编号
      * @return
      */
-    OrderVo placeOrder(Long orderNo) throws ProjectException;
+    OrderVo placeOrder(Long orderNo) ;
 
     /***
      * @description 转台业务，满足下列条件才可以转台：
@@ -100,7 +100,7 @@ public interface AppletFace {
      * @param orderNo 订单号
      * @return
      */
-    Boolean rotaryTable(Long sourceTableId,Long targetTableId,Long orderNo) throws ProjectException;
+    Boolean rotaryTable(Long sourceTableId,Long targetTableId,Long orderNo) ;
 
     /***
      * @description 清理购物车

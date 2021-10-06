@@ -9,14 +9,12 @@ import com.itheima.restkeeper.req.AffixVo;
 import com.itheima.restkeeper.req.UploadMultipartFile;
 import com.itheima.restkeeper.service.IAffixService;
 import com.itheima.restkeeper.utils.BeanConv;
-import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.List;
 
 /**

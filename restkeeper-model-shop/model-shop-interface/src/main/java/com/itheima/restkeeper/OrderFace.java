@@ -32,11 +32,18 @@ public interface OrderFace {
     OrderVo opertionToOrderItem(Long dishId, Long orderNo, String opertionType) throws ProjectException;
 
     /***
-     * @description 订单交易处理
+     * @description 订单结算
      * @param orderVo 订单信息
-     * @return
+     * @return: com.itheima.restkeeper.req.TradingVo
      */
     TradingVo handleTrading(OrderVo orderVo);
+
+    /***
+     * @description 订单退款
+     * @param orderVo 订单信息
+     * @return: com.itheima.restkeeper.req.TradingVo
+     */
+    Boolean handleTradingRefund(OrderVo orderVo);
 
     /***
      * @description 查询已支付订单

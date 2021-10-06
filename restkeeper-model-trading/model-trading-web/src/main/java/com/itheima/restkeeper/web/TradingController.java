@@ -35,13 +35,8 @@ public class TradingController {
     @PostMapping
     @ApiOperation(value = "支付",notes = "支付")
     @ApiImplicitParam(name = "tradingVo",value = "支付",required = true,dataType = "TradingVo")
-    ResponseWrap<TradingVo> doPay(@RequestBody TradingVo tradingVo) throws ProjectException {
-        try {
-            TradingVo tradingVoResult = tradingFace.doPay(tradingVo);
-            return ResponseWrapBuild.build(TradingEnum.SUCCEED,tradingVoResult);
-        } catch (Exception e) {
-            log.error("修改企业配置异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TradingEnum.FACE_TO_FACE_FAIL);
-        }
+    ResponseWrap<TradingVo> doPay(@RequestBody TradingVo tradingVo) {
+        TradingVo tradingVoResult = tradingFace.doPay(tradingVo);
+        return ResponseWrapBuild.build(TradingEnum.SUCCEED,tradingVoResult);
     }
 }

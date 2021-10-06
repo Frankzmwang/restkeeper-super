@@ -2,6 +2,8 @@ package com.itheima.restkeeper.face;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.OrderFace;
+import com.itheima.restkeeper.TableFace;
+import com.itheima.restkeeper.TradingFace;
 import com.itheima.restkeeper.constant.AppletCacheConstant;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.OpenTableEnum;
@@ -14,6 +16,7 @@ import com.itheima.restkeeper.pojo.Order;
 import com.itheima.restkeeper.pojo.OrderItem;
 import com.itheima.restkeeper.req.OrderItemVo;
 import com.itheima.restkeeper.req.OrderVo;
+import com.itheima.restkeeper.req.TableVo;
 import com.itheima.restkeeper.req.TradingVo;
 import com.itheima.restkeeper.service.IDishService;
 import com.itheima.restkeeper.service.IOrderItemService;
@@ -21,8 +24,10 @@ import com.itheima.restkeeper.service.IOrderService;
 import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
+import com.itheima.restkeeper.utils.ResponseWrapBuild;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
 import org.redisson.RedissonMultiLock;
@@ -53,6 +58,12 @@ import java.util.concurrent.TimeUnit;
     })
 public class OrderFaceImpl implements OrderFace {
 
+    @DubboReference(version = "${dubbo.application.version}", check = false)
+    TradingFace tradingFace;
+
+    @DubboReference(version = "${dubbo.application.version}", check = false)
+    TableFace tableFace;
+
     @Autowired
     IOrderService orderService;
 
@@ -67,28 +78,32 @@ public class OrderFaceImpl implements OrderFace {
 
     @Override
     public Page<OrderVo> findOrderVoPage(OrderVo orderVo, int pageNum, int pageSize) {
-        Page<Order> page = orderService.findOrderVoPage(orderVo, pageNum, pageSize);
-        Page<OrderVo> pageVo = new Page<>();
-        BeanConv.toBean(page,pageVo);
-        //结果集转换
-        List<Order> orderList = page.getRecords();
-        List<OrderVo> orderVoList = BeanConv.toBeanList(orderList,OrderVo.class);
-        //处理订单项
-        if (!EmptyUtil.isNullOrEmpty(orderVoList)){
-            orderVoList.forEach(n->{
-                List<OrderItem> orderItems = orderItemService.findOrderItemByOrderNo(n.getOrderNo());
-                List<OrderItemVo> orderItemVoList = BeanConv.toBeanList(orderItems, OrderItemVo.class);
-                n.setOrderItemVoStatisticsList(orderItemVoList);
-            });
+        try {
+            Page<Order> page = orderService.findOrderVoPage(orderVo, pageNum, pageSize);
+            Page<OrderVo> pageVo = new Page<>();
+            BeanConv.toBean(page,pageVo);
+            //结果集转换
+            List<Order> orderList = page.getRecords();
+            List<OrderVo> orderVoList = BeanConv.toBeanList(orderList,OrderVo.class);
+            //处理订单项
+            if (!EmptyUtil.isNullOrEmpty(orderVoList)){
+                orderVoList.forEach(n->{
+                    List<OrderItem> orderItems = orderItemService.findOrderItemByOrderNo(n.getOrderNo());
+                    List<OrderItemVo> orderItemVoList = BeanConv.toBeanList(orderItems, OrderItemVo.class);
+                    n.setOrderItemVoStatisticsList(orderItemVoList);
+                });
+            }
+            pageVo.setRecords(orderVoList);
+            return pageVo;
+        } catch (Exception e) {
+            log.error("查询订单列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(OrderEnum.PAGE_FAIL);
         }
-        pageVo.setRecords(orderVoList);
-        return pageVo;
     }
 
     @Override
     @GlobalTransactional
-    public OrderVo opertionToOrderItem(Long dishId, Long orderNo, String opertionType)
-            throws ProjectException {
+    public OrderVo opertionToOrderItem(Long dishId, Long orderNo, String opertionType) {
         //1、判定订单待支付状态才可操作
         OrderVo orderVoResult = orderService.findOrderByOrderNo(orderNo);
         if (!SuperConstant.DFK.equals(orderVoResult.getOrderState())){
@@ -103,50 +118,44 @@ public class OrderFaceImpl implements OrderFace {
         //3、锁定订单
         String keyOrderItem = AppletCacheConstant.ADD_TO_ORDERITEM_LOCK+orderNo;
         RLock lockOrderItem = redissonClient.getLock(keyOrderItem);
-        //4、锁定菜品
-        String keyDish = AppletCacheConstant.REPERTORY_DISH_LOCK + dishId;
-        RLock lockDish = redissonClient.getLock(keyDish);
-        //5、添加联锁，保证订单和库存都被锁定
-        RLock multiLock = redissonClient.getMultiLock(lockOrderItem, lockDish);
-        ProjectException projectException = null;
         try {
-            if (multiLock.tryLock(
-                    AppletCacheConstant.REDIS_WAIT_TIME,
-                    AppletCacheConstant.REDIS_LEASETIME,
-                    TimeUnit.SECONDS)){
+            if (lockOrderItem.tryLock(
+                AppletCacheConstant.REDIS_WAIT_TIME,
+                AppletCacheConstant.REDIS_LEASETIME,
+                TimeUnit.SECONDS)){
                 String key = AppletCacheConstant.REPERTORY_DISH+dishId;
                 RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
-                //6.1添加可核算订单项
+                //4.1添加可核算订单项
                 if (opertionType.equals(SuperConstant.OPERTION_TYPE_ADD)){
                     this.addToOrderItem(dishId,orderNo,atomicLong);
                 }
-                //6.2、移除可核算订单项
+                //4.2、移除可核算订单项
                 if (opertionType.equals(SuperConstant.OPERTION_TYPE_REMOVE)){
                     this.removeToOrderItem(dishId,orderNo,atomicLong);
                 }
-                //7、计算订单总金额
+                //5、计算订单总金额
                 List<OrderItem> orderItemListResult = orderItemService.findOrderItemByOrderNo(orderNo);
                 BigDecimal sumPrice = orderItemListResult.stream()
-                        .map(n->{
-                                BigDecimal price = n.getPrice();
-                                BigDecimal reducePrice = n.getReducePrice();
-                                Long dishNum = n.getDishNum();
-                                //如果有优惠价格以优惠价格计算
-                                if (EmptyUtil.isNullOrEmpty(reducePrice)){
-                                    return price.multiply(new BigDecimal(dishNum));
-                                }else {
-                                    return reducePrice.multiply(new BigDecimal(dishNum));
-                                }
-                            }
-                        ).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    .map(n->{
+                        BigDecimal price = n.getPrice();
+                        BigDecimal reducePrice = n.getReducePrice();
+                        Long dishNum = n.getDishNum();
+                        //如果有优惠价格以优惠价格计算
+                        if (EmptyUtil.isNullOrEmpty(reducePrice)){
+                            return price.multiply(new BigDecimal(dishNum));
+                        }else {
+                            return reducePrice.multiply(new BigDecimal(dishNum));
+                        }
+                    }
+                ).reduce(BigDecimal.ZERO, BigDecimal::add);
                 orderVoResult.setPayableAmountSum(sumPrice);
-                //8、修改订单总金额
+                //6、修改订单总金额
                 OrderVo orderVoHandler = OrderVo.builder().id(orderVoResult.getId()).payableAmountSum(sumPrice).build();
                 boolean flag = orderService.updateById(BeanConv.toBean(orderVoHandler, Order.class));
                 if (!flag){
-                    projectException = new ProjectException(OrderItemEnum.SAVE_ORDER_FAIL);
+                    throw new ProjectException(OrderItemEnum.SAVE_ORDER_FAIL);
                 }
-                //9、返回新订单信息
+                //7、返回新订单信息
                 if (!EmptyUtil.isNullOrEmpty(orderVoResult)){
                     List<OrderItemVo> orderItemVoStatisticsList = BeanConv
                             .toBeanList(orderItemListResult, OrderItemVo.class);
@@ -154,17 +163,13 @@ public class OrderFaceImpl implements OrderFace {
                     return orderVoResult;
                 }
             }
+            return orderVoResult;
         } catch (InterruptedException e) {
-            log.error("==编辑dishId：{}，orderNo：{}数量加锁失败：{}"
-                    ,dishId,orderNo, ExceptionsUtil.getStackTraceAsString(e));
-            projectException = new ProjectException(OpenTableEnum.TRY_LOCK_FAIL);
+            log.error("操作订单信息异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(OrderEnum.OPERTION_SHOPPING_CART_FAIL);
         }finally {
-            multiLock.unlock();
+            lockOrderItem.unlock();
         }
-        if (!EmptyUtil.isNullOrEmpty(projectException)){
-            throw  projectException;
-        }
-        return orderVoResult;
     }
 
     /**
@@ -174,7 +179,7 @@ public class OrderFaceImpl implements OrderFace {
      * @param atomicLong 原子计数器
      * @return
      */
-    private void removeToOrderItem(Long dishId, Long orderNo, RAtomicLong atomicLong) throws ProjectException {
+    private void removeToOrderItem(Long dishId, Long orderNo, RAtomicLong atomicLong)  {
         //1、修改订单项
         Boolean flagOrderItem  = orderItemService.updateDishNum(-1L, dishId,orderNo);
         //2、菜品库存
@@ -193,7 +198,7 @@ public class OrderFaceImpl implements OrderFace {
      * @param atomicLong 原子计数器
      * @return
      */
-    private void addToOrderItem(Long dishId, Long orderNo, RAtomicLong atomicLong) throws ProjectException {
+    private void addToOrderItem(Long dishId, Long orderNo, RAtomicLong atomicLong)  {
         //1、如果库存够，redis减库存
         if (atomicLong.decrementAndGet()>=0){
             //2、修改可核算订单项
@@ -220,25 +225,25 @@ public class OrderFaceImpl implements OrderFace {
     private TradingVo freeChargeTradingVo(OrderVo orderVo){
         //结算保存订单信息
         Order order = Order.builder().id(orderVo.getId())
-                .refund(new BigDecimal(0))
-                .discount(new BigDecimal(10))
-                .reduce(new BigDecimal(0))
-                .orderState(SuperConstant.MD)
-                .isRefund(SuperConstant.NO)
-                .tradingChannel(orderVo.getTradingChannel())
-                .build();
+            .refund(new BigDecimal(0))
+            .discount(new BigDecimal(10))
+            .reduce(new BigDecimal(0))
+            .orderState(SuperConstant.MD)
+            .isRefund(SuperConstant.NO)
+            .tradingChannel(orderVo.getTradingChannel())
+            .build();
         boolean flag = orderService.updateById(order);
         TradingVo tradingVo = TradingVo.builder()
-                .tradingAmount(orderVo.getPayableAmountSum())
-                .tradingChannel(orderVo.getTradingChannel())
-                .enterpriseId(orderVo.getEnterpriseId())
-                .storeId(orderVo.getTableId())
-                .payeeId(orderVo.getCashierId())
-                .payeeName(orderVo.getCashierName())
-                .productOrderNo(orderVo.getOrderNo())
-                .tradingType(SuperConstant.TRADING_TYPE_MD)
-                .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
-                .build();
+            .tradingAmount(orderVo.getPayableAmountSum())
+            .tradingChannel(orderVo.getTradingChannel())
+            .enterpriseId(orderVo.getEnterpriseId())
+            .storeId(orderVo.getTableId())
+            .payeeId(orderVo.getCashierId())
+            .payeeName(orderVo.getCashierName())
+            .productOrderNo(orderVo.getOrderNo())
+            .tradingType(SuperConstant.TRADING_TYPE_MD)
+            .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
+            .build();
         return tradingVo;
     }
 
@@ -249,20 +254,20 @@ public class OrderFaceImpl implements OrderFace {
      */
     private TradingVo refundTradingVo(OrderVo orderVo){
         Order order = Order.builder().id(orderVo.getId())
-                .refund(orderVo.getRefunded().add(orderVo.getOperTionRefund()))
-                .isRefund(SuperConstant.YES).build();
+            .refund(orderVo.getRefunded().add(orderVo.getOperTionRefund()))
+            .isRefund(SuperConstant.YES).build();
         boolean flag = orderService.updateById(order);
         TradingVo tradingVo = TradingVo.builder()
-                .tradingAmount(orderVo.getRealAmountSum())
-                .tradingChannel(orderVo.getTradingChannel())
-                .enterpriseId(orderVo.getEnterpriseId())
-                .storeId(orderVo.getTableId())
-                .payeeId(orderVo.getCashierId())
-                .payeeName(orderVo.getCashierName())
-                .productOrderNo(orderVo.getOrderNo())
-                .tradingType(SuperConstant.TRADING_TYPE_TK)
-                .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
-                .build();
+            .tradingAmount(orderVo.getRealAmountSum())
+            .tradingChannel(orderVo.getTradingChannel())
+            .enterpriseId(orderVo.getEnterpriseId())
+            .storeId(orderVo.getTableId())
+            .payeeId(orderVo.getCashierId())
+            .payeeName(orderVo.getCashierName())
+            .productOrderNo(orderVo.getOrderNo())
+            .tradingType(SuperConstant.TRADING_TYPE_TK)
+            .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
+            .build();
         tradingVo.setProductOrderNo(orderVo.getOrderNo());
         tradingVo.setRefund(orderVo.getRefund());
         tradingVo.setIsRefund(SuperConstant.YES);
@@ -285,27 +290,27 @@ public class OrderFaceImpl implements OrderFace {
         BigDecimal realAmountSum = payableAmountSum.multiply(discount.divide(new BigDecimal(10))).subtract(reduce);
         //更新订单状态
         Order order = Order.builder().id(orderVo.getId())
-                .realAmountSum(realAmountSum)
-                .cashierId(orderVo.getCashierId())
-                .cashierName(orderVo.getCashierName())
-                .tradingChannel(orderVo.getTradingChannel())
-                .orderState(SuperConstant.FKZ)
-                .isRefund(SuperConstant.NO).build();
+            .realAmountSum(realAmountSum)
+            .cashierId(orderVo.getCashierId())
+            .cashierName(orderVo.getCashierName())
+            .tradingChannel(orderVo.getTradingChannel())
+            .orderState(SuperConstant.FKZ)
+            .isRefund(SuperConstant.NO).build();
         boolean flag = orderService.updateById(order);
         TradingVo tradingVo = null;
         //构建交易单
         if (flag){
             tradingVo = TradingVo.builder()
-                    .tradingAmount(realAmountSum)
-                    .tradingChannel(orderVo.getTradingChannel())
-                    .enterpriseId(orderVo.getEnterpriseId())
-                    .storeId(orderVo.getTableId())
-                    .payeeId(orderVo.getCashierId())
-                    .payeeName(orderVo.getCashierName())
-                    .productOrderNo(orderVo.getOrderNo())
-                    .tradingType(SuperConstant.TRADING_TYPE_FK)
-                    .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
-                    .build();
+                .tradingAmount(realAmountSum)
+                .tradingChannel(orderVo.getTradingChannel())
+                .enterpriseId(orderVo.getEnterpriseId())
+                .storeId(orderVo.getTableId())
+                .payeeId(orderVo.getCashierId())
+                .payeeName(orderVo.getCashierName())
+                .productOrderNo(orderVo.getOrderNo())
+                .tradingType(SuperConstant.TRADING_TYPE_FK)
+                .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
+                .build();
         }
         return tradingVo;
     }
@@ -313,6 +318,63 @@ public class OrderFaceImpl implements OrderFace {
     @Override
     @GlobalTransactional
     public TradingVo handleTrading(OrderVo orderVo) {
+        //2、根据订单生成交易单
+        TradingVo tradingVo = tradingConvertor(orderVo);
+        if (EmptyUtil.isNullOrEmpty(tradingVo)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }
+        //3、调用支付RPC接口，进行支付
+        TradingVo tradingVoResult = tradingFace.doPay(tradingVo);
+        //4、结算后桌台状态修改：开桌-->空闲
+        Boolean flag = true;
+        if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }else {
+            TableVo tableVo = TableVo.builder()
+                .id(orderVo.getTableId())
+                .tableStatus(SuperConstant.FREE).build();
+            flag = tableFace.updateTable(tableVo);
+            if (!flag){
+                throw new ProjectException(OrderEnum.FAIL);
+            }
+        }
+        return tradingVoResult;
+    }
+
+    @Override
+    @GlobalTransactional
+    public Boolean handleTradingRefund(OrderVo orderVo) {
+        //2、获取当前交易单信息
+        OrderVo orderVoBefore = findOrderVoPaid(orderVo.getOrderNo());
+        //3、退款收款人不为同一人，退款操作拒绝
+        if (orderVo.getTradingChannel().equals(SuperConstant.TRADING_CHANNEL_REFUND)
+            &&orderVo.getCashierId().longValue()!=orderVoBefore.getCashierId().longValue()){
+            throw new ProjectException(OrderEnum.REFUND_FAIL);
+        }
+        //4、当前交易单信息，退款操作拒绝
+        if (!SuperConstant.YJS.equals(orderVoBefore.getOrderState())){
+            throw new ProjectException(OrderEnum.REFUND_FAIL);
+        }
+        //5、根据订单生成交易单
+        TradingVo tradingVo = tradingConvertor(orderVo);
+        if (EmptyUtil.isNullOrEmpty(tradingVo)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }
+        //6、执行退款交易
+        TradingVo tradingVoResult = tradingFace.doPay(tradingVo);
+        boolean flag = true;
+        if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }
+        return flag;
+    }
+
+    /***
+     * @description 转换订单为交易单
+     * @param orderVo 订单信息
+     * @return: com.itheima.restkeeper.req.TradingVo
+     */
+    private TradingVo tradingConvertor(OrderVo orderVo) {
         //免单渠道，交易单生成
         if (orderVo.getTradingChannel().equals(SuperConstant.TRADING_CHANNEL_FREE_CHARGE)){
             return freeChargeTradingVo(orderVo);

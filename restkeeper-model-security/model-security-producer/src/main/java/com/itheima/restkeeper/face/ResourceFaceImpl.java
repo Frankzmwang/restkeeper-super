@@ -2,11 +2,14 @@ package com.itheima.restkeeper.face;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.ResourceFace;
+import com.itheima.restkeeper.enums.ResourceEnum;
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.Resource;
 import com.itheima.restkeeper.req.ResourceVo;
 import com.itheima.restkeeper.req.TreeVo;
 import com.itheima.restkeeper.service.IResourceService;
 import com.itheima.restkeeper.utils.BeanConv;
+import com.itheima.restkeeper.utils.ExceptionsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
@@ -34,33 +37,60 @@ public class ResourceFaceImpl implements ResourceFace {
 
     @Override
     public Page<ResourceVo> findResourceVoPage(ResourceVo resourceVo, int pageNum, int pageSize) {
-        Page<Resource> page = resourceService.findResourceVoPage(resourceVo, pageNum, pageSize);
-        Page<ResourceVo> pageVo = new Page<>();
-        BeanConv.toBean(page,pageVo);
-        //结果集转换
-        List<Resource> routeList = page.getRecords();
-        List<ResourceVo> routeVoList = BeanConv.toBeanList(routeList,ResourceVo.class);
-        pageVo.setRecords(routeVoList);
-        return pageVo;
+        try {
+            Page<Resource> page = resourceService.findResourceVoPage(resourceVo, pageNum, pageSize);
+            Page<ResourceVo> pageVo = new Page<>();
+            BeanConv.toBean(page,pageVo);
+            //结果集转换
+            List<Resource> routeList = page.getRecords();
+            List<ResourceVo> routeVoList = BeanConv.toBeanList(routeList,ResourceVo.class);
+            pageVo.setRecords(routeVoList);
+            return pageVo;
+        } catch (Exception e) {
+            log.error("查询资源列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(ResourceEnum.PAGE_FAIL);
+        }
     }
 
     @Override
     public TreeVo initResourceTreeVo(String[] checkedIds) {
-        return resourceService.initResourceTreeVo(checkedIds);
+        try {
+            return resourceService.initResourceTreeVo(checkedIds);
+        } catch (Exception e) {
+            log.error("查询资源数异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(ResourceEnum.INIT_TREE_FAIL);
+        }
     }
 
     @Override
     public ResourceVo createResource(ResourceVo resourceVo) {
-        return BeanConv.toBean(resourceService.createResource(resourceVo),ResourceVo.class);
+        try {
+            return BeanConv.toBean(resourceService.createResource(resourceVo),ResourceVo.class);
+        } catch (Exception e) {
+            log.error("保存资源异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(ResourceEnum.CREATE_FAIL);
+        }
+
     }
 
     @Override
     public Boolean updateResource(ResourceVo resourceVo) {
-        return resourceService.updateResource(resourceVo);
+        try {
+            return resourceService.updateResource(resourceVo);
+        } catch (Exception e) {
+            log.error("保存资源异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(ResourceEnum.UPDATE_FAIL);
+        }
     }
 
     @Override
     public Boolean deleteResource(String[] checkedIds) {
-        return resourceService.deleteResource(checkedIds);
+        try {
+            return resourceService.deleteResource(checkedIds);
+        } catch (Exception e) {
+            log.error("删除资源异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(ResourceEnum.DELETE_FAIL);
+        }
+
     }
 }

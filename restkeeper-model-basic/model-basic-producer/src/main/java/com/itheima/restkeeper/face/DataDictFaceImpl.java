@@ -26,17 +26,17 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @DubboService(version = "${dubbo.application.version}",timeout = 5000,
-        methods ={
-                @Method(name = "findDataDictVoPage",retries = 2),
-                @Method(name = "saveDataDict",retries = 0),
-                @Method(name = "updateDataDict",retries = 0),
-                @Method(name = "findDataDictVoById",retries = 2),
-                @Method(name = "updateByDataKey",retries = 0),
-                @Method(name = "checkByDataKey",retries = 2),
-                @Method(name = "findValueByDataKey",retries = 2),
-                @Method(name = "findValueByDataKeys",retries = 2),
-                @Method(name = "findDataDictVoByParentKey",retries = 2)
-        })
+    methods ={
+        @Method(name = "findDataDictVoPage",retries = 2),
+        @Method(name = "saveDataDict",retries = 0),
+        @Method(name = "updateDataDict",retries = 0),
+        @Method(name = "findDataDictVoById",retries = 2),
+        @Method(name = "updateByDataKey",retries = 0),
+        @Method(name = "checkByDataKey",retries = 2),
+        @Method(name = "findValueByDataKey",retries = 2),
+        @Method(name = "findValueByDataKeys",retries = 2),
+        @Method(name = "findDataDictVoByParentKey",retries = 2)
+    })
 public class DataDictFaceImpl implements DataDictFace {
 
     @Autowired
@@ -73,7 +73,7 @@ public class DataDictFaceImpl implements DataDictFace {
             if (lock.tryLock(
                     DictCacheConstant.REDIS_WAIT_TIME,
                     DictCacheConstant.REDIS_LEASETIME,
-                    TimeUnit.MILLISECONDS)){
+                    TimeUnit.SECONDS)){
                 flag = this.checkByDataKey(dataKey);
                 if (flag){
                     //保存或修改信息
@@ -101,7 +101,7 @@ public class DataDictFaceImpl implements DataDictFace {
             if (lock.tryLock(
                     DictCacheConstant.REDIS_WAIT_TIME,
                     DictCacheConstant.REDIS_LEASETIME,
-                    TimeUnit.MILLISECONDS)){
+                    TimeUnit.SECONDS)){
                 flag = this.checkByDataKey(dataKey);
                 if (flag){
                     //保存或修改信息

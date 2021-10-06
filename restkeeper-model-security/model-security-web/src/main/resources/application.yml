@@ -15,7 +15,7 @@ dubbo:
     logger: slf4j
   cloud:
     #表示要订阅服务的服务名，可以配置'*'，代表订阅所有服务，不推荐使用。若需订阅多应用，使用 "," 分割。
-    subscribed-services: model-security-producer,model-basic-producer
+    subscribed-services: model-security-producer
   scan:
     base-packages: com.itheima.restkeeper.web
   registry:

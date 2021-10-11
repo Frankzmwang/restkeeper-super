@@ -75,15 +75,10 @@ public class AppletController {
     @ApiOperation(value = "查询菜品详情",notes = "显示菜品详情,包括口味")
     @ApiImplicitParam(paramType = "path",name = "dishId",value = "菜品Id",dataType = "菜品Id")
     public ResponseWrap<DishVo> findDishVoById(@PathVariable("dishId") Long dishId) {
-        try {
-            //查询菜品信息，注意：菜品图片口味信息需要调用通用服务获得
-            DishVo dishVo = appletFace.findDishVoById(dishId);
-            //封装返回结果
-            return ResponseWrapBuild.build(BrandEnum.SUCCEED,dishVo);
-        }catch (Exception e){
-            log.error("查询菜品详情异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(DishEnum.SELECT_DISH_FAIL);
-        }
+        //查询菜品信息，注意：菜品图片口味信息需要调用通用服务获得
+        DishVo dishVo = appletFace.findDishVoById(dishId);
+        //封装返回结果
+        return ResponseWrapBuild.build(BrandEnum.SUCCEED,dishVo);
     }
 
     @PostMapping("opertion-shopping-cart/{dishId}/{orderNo}/{dishFlavor}/{opertionType}")

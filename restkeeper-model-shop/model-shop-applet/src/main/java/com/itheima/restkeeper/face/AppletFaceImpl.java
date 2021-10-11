@@ -14,6 +14,7 @@ import com.itheima.restkeeper.service.*;
 import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
+import com.itheima.restkeeper.utils.ResponseWrapBuild;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -293,21 +294,26 @@ public class AppletFaceImpl implements AppletFace {
 
     @Override
     public DishVo findDishVoById(Long dishId) {
-        //1、查询菜品
-        Dish dish = dishService.getById(dishId);
-        //2、查询菜品口味
-        List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(dishId);
-        DishVo dishVo = BeanConv.toBean(dish, DishVo.class);
-        //3、处理菜品口味
-        List<DishFlavorVo> dishFlavorVos = BeanConv.toBeanList(dishFlavors,DishFlavorVo.class);
-        List<String> DataKeys = dishFlavorVos.stream()
-                .map(DishFlavorVo::getDataKey).collect(Collectors.toList());
-        List<DataDictVo> valueByDataKeys = dataDictFace.findValueByDataKeys(DataKeys);
-        dishVo.setDataDictVos(valueByDataKeys);
-        //4、处理菜品图片
-        List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(dishVo.getId());
-        dishVo.setAffixVo(affixVoListDish.get(0));
-        return dishVo ;
+        try {
+            //1、查询菜品
+            Dish dish = dishService.getById(dishId);
+            //2、查询菜品口味
+            List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(dishId);
+            DishVo dishVo = BeanConv.toBean(dish, DishVo.class);
+            //3、处理菜品口味
+            List<DishFlavorVo> dishFlavorVos = BeanConv.toBeanList(dishFlavors,DishFlavorVo.class);
+            List<String> DataKeys = dishFlavorVos.stream()
+                    .map(DishFlavorVo::getDataKey).collect(Collectors.toList());
+            List<DataDictVo> valueByDataKeys = dataDictFace.findValueByDataKeys(DataKeys);
+            dishVo.setDataDictVos(valueByDataKeys);
+            //4、处理菜品图片
+            List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(dishVo.getId());
+            dishVo.setAffixVo(affixVoListDish.get(0));
+            return dishVo ;
+        }catch (Exception e){
+            log.error("查询菜品详情异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(DishEnum.SELECT_DISH_FAIL);
+        }
     }
 
     @Override

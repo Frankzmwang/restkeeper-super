@@ -9,7 +9,7 @@ import com.itheima.restkeeper.basic.IBasicEnum;
 public enum LogBusinessEnum implements IBasicEnum {
     SUCCEED("200","操作成功"),
     FAIL("1000","操作失败"),
-    PAGE_FAIL("100001", "查询数据字典列表失败")
+    PAGE_FAIL("29001", "查询数据字典列表失败")
     ;
 
     private String code;

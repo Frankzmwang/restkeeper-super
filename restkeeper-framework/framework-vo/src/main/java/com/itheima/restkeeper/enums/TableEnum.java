@@ -9,14 +9,14 @@ import com.itheima.restkeeper.basic.IBasicEnum;
 public enum TableEnum implements IBasicEnum {
     SUCCEED("200","操作成功"),
     FAIL("1000","操作失败"),
-    PAGE_FAIL("15005", "查询桌台列表失败"),
-    CREATE_FAIL("15007", "保存桌台失败"),
-    UPDATE_FAIL("15008", "修改桌台失败"),
-    DELETE_FAIL("15009", "修改桌台失败"),
-    SELECT_TABLE_FAIL("15010", "查询桌台失败"),
-    OPEN_TABLE_FAIL("15011","开台失败"),
-    SELECT_TABLE_LIST_FAIL("15012", "查询桌台list失败"),
-    ROTARY_TABLE_FAIL("15013", "转桌失败")
+    PAGE_FAIL("42001", "查询桌台列表失败"),
+    CREATE_FAIL("42002", "保存桌台失败"),
+    UPDATE_FAIL("42003", "修改桌台失败"),
+    DELETE_FAIL("42004", "修改桌台失败"),
+    SELECT_TABLE_FAIL("42005", "查询桌台失败"),
+    OPEN_TABLE_FAIL("42006","开台失败"),
+    SELECT_TABLE_LIST_FAIL("42007", "查询桌台list失败"),
+    ROTARY_TABLE_FAIL("42008", "转桌失败")
     ;
 
     private String code;

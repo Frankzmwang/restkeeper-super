@@ -9,7 +9,7 @@ import com.itheima.restkeeper.basic.IBasicEnum;
 public enum MenusEnum implements IBasicEnum {
     SUCCEED("200","操作成功"),
     FAIL("1000","操作失败"),
-    PAGE_FAIL("40005", "查询菜单列表失败")
+    PAGE_FAIL("30001", "查询菜单列表失败")
     ;
 
     private String code;

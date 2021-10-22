@@ -9,11 +9,11 @@ import com.itheima.restkeeper.basic.IBasicEnum;
 public enum RoleEnum implements IBasicEnum {
     SUCCEED("200","操作成功"),
     FAIL("1000","操作失败"),
-    PAGE_FAIL("60005", "查询角色列表失败"),
-    CREATE_FAIL("60007", "保存角色失败"),
-    UPDATE_FAIL("60008", "修改角色失败"),
-    DELETE_FAIL("60009", "删除角色失败"),
-    INIT_ROLEID_OPTIONS_FAIL("60010", "初始化角色失败")
+    PAGE_FAIL("36001", "查询角色列表失败"),
+    CREATE_FAIL("36002", "保存角色失败"),
+    UPDATE_FAIL("36003", "修改角色失败"),
+    DELETE_FAIL("36004", "删除角色失败"),
+    INIT_ROLEID_OPTIONS_FAIL("36005", "初始化角色失败")
     ;
 
     private String code;

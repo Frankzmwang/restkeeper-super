@@ -8,9 +8,9 @@ import com.itheima.restkeeper.basic.IBasicEnum;
  */
 public enum OpenTableEnum implements IBasicEnum {
     SUCCEED("200","操作成功"),
-    CHANG_TABLE_FAIL("160001","开桌失败"),
-    CREATE_ORDER_FAIL("160002", "创建订单失败"),
-    TRY_LOCK_FAIL("160003","加锁失败")
+    CHANG_TABLE_FAIL("31001","开桌失败"),
+    CREATE_ORDER_FAIL("31002", "创建订单失败"),
+    TRY_LOCK_FAIL("31003","加锁失败")
     ;
 
     private String code;

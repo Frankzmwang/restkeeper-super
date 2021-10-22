@@ -44,7 +44,7 @@ spring:
                 virtual-host: /
       bindings: # Binding 配置项，对应 BindingProperties Map
         log-output:
-          destination: log-output-01 # 目的地。这里使用 RocketMQ Topic
+          destination: log-output-01 # 目的地。这里使用Topic
           content-type: application/json # 内容格式。这里使用 JSON
           binder: rabbit-log
     gateway:

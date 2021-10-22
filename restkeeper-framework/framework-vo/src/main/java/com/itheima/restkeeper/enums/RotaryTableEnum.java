@@ -8,7 +8,7 @@ import com.itheima.restkeeper.basic.IBasicEnum;
  */
 public enum  RotaryTableEnum implements IBasicEnum {
     SUCCEED("200","操作成功"),
-    ROTARY_TABLE_FAIL("180001","转台失败，请检查订单及桌台状态")
+    ROTARY_TABLE_FAIL("37001","转台失败，请检查订单及桌台状态")
             ;
 
     private String code;

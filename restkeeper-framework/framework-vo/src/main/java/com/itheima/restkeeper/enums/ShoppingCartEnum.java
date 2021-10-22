@@ -8,10 +8,10 @@ import com.itheima.restkeeper.basic.IBasicEnum;
  */
 public enum ShoppingCartEnum implements IBasicEnum {
     SUCCEED("200","操作成功"),
-    UPDATE_DISHNUM_FAIL("170001","修改购物车数量失败"),
-    CREATE_ORDERITEM_FAIL("170002", "创建购物车订单项失败"),
-    UPDATE_DISHNUMBER_FAIL("170003","修改菜品数量失败"),
-    UNDERSTOCK("170004","库存不足")
+    UPDATE_DISHNUM_FAIL("38001","修改购物车数量失败"),
+    CREATE_ORDERITEM_FAIL("38002", "创建购物车订单项失败"),
+    UPDATE_DISHNUMBER_FAIL("38003","修改菜品数量失败"),
+    UNDERSTOCK("38004","库存不足")
     ;
 
     private String code;

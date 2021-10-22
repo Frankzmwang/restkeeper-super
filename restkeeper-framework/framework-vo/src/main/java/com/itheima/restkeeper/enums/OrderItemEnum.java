@@ -8,10 +8,10 @@ import com.itheima.restkeeper.basic.IBasicEnum;
  */
 public enum OrderItemEnum implements IBasicEnum {
     SUCCEED("200","操作成功"),
-    UPDATE_ORDERITEM_FAIL("190001","修改订单项失败"),
-    DELETE_ORDERITEM_FAIL("190002","删除订单项失败"),
-    SAVE_ORDER_FAIL("190003","保存订单失败"),
-    LOCK_ORDER_FAIL("190004","保存订单失败"),
+    UPDATE_ORDERITEM_FAIL("33001","修改订单项失败"),
+    DELETE_ORDERITEM_FAIL("33002","删除订单项失败"),
+    SAVE_ORDER_FAIL("33003","保存订单失败"),
+    LOCK_ORDER_FAIL("33004","保存订单失败"),
             ;
 
     private String code;

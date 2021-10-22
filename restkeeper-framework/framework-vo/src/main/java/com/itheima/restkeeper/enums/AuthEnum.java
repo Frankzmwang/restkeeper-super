@@ -10,8 +10,8 @@ public enum  AuthEnum implements IBasicEnum {
 
     SUCCEED("200","操作成功"),
     FAIL("1000","操作失败"),
-    AUTH_FAIL("80401", "鉴权失败"),
-    NEED_LOGIN("80403", "请先登陆")
+    AUTH_FAIL("22001", "鉴权失败"),
+    NEED_LOGIN("22002", "请先登陆")
             ;
 
     private String code;

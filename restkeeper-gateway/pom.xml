@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <modules>
-        <module>restkeeper-gateway-operator</module>
-        <module>restkeeper-gateway-shop</module>
+        <module>gateway-operator</module>
+        <module>gateway-shop</module>
     </modules>
     <packaging>pom</packaging>
     <artifactId>restkeeper-gateway</artifactId>

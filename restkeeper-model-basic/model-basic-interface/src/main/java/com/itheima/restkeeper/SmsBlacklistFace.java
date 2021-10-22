@@ -1,8 +1,49 @@
 package com.itheima.restkeeper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.restkeeper.req.SmsBlacklistVo;
+
 /**
  * @ClassName SmsBlacklistFace.java
  * @Description 黑名单dubbo接口
  */
 public interface SmsBlacklistFace {
+
+    /**
+     * @Description 渠道列表
+     * @param smsBlacklistVo 查询条件
+     * @param pageNum 页码
+     * @param pageSize 每页条数
+     * @return Page<SmsBlacklistVo>
+     */
+    Page<SmsBlacklistVo> findSmsBlacklistVoPage(SmsBlacklistVo smsBlacklistVo, int pageNum, int pageSize);
+
+    /**
+     * @Description 创建渠道
+     * @param smsBlacklistVo 对象信息
+     * @return SmsBlacklistVo
+     */
+    SmsBlacklistVo createSmsBlacklist(SmsBlacklistVo smsBlacklistVo);
+
+    /**
+     * @Description 修改渠道
+     * @param smsBlacklistVo 对象信息
+     * @return Boolean
+     */
+    Boolean updateSmsBlacklist(SmsBlacklistVo smsBlacklistVo);
+
+    /**
+     * @Description 删除渠道
+     * @param checkedIds 选择中对象Ids
+     * @return Boolean
+     */
+    Boolean deleteSmsBlacklist(String[] checkedIds);
+
+    /**
+     * @Description 查找渠道
+     * @param smsBlacklistId 选择对象信息Id
+     * @return SmsBlacklistVo
+     */
+    SmsBlacklistVo findSmsBlacklistBySmsBlacklistId(Long smsBlacklistId);
+    
 }

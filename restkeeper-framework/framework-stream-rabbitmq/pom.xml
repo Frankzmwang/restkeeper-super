@@ -9,9 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>framework-stream-binder-rabbitmq</artifactId>
+    <artifactId>framework-stream-rabbitmq</artifactId>
 
-    <name>framework-stream-binder-rabbitmq</name>
+    <name>framework-stream-rabbitmq</name>
 
     <dependencies>
         <dependency>

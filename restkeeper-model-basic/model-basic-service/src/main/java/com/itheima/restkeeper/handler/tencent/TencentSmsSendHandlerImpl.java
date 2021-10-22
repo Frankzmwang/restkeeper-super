@@ -19,6 +19,7 @@ import com.tencentcloudapi.sms.v20210111.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -31,6 +32,7 @@ import java.util.*;
 @Service("tencentSmsSendHandler")
 public class TencentSmsSendHandlerImpl implements SmsSendHandler {
 
+    @Lazy
     @Autowired
     SmsClient tencentSmsConfig;
 

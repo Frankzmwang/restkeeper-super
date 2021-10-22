@@ -10,7 +10,7 @@
     <modules>
         <module>framework-commons</module>
         <module>framework-vo</module>
-        <module>framework-starter-redis</module>
+        <module>framework-redis</module>
         <module>framework-mybatis-plus</module>
         <module>framework-seata</module>
         <module>framework-knife4j-web</module>
@@ -18,7 +18,7 @@
         <module>framework-web</module>
         <module>framework-jwt</module>
         <module>framework-xxl-job</module>
-        <module>framework-stream-binder-rabbitmq</module>
+        <module>framework-stream-rabbitmq</module>
         <module>framework-sharding-jdbc</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>

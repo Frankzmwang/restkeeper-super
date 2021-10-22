@@ -9,6 +9,7 @@ import com.itheima.restkeeper.req.SmsSignVo;
 import com.itheima.restkeeper.service.ISmsSignService;
 import com.itheima.restkeeper.utils.BeanConv;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.List;
 @Service("aliyunSmsSignHandler")
 public class AliyunSmsSignHandlerImpl implements SmsSignHandler {
 
+    @Lazy
     @Autowired
     Client aliyunSmsConfig;
 

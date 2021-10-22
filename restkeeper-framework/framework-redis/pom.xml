@@ -9,9 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>framework-starter-redis</artifactId>
+    <artifactId>framework-redis</artifactId>
 
-    <name>framework-starter-redis</name>
+    <name>framework-redis</name>
 
     <dependencies>
         <!--springboot的cache支持-->
@@ -26,7 +26,7 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
-        <!--redis缓存客户端-->
+        <!--redisson缓存客户端-->
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-spring-boot-starter</artifactId>

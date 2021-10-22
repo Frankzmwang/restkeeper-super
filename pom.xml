@@ -109,7 +109,7 @@
             </dependency>
             <dependency>
                 <groupId>com.itheima.restkeeper</groupId>
-                <artifactId>framework-starter-redis</artifactId>
+                <artifactId>framework-redis</artifactId>
                 <version>${itheima.version}</version>
             </dependency>
             <dependency>
@@ -155,7 +155,7 @@
 
             <dependency>
                 <groupId>com.itheima.restkeeper</groupId>
-                <artifactId>framework-stream-binder-rabbitmq</artifactId>
+                <artifactId>framework-stream-rabbitmq</artifactId>
                 <version>${itheima.version}</version>
             </dependency>
 

@@ -10,6 +10,7 @@ import com.itheima.restkeeper.utils.EmptyUtil;
 import com.tencentcloudapi.sms.v20210111.SmsClient;
 import com.tencentcloudapi.sms.v20210111.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.List;
 @Service("tencentTemplateHandler")
 public class TencentTemplateHandlerImpl implements SmsTemplateHandler {
 
+    @Lazy
     @Autowired
     SmsClient tencentSmsConfig;
 

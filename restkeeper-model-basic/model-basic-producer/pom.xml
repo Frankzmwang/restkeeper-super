@@ -25,7 +25,7 @@
 
         <dependency>
             <groupId>com.itheima.restkeeper</groupId>
-            <artifactId>framework-starter-redis</artifactId>
+            <artifactId>framework-redis</artifactId>
         </dependency>
 
         <dependency>

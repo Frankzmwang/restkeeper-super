@@ -4,7 +4,7 @@ spring:
   #应用配置
   application:
     #应用名称
-    name: restkeeper-gateway-operator
+    name: gateway-operator
   cloud:
     nacos:
       discovery:

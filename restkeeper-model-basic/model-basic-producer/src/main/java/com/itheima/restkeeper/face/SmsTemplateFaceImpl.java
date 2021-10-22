@@ -30,7 +30,7 @@ import java.util.List;
         @Method(name = "addSmsTemplate",retries = 0),
         @Method(name = "deleteSmsTemplate",retries = 0),
         @Method(name = "modifySmsTemplate",retries = 0),
-        @Method(name = "QuerySmsTemplate",retries = 2)
+        @Method(name = "querySmsTemplate",retries = 2)
     })
 public class SmsTemplateFaceImpl implements SmsTemplateFace {
 

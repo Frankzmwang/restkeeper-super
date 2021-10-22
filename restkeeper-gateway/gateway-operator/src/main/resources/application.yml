@@ -1,7 +1,7 @@
 #服务配置
 server:
   #端口
-  port: 8017
+  port: 8011
   #服务编码
   tomcat:
     uri-encoding: UTF-8
@@ -12,22 +12,17 @@ spring:
   redis:
     redisson:
       config: classpath:singleServerConfig.yaml
-  #权限配置
   security:
-    #匿名资源配置
     ignore-url:
       - /security/user/login
       - /doc.html
-      - /basic-swagger/**
       - /security-swagger/**
-      - /trading-swagger/**
-      - /shop-swagger/**
+      - /basic-swagger/**
+      - /operator-swagger/**
       - /swagger-resources/**
       - /webjars/**
-    #跨域配置
     origins:
-      - http://ppsk.shop.eehp.cn:8080
-    #登录页指定
+      - http://www.eehp.cn
     login-page: /security/user/login
   cloud:
     nacos:
@@ -49,7 +44,7 @@ spring:
                 virtual-host: /
       bindings: # Binding 配置项，对应 BindingProperties Map
         log-output:
-          destination: log-output-01 # 目的地。这里使用 RocketMQ Topic
+          destination: log-output-01 # 目的地。这里使用Topic
           content-type: application/json # 内容格式。这里使用 JSON
           binder: rabbit-log
     gateway:
@@ -58,19 +53,6 @@ spring:
           enabled: true
           lowerCaseServiceId: true
       routes:
-        - id: model-trading-web #从nacos中找到服务
-          uri: lb://model-trading-web
-          predicates:
-            - Path=/trading/** #路径断言
-          filters:
-            - StripPrefix=1
-        - id: model-trading-swagger #从nacos中找到服务
-          uri: lb://model-trading-web
-          filters:
-            - SwaggerHeaderFilter
-            - StripPrefix=1
-          predicates:
-            - Path=/trading-swagger/**
         - id: model-security-web #从nacos中找到服务
           uri: lb://model-security-web
           predicates:
@@ -97,19 +79,6 @@ spring:
             - StripPrefix=1
           predicates:
             - Path=/basic-swagger/**
-        - id: model-shop-web #从nacos中找到服务
-          uri: lb://model-shop-web
-          predicates:
-            - Path=/shop/**
-          filters:
-            - StripPrefix=1
-        - id: model-shop-swagger #从nacos中找到服务
-          uri: lb://model-shop-web
-          filters:
-            - SwaggerHeaderFilter
-            - StripPrefix=1
-          predicates:
-            - Path=/shop-swagger/**
       globalcors:
         cors-configurations:
           '[/**]':
@@ -120,11 +89,9 @@ spring:
             # 跨域允许的有效期
             allow-credentials: true
             allowedOrigins:
-              - "http://ppsk.shop.eehp.cn:8080"
+              - "http://www.eehp.cn"
             allowedHeaders: "*"
             allowedMethods: "*"
-logging:
-  config: classpath:logback.xml
 dubbo:
   application:
     version: 1.0.0
@@ -133,14 +100,14 @@ dubbo:
     #表示要订阅服务的服务名，可以配置'*'，代表订阅所有服务，不推荐使用。若需订阅多应用，使用 "," 分割。
     subscribed-services: model-security-producer
   scan:
-    base-packages: com.itheima.restkeeper
+    base-packages: com.itheima.restkeeper.core
   registry:
     address: spring-cloud://192.168.112.77
   protocol:
     name: dubbo
-    port: 28017
+    port: 28011
     threads: 200
-    accesslog: D:/logs/restkeeper-gateway-shop-01.log
+    accesslog: D:/logs/gateway-operator-01.log
 restkeeper:
   framework:
     jwt:
@@ -156,7 +123,5 @@ restkeeper:
         - /doc.html
         - /security-swagger/**
         - /basic-swagger/**
-        - /trading-swagger/**
-        - /shop-swagger/**
         - /swagger-resources/**
         - /webjars/**

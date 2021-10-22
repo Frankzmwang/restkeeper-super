@@ -9,6 +9,7 @@ import com.itheima.restkeeper.req.SmsSignVo;
 import com.itheima.restkeeper.service.ISmsSignService;
 import com.itheima.restkeeper.utils.BeanConv;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Service("baiduSmsSignHandler")
 public class BaiduSmsSignHandlerImpl implements SmsSignHandler {
 
+    @Lazy
     @Autowired
     SmsClient baiduSmsConfig;
 

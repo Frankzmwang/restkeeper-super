@@ -15,12 +15,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value="SmsBlacklist对象", description="黑名单表")
-public class SmsBlacklist extends BasicVo {
+public class SmsBlacklistVo extends BasicVo {
 
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public SmsBlacklist(Long id, String mobile){
+    public SmsBlacklistVo(Long id, String mobile){
         super(id);
         this.mobile=mobile;
     }

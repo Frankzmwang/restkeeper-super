@@ -9,11 +9,16 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>restkeeper-gateway-operator</artifactId>
+    <artifactId>gateway-shop</artifactId>
 
-    <name>restkeeper-gateway-operator</name>
-
+    <name>gateway-shop</name>
     <dependencies>
+        <!--鉴权服务接口-->
+        <dependency>
+            <groupId>com.itheima.restkeeper</groupId>
+            <artifactId>model-security-interface</artifactId>
+        </dependency>
+        <!--鉴权客户端【消费者】-->
         <dependency>
             <groupId>com.itheima.restkeeper</groupId>
             <artifactId>model-security-client</artifactId>
@@ -48,11 +53,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.itheima.restkeeper</groupId>
-            <artifactId>model-security-interface</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
@@ -65,7 +65,7 @@
     </dependencies>
 
     <build>
-        <finalName>gateway-operator</finalName>
+        <finalName>gateway-shop</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

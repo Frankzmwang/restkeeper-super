@@ -2,6 +2,7 @@ package com.itheima.restkeeper.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.Affix;
 import com.itheima.restkeeper.req.AffixVo;
 import com.itheima.restkeeper.req.UploadMultipartFile;
@@ -14,6 +15,13 @@ import java.util.List;
  */
 public interface IAffixService extends IService<Affix> {
 
+    /***
+     * @description 下载文件
+     * @param affixId
+     * @return
+     */
+    AffixVo downLoad(Long affixId) throws ProjectException;
+
     /**
      * @Description 文件上传
      * @param multipartFile 上传对象
@@ -21,7 +29,7 @@ public interface IAffixService extends IService<Affix> {
      * @return
      */
     Affix upLoad(UploadMultipartFile multipartFile,
-                 AffixVo affixVo) throws IOException;
+                 AffixVo affixVo) throws ProjectException;
 
     /**
      * @Description 为上传绑定对应的业务Id
@@ -29,6 +37,14 @@ public interface IAffixService extends IService<Affix> {
      * @return
      */
     Affix bindBusinessId(AffixVo affixVo);
+
+
+    /**
+     * @Description 批量上传绑定对应的业务Id
+     * @param  affixVos 附件对象
+     * @return
+     */
+    List<Affix> bindBatchBusinessId(List<AffixVo> affixVos);
 
     /**
      * @Description 按业务ID查询附件
@@ -57,5 +73,6 @@ public interface IAffixService extends IService<Affix> {
      * @return
      */
     Boolean deleteAffix(String[] checkedIds);
+
 
 }

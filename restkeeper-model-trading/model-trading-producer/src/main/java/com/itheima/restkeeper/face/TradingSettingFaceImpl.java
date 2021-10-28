@@ -39,7 +39,9 @@ public class TradingSettingFaceImpl implements TradingSettingFace {
     ITradingSettingService tradingSettingService;
 
     @Override
-    public Page<TradingSettingVo> findTradingSettingVoPage(TradingSettingVo enterpriseSettingVo, int pageNum, int pageSize) {
+    public Page<TradingSettingVo> findTradingSettingVoPage(TradingSettingVo enterpriseSettingVo,
+                                                           int pageNum,
+                                                           int pageSize)throws ProjectException{
         Page<TradingSetting> page = tradingSettingService.findTradingSettingVoPage(enterpriseSettingVo, pageNum, pageSize);
         Page<TradingSettingVo> pageVo = new Page<>();
         BeanConv.toBean(page, pageVo);
@@ -51,22 +53,22 @@ public class TradingSettingFaceImpl implements TradingSettingFace {
     }
 
     @Override
-    public TradingSettingVo createTradingSetting(TradingSettingVo enterpriseSettingVo) {
+    public TradingSettingVo createTradingSetting(TradingSettingVo enterpriseSettingVo) throws ProjectException{
         return BeanConv.toBean(tradingSettingService.createTradingSetting(enterpriseSettingVo), TradingSettingVo.class);
     }
 
     @Override
-    public Boolean updateTradingSetting(TradingSettingVo enterpriseSettingVo) {
+    public Boolean updateTradingSetting(TradingSettingVo enterpriseSettingVo)throws ProjectException {
         return tradingSettingService.updateTradingSetting(enterpriseSettingVo);
     }
 
     @Override
-    public Boolean deleteTradingSetting(String[] checkedIds) {
+    public Boolean deleteTradingSetting(String[] checkedIds)throws ProjectException {
         return tradingSettingService.deleteTradingSetting(checkedIds);
     }
 
     @Override
-    public TradingSettingVo saveOrUpdateTradingSetting(TradingSettingVo tradingSettingVo) {
+    public TradingSettingVo saveOrUpdateTradingSetting(TradingSettingVo tradingSettingVo)throws ProjectException {
         try {
             TradingSetting tradingSetting = BeanConv.toBean(tradingSettingVo, TradingSetting.class);
             tradingSettingService.saveOrUpdate(tradingSetting);
@@ -79,7 +81,7 @@ public class TradingSettingFaceImpl implements TradingSettingFace {
     }
 
     @Override
-    public TradingSettingVo findTradingSettingByEnterpriseId() {
+    public TradingSettingVo findTradingSettingByEnterpriseId() throws ProjectException{
         try {
             TradingSetting tradingSetting = tradingSettingService.getOne(new QueryWrapper<>());
             return BeanConv.toBean(tradingSetting, TradingSettingVo.class);

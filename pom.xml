@@ -25,9 +25,9 @@
         <!--itheima.version-->
         <itheima.version>2.0-SNAPSHOT</itheima.version>
         <!--spring-cloud版本-->
-        <spring-cloud.version>Hoxton.SR8</spring-cloud.version>
+        <spring-cloud.version>Hoxton.SR9</spring-cloud.version>
         <!--spring-cloud-alibaba版本-->
-        <spring-cloud-alibaba.version>2.2.5.RELEASE</spring-cloud-alibaba.version>
+        <spring-cloud-alibaba.version>2.2.5.RC2</spring-cloud-alibaba.version>
         <stream-rabbit.version>3.1.0</stream-rabbit.version>
         <!--spring-boot版本-->
         <spring.boot.version>2.3.2.RELEASE</spring.boot.version>

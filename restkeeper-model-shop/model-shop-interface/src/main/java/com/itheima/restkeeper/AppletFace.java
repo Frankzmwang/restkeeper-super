@@ -17,14 +17,14 @@ public interface AppletFace {
      * @param tableId 桌台Id
      * @return Boolean
      */
-    Boolean isOpen(Long tableId);
+    Boolean isOpen(Long tableId)throws ProjectException;
 
     /***
      * @description 查询桌台相关主体信息
      * @param tableId 桌台Id
      * @return AppletInfoVo
      */
-    AppletInfoVo findAppletInfoVoByTableId(Long tableId);
+    AppletInfoVo findAppletInfoVoByTableId(Long tableId)throws ProjectException;
 
     /***
      * @description 未开桌：选择人数创建订单
@@ -32,14 +32,14 @@ public interface AppletFace {
      * @param personNumbers 就餐人数
      * @return Boolean
      */
-    OrderVo openTable(Long tableId,Integer personNumbers);
+    OrderVo openTable(Long tableId,Integer personNumbers)throws ProjectException;
 
     /***
      * @description 已开桌：查询当前桌台订单信息【包括可核算订单项和购物车订单项】
      * @param tableId 桌台ID
      * @return
      */
-    OrderVo showOrderVoforTable(Long tableId) ;
+    OrderVo showOrderVoforTable(Long tableId) throws ProjectException;
 
     /***
      * @description 处理当前订单中订单项
@@ -48,7 +48,7 @@ public interface AppletFace {
      * @param orderVo 订单信息
      * @return
      */
-    OrderVo handlerOrderVo(OrderVo orderVo);
+    OrderVo handlerOrderVo(OrderVo orderVo)throws ProjectException;
 
     /***
      * @description 订单项计算
@@ -56,7 +56,7 @@ public interface AppletFace {
      * @return
      * @return: java.math.BigDecimal
      */
-    BigDecimal reducePriceHandler(List<OrderItemVo> orderItemVos );
+    BigDecimal reducePriceHandler(List<OrderItemVo> orderItemVos )throws ProjectException;
 
 
     /***

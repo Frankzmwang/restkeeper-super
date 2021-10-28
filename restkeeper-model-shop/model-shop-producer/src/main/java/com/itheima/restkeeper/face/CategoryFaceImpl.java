@@ -36,7 +36,9 @@ public class CategoryFaceImpl implements CategoryFace {
 
 
     @Override
-    public Page<CategoryVo> findCategoryVoPage(CategoryVo categoryVo, int pageNum, int pageSize) {
+    public Page<CategoryVo> findCategoryVoPage(CategoryVo categoryVo,
+                                               int pageNum,
+                                               int pageSize)throws ProjectException {
         try {
             Page<Category> page = categoryService.findCategoryVoPage(categoryVo, pageNum, pageSize);
             Page<CategoryVo> pageVo = new Page<>();
@@ -54,7 +56,7 @@ public class CategoryFaceImpl implements CategoryFace {
     }
 
     @Override
-    public CategoryVo createCategory(CategoryVo categoryVo) {
+    public CategoryVo createCategory(CategoryVo categoryVo)throws ProjectException {
         try {
             return BeanConv.toBean( categoryService.createCategory(categoryVo), CategoryVo.class);
         } catch (Exception e) {
@@ -64,7 +66,7 @@ public class CategoryFaceImpl implements CategoryFace {
     }
 
     @Override
-    public Boolean updateCategory(CategoryVo categoryVo) {
+    public Boolean updateCategory(CategoryVo categoryVo) throws ProjectException{
         try {
             return categoryService.updateCategory(categoryVo);
         } catch (Exception e) {
@@ -84,7 +86,7 @@ public class CategoryFaceImpl implements CategoryFace {
     }
 
     @Override
-    public CategoryVo findCategoryByCategoryId(Long categoryId) {
+    public CategoryVo findCategoryByCategoryId(Long categoryId)throws ProjectException {
         try {
             Category category = categoryService.getById(categoryId);
             if (!EmptyUtil.isNullOrEmpty(category)){
@@ -98,7 +100,7 @@ public class CategoryFaceImpl implements CategoryFace {
     }
 
     @Override
-    public List<CategoryVo> findCategoryVoList() {
+    public List<CategoryVo> findCategoryVoList()throws ProjectException {
         try {
             return BeanConv.toBeanList(categoryService.findCategoryVoList(),CategoryVo.class);
         } catch (Exception e) {

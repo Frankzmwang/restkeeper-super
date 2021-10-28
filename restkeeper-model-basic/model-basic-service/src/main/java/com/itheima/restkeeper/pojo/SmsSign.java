@@ -22,7 +22,7 @@ public class SmsSign extends BasicPojo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public SmsSign(Long id,String channelLabel,String signName,String signCode,String signType,String documentType,String international,String signPurpose,String proofImage,String proofType,String remark,String acceptStatus,String acceptMsg,String auditStatus,String auditMsg){
+    public SmsSign(Long id,String channelLabel,String signName,String signCode,String signType,String documentType,String international,String signPurpose,String remark,String acceptStatus,String acceptMsg,String auditStatus,String auditMsg,String signNo){
         super(id);
         this.channelLabel=channelLabel;
         this.signName=signName;
@@ -31,13 +31,12 @@ public class SmsSign extends BasicPojo {
         this.documentType=documentType;
         this.international=international;
         this.signPurpose=signPurpose;
-        this.proofImage=proofImage;
-        this.proofType=proofType;
         this.remark=remark;
         this.acceptStatus=acceptStatus;
         this.acceptMsg=acceptMsg;
         this.auditStatus=auditStatus;
         this.auditMsg=auditMsg;
+        this.signNo=signNo;
     }
 
     @ApiModelProperty(value = "通道唯一标识")
@@ -61,12 +60,6 @@ public class SmsSign extends BasicPojo {
     @ApiModelProperty(value = "签名用途：	0：自用。	1：他用。")
     private String signPurpose;
 
-    @ApiModelProperty(value = "签名对应的资质证明图片需先进行 base64 编码格式转换")
-    private String proofImage;
-
-    @ApiModelProperty(value = "签名证明文件类型")
-    private String proofType;
-
     @ApiModelProperty(value = "			短信申请说明")
     private String remark;
 
@@ -81,6 +74,9 @@ public class SmsSign extends BasicPojo {
 
     @ApiModelProperty(value = "审核信息")
     private String auditMsg;
+
+    @ApiModelProperty(value = "三方签名code:发送短信可能用到")
+    private String signNo;
 
 
 }

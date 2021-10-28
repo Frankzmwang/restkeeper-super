@@ -56,7 +56,9 @@ public class DishFaceImpl implements DishFace {
     AffixFace affixFace;
 
     @Override
-    public Page<DishVo> findDishVoPage(DishVo dishVo, int pageNum, int pageSize) {
+    public Page<DishVo> findDishVoPage(DishVo dishVo,
+                                       int pageNum,
+                                       int pageSize)throws ProjectException {
         try {
             Page<Dish> page = dishService.findDishVoPage(dishVo, pageNum, pageSize);
             Page<DishVo> pageVo = new Page<>();
@@ -91,7 +93,7 @@ public class DishFaceImpl implements DishFace {
     }
 
     @Override
-    public DishVo createDish(DishVo dishVo) {
+    public DishVo createDish(DishVo dishVo) throws ProjectException{
         try {
             DishVo dishVoResult = BeanConv.toBean(dishService.createDish(dishVo), DishVo.class);
             dishVoResult.setHasDishFlavor(dishVo.getHasDishFlavor());
@@ -163,7 +165,7 @@ public class DishFaceImpl implements DishFace {
     }
 
     @Override
-    public Boolean deleteDish(String[] checkedIds) {
+    public Boolean deleteDish(String[] checkedIds)throws ProjectException {
         try {
             Boolean flag = dishService.deleteDish(checkedIds);
             for (String checkedId : checkedIds) {
@@ -182,7 +184,7 @@ public class DishFaceImpl implements DishFace {
     }
 
     @Override
-    public DishVo findDishByDishId(Long dishId) {
+    public DishVo findDishByDishId(Long dishId)throws ProjectException {
         try {
             Dish dish = dishService.getById(dishId);
             if (!EmptyUtil.isNullOrEmpty(dish)){

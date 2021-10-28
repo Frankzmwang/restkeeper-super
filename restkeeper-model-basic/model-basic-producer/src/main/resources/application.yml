@@ -49,6 +49,11 @@ mybatis-plus:
     - tab_affix
     - tab_log_business
     - tab_data_dict
+    - tab_sms_blacklist
+    - tab_sms_channel
+    - tab_sms_send_record
+    - tab_sms_sign
+    - tab_sms_template
     - undo_log
   #忽略门店号表
   ignore-store-tables:
@@ -56,6 +61,11 @@ mybatis-plus:
     - tab_affix
     - tab_log_business
     - tab_data_dict
+    - tab_sms_blacklist
+    - tab_sms_channel
+    - tab_sms_send_record
+    - tab_sms_sign
+    - tab_sms_template
     - undo_log
 dubbo:
   application:

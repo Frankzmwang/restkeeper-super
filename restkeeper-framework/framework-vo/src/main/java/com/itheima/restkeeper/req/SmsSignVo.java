@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * @Description：
  */
@@ -36,6 +39,7 @@ public class SmsSignVo extends BasicVo {
         this.acceptMsg=acceptMsg;
         this.auditStatus=auditStatus;
         this.auditMsg=auditMsg;
+        this.signNo=signNo;
     }
 
     @ApiModelProperty(value = "通道唯一标识")
@@ -65,7 +69,7 @@ public class SmsSignVo extends BasicVo {
     @ApiModelProperty(value = "签名证明文件类型")
     private String proofType;
 
-    @ApiModelProperty(value = "			短信申请说明")
+    @ApiModelProperty(value = "短信申请说明")
     private String remark;
 
     @ApiModelProperty(value = "是否受理成功")
@@ -80,5 +84,15 @@ public class SmsSignVo extends BasicVo {
     @ApiModelProperty(value = "审核信息")
     private String auditMsg;
 
+    @ApiModelProperty(value = "三方签名code:发送短信可能用到")
+    private String signNo;
+    @ApiModelProperty(value = "选中节点")
+    private String[] checkedIds;
+
+    @ApiModelProperty(value = "证明文件组",dataType = "ProofVo")
+    private LinkedList<ProofVo> proofVos;
+
+    @ApiModelProperty(value = "附件信息",dataType = "AffixVo")
+    private LinkedList<AffixVo> affixVos;
 
 }

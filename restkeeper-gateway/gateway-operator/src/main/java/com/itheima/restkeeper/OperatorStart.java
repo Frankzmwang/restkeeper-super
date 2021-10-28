@@ -10,9 +10,9 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  */
 @SpringBootApplication
 @EnableDiscoveryClient
-public class GatewayOperatorStart {
+public class OperatorStart {
 
     public static void main(String[] args) {
-        SpringApplication.run(GatewayOperatorStart.class);
+        SpringApplication.run(OperatorStart.class);
     }
 }

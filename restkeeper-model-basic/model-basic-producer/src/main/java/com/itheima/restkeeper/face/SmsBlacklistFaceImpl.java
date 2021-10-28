@@ -37,7 +37,9 @@ public class SmsBlacklistFaceImpl implements SmsBlacklistFace {
     ISmsBlacklistService smsBlacklistService;
 
     @Override
-    public Page<SmsBlacklistVo> findSmsBlacklistVoPage(SmsBlacklistVo smsBlacklistVo, int pageNum, int pageSize) {
+    public Page<SmsBlacklistVo> findSmsBlacklistVoPage(SmsBlacklistVo smsBlacklistVo,
+                                                       int pageNum,
+                                                       int pageSize)throws ProjectException {
         try {
             Page<SmsBlacklist> page = smsBlacklistService.findSmsBlacklistVoPage(smsBlacklistVo, pageNum, pageSize);
             Page<SmsBlacklistVo> pageVo = new Page<>();
@@ -55,7 +57,7 @@ public class SmsBlacklistFaceImpl implements SmsBlacklistFace {
     }
 
     @Override
-    public SmsBlacklistVo createSmsBlacklist(SmsBlacklistVo smsBlacklistVo) {
+    public SmsBlacklistVo createSmsBlacklist(SmsBlacklistVo smsBlacklistVo)throws ProjectException {
         try {
             return BeanConv.toBean( smsBlacklistService.createSmsBlacklist(smsBlacklistVo), SmsBlacklistVo.class);
         } catch (Exception e) {
@@ -65,7 +67,7 @@ public class SmsBlacklistFaceImpl implements SmsBlacklistFace {
     }
 
     @Override
-    public Boolean updateSmsBlacklist(SmsBlacklistVo smsBlacklistVo) {
+    public Boolean updateSmsBlacklist(SmsBlacklistVo smsBlacklistVo)throws ProjectException {
         try {
             return smsBlacklistService.updateSmsBlacklist(smsBlacklistVo);
         } catch (Exception e) {
@@ -75,7 +77,7 @@ public class SmsBlacklistFaceImpl implements SmsBlacklistFace {
     }
 
     @Override
-    public Boolean deleteSmsBlacklist(String[] checkedIds) {
+    public Boolean deleteSmsBlacklist(String[] checkedIds) throws ProjectException{
         try {
             return smsBlacklistService.deleteSmsBlacklist(checkedIds);
         } catch (Exception e) {
@@ -85,7 +87,7 @@ public class SmsBlacklistFaceImpl implements SmsBlacklistFace {
     }
 
     @Override
-    public SmsBlacklistVo findSmsBlacklistBySmsBlacklistId(Long smsBlacklistId) {
+    public SmsBlacklistVo findSmsBlacklistBySmsBlacklistId(Long smsBlacklistId)throws ProjectException {
         try {
             SmsBlacklist smsBlacklist = smsBlacklistService.getById(smsBlacklistId);
             if (!EmptyUtil.isNullOrEmpty(smsBlacklist)){

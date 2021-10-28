@@ -36,7 +36,9 @@ public class TableFaceImpl implements TableFace {
     ITableService tableService;
     
     @Override
-    public Page<TableVo> findTableVoPage(TableVo tableVo, int pageNum, int pageSize) {
+    public Page<TableVo> findTableVoPage(TableVo tableVo,
+                                         int pageNum,
+                                         int pageSize) throws ProjectException{
         try {
             Page<Table> page = tableService.findTableVoPage(tableVo, pageNum, pageSize);
             Page<TableVo> pageVo = new Page<>();
@@ -53,7 +55,7 @@ public class TableFaceImpl implements TableFace {
     }
 
     @Override
-    public TableVo createTable(TableVo tableVo) {
+    public TableVo createTable(TableVo tableVo) throws ProjectException{
         try {
             return BeanConv.toBean( tableService.createTable(tableVo), TableVo.class);
         } catch (Exception e) {
@@ -64,7 +66,7 @@ public class TableFaceImpl implements TableFace {
 
     @Override
     @GlobalTransactional
-    public Boolean updateTable(TableVo tableVo) {
+    public Boolean updateTable(TableVo tableVo) throws ProjectException{
         try {
             return tableService.updateTable(tableVo);
         } catch (Exception e) {
@@ -74,7 +76,7 @@ public class TableFaceImpl implements TableFace {
     }
 
     @Override
-    public Boolean deleteTable(String[] checkedIds) {
+    public Boolean deleteTable(String[] checkedIds) throws ProjectException{
         try {
             return tableService.deleteTable(checkedIds);
         } catch (Exception e) {
@@ -84,7 +86,7 @@ public class TableFaceImpl implements TableFace {
     }
 
     @Override
-    public TableVo findTableByTableId(Long tableId) {
+    public TableVo findTableByTableId(Long tableId)throws ProjectException {
         try {
             Table table = tableService.getById(tableId);
             if (!EmptyUtil.isNullOrEmpty(table)){
@@ -98,7 +100,7 @@ public class TableFaceImpl implements TableFace {
     }
 
     @Override
-    public List<TableVo> findTableVoList() {
+    public List<TableVo> findTableVoList()throws ProjectException {
         try {
             return BeanConv.toBeanList(tableService.findTableVoList(),TableVo.class);
         } catch (Exception e) {

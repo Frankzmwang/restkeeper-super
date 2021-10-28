@@ -1,67 +1,49 @@
-package com.itheima.restkeeper.config;
+package com.itheima.restkeeper.handler.tencent.config;
 
-import com.aliyun.dysmsapi20170525.Client;
-import com.aliyun.teaopenapi.models.Config;
-import com.baidubce.auth.DefaultBceCredentials;
-import com.baidubce.http.DefaultRetryPolicy;
-import com.baidubce.http.RetryPolicy;
-import com.baidubce.services.sms.SmsClientConfiguration;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.pojo.SmsChannel;
 import com.itheima.restkeeper.service.ISmsChannelService;
 import com.itheima.restkeeper.utils.EmptyUtil;
-import com.itheima.restkeeper.utils.ExceptionsUtil;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20210111.SmsClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
- * @ClassName SmsConfig.java
- * @Description 短信服务配置
+ * @ClassName AlipayConfig.java
+ * @Description 支付宝配置类
  */
 @Slf4j
 @Configuration
-public class SmsConfig {
+public class TencentSmsConfig {
 
     @Autowired
     ISmsChannelService smsChannelService;
 
-    @Bean
-    public Client aliyunSmsConfig(){
-        //查询阿里云SMS的配置信息
-        SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(SuperConstant.ALIYUN_SMS);
-        if (EmptyUtil.isNullOrEmpty(smsChannel)){
-            log.warn("阿里云SMS的未配置");
-            return null;
-        }
-        Config config = new Config()
-            // 阿里云AccessKey ID
-            .setAccessKeyId(smsChannel.getAccessKeyId())
-            // 阿里云AccessKey Secret
-            .setAccessKeySecret(smsChannel.getAccessKeySecret());
-        // 访问的域名
-        config.endpoint = smsChannel.getDomain();
-        try {
-            return new Client(config);
-        } catch (Exception e) {
-           log.error("阿里云SMS的配置信息出错：{}", ExceptionsUtil.getStackTraceAsString(e));
-           return null;
-        }
-    }
+    private static Map<String,SmsClient> clientHashMap =new ConcurrentHashMap<>();
 
-    @Bean
-    public SmsClient tencentSmsConfig(){
-        //查询腾讯云SMS的配置信息
+    /***
+     * @description 初始化短信配置
+     */
+    @PostConstruct
+    public void initSmsConfig() {
+        //查询阿里云SMS的配置信息
         SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(SuperConstant.TENCENT_SMS);
         if (EmptyUtil.isNullOrEmpty(smsChannel)){
-            log.warn("腾讯云SMS的未配置");
-            return null;
+            log.warn("阿里云SMS的未配置");
+            return;
         }
+        this.createOrUpdateClient(smsChannel);
+    }
+
+    public void createOrUpdateClient(SmsChannel smsChannel){
         /* 必要步骤：
          * 实例化一个认证对象，入参需要传入腾讯云账户密钥对secretId，secretKey。
          * 这里采用的是从环境变量读取的方式，需要在环境变量中先设置这两个值。
@@ -92,33 +74,27 @@ public class SmsConfig {
         clientProfile.setHttpProfile(httpProfile);
         /* 实例化要请求产品(以sms为例)的client对象
          * 第二个参数是地域信息，可以直接填写字符串ap-guangzhou，或者引用预设的常量 */
-        SmsClient client = new SmsClient(cred, "ap-guangzhou",clientProfile);
-        return client;
-    }
-
-    @Bean
-    public com.baidubce.services.sms.SmsClient baiduSmsConfig(){
-        //查询百度云SMS的配置信息
-        SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(SuperConstant.BAIDU_SMS);
-        if (EmptyUtil.isNullOrEmpty(smsChannel)){
-            log.warn("百度云SMS的未配置");
-            return null;
+        SmsClient client = new SmsClient(cred, "ap-guangzhou", clientProfile);
+        if (clientHashMap.containsKey("tenCentSmsClient")){
+            clientHashMap.replace("tenCentSmsClient",client);
+        }else {
+            clientHashMap.put("tenCentSmsClient",client);
         }
-        //百度云配置
-        SmsClientConfiguration config = new SmsClientConfiguration()
-            //站点
-            .withEndpoint(smsChannel.getDomain())
-            //百度云密钥
-            .withCredentials(new DefaultBceCredentials(smsChannel.getAccessKeyId(), smsChannel.getAccessKeySecret()))
-            // 设置HTTP最大连接数为10
-            .withMaxConnections(10)
-            // 设置TCP连接超时为5000毫秒
-            .withConnectionTimeoutInMillis(5000)
-            // 设置默重试最大的重试次数为3
-            .withRetryPolicy(new DefaultRetryPolicy())
-            //设置Socket传输数据超时的时间为2000毫秒
-            .withSocketTimeoutInMillis(2000);
-        return new com.baidubce.services.sms.SmsClient(config);
     }
 
+    /***
+     * @description 移除配置
+     * @return
+     */
+    public void removeClient(){
+        clientHashMap.clear();
+    }
+
+    /***
+     * @description 获得配置
+     * @return
+     */
+    public SmsClient queryClient(){
+        return clientHashMap.get("tenCentSmsClient");
+    }
 }

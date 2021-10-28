@@ -1,16 +1,21 @@
 package com.itheima.restkeeper.handler.tencent;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.SmsSendEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.SmsSendHandler;
+import com.itheima.restkeeper.handler.tencent.config.TencentSmsConfig;
 import com.itheima.restkeeper.pojo.SmsChannel;
 import com.itheima.restkeeper.pojo.SmsSendRecord;
+import com.itheima.restkeeper.pojo.SmsSign;
 import com.itheima.restkeeper.pojo.SmsTemplate;
+import com.itheima.restkeeper.req.OtherConfigVo;
 import com.itheima.restkeeper.service.ISmsChannelService;
 import com.itheima.restkeeper.service.ISmsSendRecordService;
+import com.itheima.restkeeper.service.ISmsSignService;
 import com.itheima.restkeeper.service.ISmsTemplateService;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
@@ -34,7 +39,7 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
 
     @Lazy
     @Autowired
-    SmsClient tencentSmsConfig;
+    TencentSmsConfig tencentSmsConfig;
 
     @Autowired
     ISmsSendRecordService smsSendRecordService;
@@ -45,9 +50,13 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
     @Autowired
     ISmsChannelService smsChannelService;
 
+    @Autowired
+    ISmsSignService smsSignService;
+
     @Override
     public Boolean SendSms(SmsTemplate smsTemplate,
                            SmsChannel smsChannel,
+                           SmsSign smsSign,
                            Set<String> mobiles,
                            LinkedHashMap<String, String> templateParam) throws Exception {
         //超过发送上限
@@ -59,11 +68,17 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
         //接收短信的手机号码，Array of String数组格式。
         request.setPhoneNumberSet(mobiles.stream().toArray(String[]::new));
         //短信SdkAppId在短信控制台 添加应用后生成的实际 SdkAppId，
-        request.setSmsSdkAppId(JSONObject.parseObject(smsChannel.getOtherConfig()).getString("smsSdkAppId"));
+        List <OtherConfigVo> otherConfigVoList = JSONArray.parseArray(smsChannel.getOtherConfig(),OtherConfigVo.class);
+        for (OtherConfigVo otherConfigVo : otherConfigVoList) {
+            if ("smsSdkAppId".equals(otherConfigVo.getConfigKey())){
+                request.setSmsSdkAppId(otherConfigVo.getConfigValue());
+                break;
+            }
+        }
         //模板ID必须填写已审核通过的模板 ID
         request.setTemplateId(smsTemplate.getTemplateCode());
         //短信签名内容，使用 UTF-8 编码，必须填写已审核通过的签名
-        request.setSignName(smsTemplate.getSignName());
+        request.setSignName(smsSign.getSignName());
         //模板参数，若无模板参数，则设置为空。
         if (!EmptyUtil.isNullOrEmpty(templateParam)){
             LinkedList<String> templateParamList = new LinkedList<>();
@@ -73,7 +88,8 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
             request.setTemplateParamSet(templateParamList.stream().toArray(String[]::new));
         }
         //返回的resp是一个SendSmsResponse的实例，与请求对象对应
-        SendSmsResponse response = tencentSmsConfig.SendSms(request);
+        SmsClient smsClient = tencentSmsConfig.queryClient();
+        SendSmsResponse response = smsClient.SendSms(request);
         SendStatus[] sendStatusSet = response.getSendStatusSet();
         String content = smsTemplate.getContent();
         for (Map.Entry<String, String> entry : templateParam.entrySet()) {
@@ -106,8 +122,8 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
                 .sendStatus(sendStatus)
                 .sendMsg(sendMsg)
                 .mobile(sendStatusHandler.getPhoneNumber())
-                .signCode(smsTemplate.getSignCode())
-                .signName(smsTemplate.getSignName())
+                .signCode(smsSign.getSignCode())
+                .signName(smsSign.getSignName())
                 .templateCode(smsTemplate.getTemplateCode())
                 .templateId(smsTemplate.getId())
                 .templateType(smsTemplate.getTemplateType())
@@ -133,13 +149,20 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
         request.setLimit(100L);
         //短信SdkAppId在短信控制台 添加应用后生成的实际 SdkAppId，
         SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(smsSendRecord.getChannelLabel());
-        request.setSmsSdkAppId(JSONObject.parseObject(smsChannel.getOtherConfig()).getString("smsSdkAppId"));
+        List <OtherConfigVo> otherConfigVoList = JSONArray.parseArray(smsChannel.getOtherConfig(),OtherConfigVo.class);
+        for (OtherConfigVo otherConfigVo : otherConfigVoList) {
+            if ("smsSdkAppId".equals(otherConfigVo.getConfigKey())){
+                request.setSmsSdkAppId(otherConfigVo.getConfigValue());
+                break;
+            }
+        }
         //下发目的手机号码
         request.setPhoneNumber(smsSendRecord.getMobile());
         //拉取截止时间，UNIX 时间戳（时间：秒）。
         request.setEndTime(new Date().getTime());
         // 返回的resp是一个PullSmsSendStatusByPhoneNumberResponse的实例，与请求对象对应
-        PullSmsSendStatusByPhoneNumberResponse response = tencentSmsConfig.PullSmsSendStatusByPhoneNumber(request);
+        SmsClient smsClient = tencentSmsConfig.queryClient();
+        PullSmsSendStatusByPhoneNumberResponse response = smsClient.PullSmsSendStatusByPhoneNumber(request);
         PullSmsSendStatus[] pullSmsSendStatusSet = response.getPullSmsSendStatusSet();
         for (PullSmsSendStatus pullSmsSendStatus : pullSmsSendStatusSet) {
             if (pullSmsSendStatus.getSerialNo().equals(smsSendRecord.getSerialNo())){
@@ -169,10 +192,11 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
         }
         SmsTemplate smsTemplate = smsTemplateService.getById(smsSendRecord.getTemplateId());
         SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(smsSendRecord.getChannelLabel());
+        SmsSign smsSign = smsSignService.findSmsSignBySignCodeAndChannelLabel(smsSendRecord.getSignCode(), smsSendRecord.getChannelLabel());
         Set<String> mobiles = new HashSet<>();
         mobiles.add(smsSendRecord.getMobile());
         LinkedHashMap<String, String> templateParam =
                 JSON.parseObject(smsSendRecord.getTemplateParams(), LinkedHashMap.class);
-        return SendSms(smsTemplate,smsChannel,mobiles,templateParam);
+        return SendSms(smsTemplate,smsChannel,smsSign,mobiles,templateParam);
     }
 }

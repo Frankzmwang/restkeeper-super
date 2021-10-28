@@ -17,14 +17,16 @@ public interface DishFace {
      * @param pageSize 每页条数
      * @return Page<DishVo>
      */
-    Page<DishVo> findDishVoPage(DishVo dishVo, int pageNum, int pageSize);
+    Page<DishVo> findDishVoPage(DishVo dishVo,
+                                int pageNum,
+                                int pageSize)throws ProjectException;
 
     /**
      * @Description 创建菜品
      * @param dishVo 对象信息
      * @return DishVo
      */
-    DishVo createDish(DishVo dishVo);
+    DishVo createDish(DishVo dishVo)throws ProjectException;
 
     /**
      * @Description 修改菜品
@@ -38,7 +40,7 @@ public interface DishFace {
      * @param checkedIds 选择对象信息Id
      * @return Boolean
      */
-    Boolean deleteDish(String[] checkedIds);
+    Boolean deleteDish(String[] checkedIds)throws ProjectException;
 
 
     /**
@@ -46,6 +48,6 @@ public interface DishFace {
      * @param dishId 选择对象信息Id
      * @return DishVo
      */
-    DishVo findDishByDishId(Long dishId);
+    DishVo findDishByDishId(Long dishId)throws ProjectException;
 
 }

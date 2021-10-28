@@ -27,7 +27,9 @@ public class LogBusinessFaceImpl implements LogBusinessFace {
     ILogBusinessService logBusinessService;
 
     @Override
-    public Page<LogBusinessVo> findLogBusinessVoPage(LogBusinessVo logBusinessVo, int pageNum, int pageSize) {
+    public Page<LogBusinessVo> findLogBusinessVoPage(LogBusinessVo logBusinessVo,
+                                                     int pageNum,
+                                                     int pageSize) throws ProjectException{
         try {
             Page<LogBusiness> page = logBusinessService.findLogBusinessVoPage(logBusinessVo, pageNum, pageSize);
             Page<LogBusinessVo> pageVo = new Page<>();

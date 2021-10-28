@@ -1,5 +1,6 @@
 package com.itheima.restkeeper;
 
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.req.PlacesVo;
 
 import java.util.List;
@@ -17,5 +18,5 @@ public interface PlacesFace {
      * @return
      * @return: java.util.List<com.itheima.restkeeper.req.PlacesVo>
      */
-    public List<PlacesVo> findPlacesVoListByParentId(Long parentId);
+    public List<PlacesVo> findPlacesVoListByParentId(Long parentId)throws ProjectException;
 }

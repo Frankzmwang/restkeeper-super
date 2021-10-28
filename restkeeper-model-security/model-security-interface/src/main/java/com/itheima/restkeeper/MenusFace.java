@@ -1,5 +1,6 @@
 package com.itheima.restkeeper;
 
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.req.MenuVo;
 
 import java.util.List;
@@ -14,5 +15,5 @@ public interface MenusFace {
      * @param systemCode 系统编码
      * @return
      */
-    List<MenuVo> findMenusBySystemCode(String systemCode);
+    List<MenuVo> findMenusBySystemCode(String systemCode)throws ProjectException;
 }

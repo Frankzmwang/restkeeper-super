@@ -20,7 +20,7 @@ public class SmsTemplateVo extends BasicVo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public SmsTemplateVo(Long id, String channelLabel, String templateName, String templateType, String templateNo, String templateCode, String content, String international, Long signId, String signName, String signCode, String remark, String acceptStatus, String acceptMsg, String auditStatus, String auditMsg){
+    public SmsTemplateVo(Long id,String channelLabel,String templateName,String templateType,String templateNo,String templateCode,String content,String international,String remark,String acceptStatus,String acceptMsg,String auditStatus,String auditMsg){
         super(id);
         this.channelLabel=channelLabel;
         this.templateName=templateName;
@@ -29,9 +29,6 @@ public class SmsTemplateVo extends BasicVo {
         this.templateCode=templateCode;
         this.content=content;
         this.international=international;
-        this.signId=signId;
-        this.signName=signName;
-        this.signCode=signCode;
         this.remark=remark;
         this.acceptStatus=acceptStatus;
         this.acceptMsg=acceptMsg;
@@ -60,15 +57,6 @@ public class SmsTemplateVo extends BasicVo {
     @ApiModelProperty(value = "是否国际/港澳台短信：	0：表示国内短信。	1：表示国际/港澳台短信。")
     private String international;
 
-    @ApiModelProperty(value = "签名表ID")
-    private Long signId;
-
-    @ApiModelProperty(value = "签名名称")
-    private String signName;
-
-    @ApiModelProperty(value = "三方签名code:发送短信可能用到")
-    private String signCode;
-
     @ApiModelProperty(value = "			短信申请说明")
     private String remark;
 
@@ -84,5 +72,7 @@ public class SmsTemplateVo extends BasicVo {
     @ApiModelProperty(value = "审核信息")
     private String auditMsg;
 
+    @ApiModelProperty(value = "选中节点")
+    private String[] checkedIds;
 
 }

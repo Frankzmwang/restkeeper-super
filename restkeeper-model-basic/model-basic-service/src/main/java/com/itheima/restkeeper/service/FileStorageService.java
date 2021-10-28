@@ -39,7 +39,7 @@ public interface FileStorageService {
      * @param pathUrl 全路径
      * @return
      */
-    InputStream downloadFile(String pathUrl);
+    InputStream downloadFile(String pathUrl) throws IOException;
 
     /**
      * @Description 获取文件文本内容

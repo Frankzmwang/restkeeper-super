@@ -6,10 +6,12 @@ import com.itheima.restkeeper.handler.SmsSendHandler;
 import com.itheima.restkeeper.handler.SmsSignHandler;
 import com.itheima.restkeeper.pojo.SmsSign;
 import com.itheima.restkeeper.req.SmsSignVo;
+import com.itheima.restkeeper.service.ISmsSignService;
 import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.RegisterBeanHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +33,9 @@ public class SmsSignAdapterImpl implements SmsSignAdapter {
     SmsSignHandler baiduSmsSignHandler;
 
     @Autowired
+    ISmsSignService smsSignService;
+
+    @Autowired
     RegisterBeanHandler registerBeanHandler;
 
     private static Map<String,String> SmsSignHandlers =new HashMap<>();
@@ -42,7 +47,7 @@ public class SmsSignAdapterImpl implements SmsSignAdapter {
     }
 
     @Override
-    public SmsSignVo addSmsSign(SmsSignVo smsSignVo) throws Exception {
+    public SmsSignVo addSmsSign(SmsSignVo smsSignVo) {
         String channelLabel = smsSignVo.getChannelLabel();
         String stringSmsSignHandler = SmsSignHandlers.get(channelLabel);
         SmsSignHandler smsSignHandler =registerBeanHandler.getBean(stringSmsSignHandler,SmsSignHandler.class);
@@ -50,15 +55,20 @@ public class SmsSignAdapterImpl implements SmsSignAdapter {
     }
 
     @Override
-    public Boolean deleteSmsSign(SmsSignVo smsSignVo) throws Exception {
-        String channelLabel = smsSignVo.getChannelLabel();
-        String stringSmsSignHandler = SmsSignHandlers.get(channelLabel);
-        SmsSignHandler smsSignHandler =registerBeanHandler.getBean(stringSmsSignHandler,SmsSignHandler.class);
-        return smsSignHandler.deleteSmsSign(smsSignVo);
+    @Transactional
+    public Boolean deleteSmsSign(String[] checkedIds) {
+        for (String checkedId : checkedIds) {
+            SmsSignVo smsSignVo = BeanConv.toBean(smsSignService.getById(checkedId), SmsSignVo.class);
+            String channelLabel = smsSignVo.getChannelLabel();
+            String stringSmsSignHandler = SmsSignHandlers.get(channelLabel);
+            SmsSignHandler smsSignHandler =registerBeanHandler.getBean(stringSmsSignHandler,SmsSignHandler.class);
+            smsSignHandler.deleteSmsSign(smsSignVo);
+        }
+        return true;
     }
 
     @Override
-    public Boolean modifySmsSign(SmsSignVo smsSignVo) throws Exception {
+    public Boolean modifySmsSign(SmsSignVo smsSignVo) {
         String channelLabel = smsSignVo.getChannelLabel();
         String stringSmsSignHandler = SmsSignHandlers.get(channelLabel);
         SmsSignHandler smsSignHandler =registerBeanHandler.getBean(stringSmsSignHandler,SmsSignHandler.class);
@@ -66,7 +76,7 @@ public class SmsSignAdapterImpl implements SmsSignAdapter {
     }
 
     @Override
-    public Boolean querySmsSign(SmsSignVo smsSignVo) throws Exception {
+    public Boolean querySmsSign(SmsSignVo smsSignVo) {
         String channelLabel = smsSignVo.getChannelLabel();
         String stringSmsSignHandler = SmsSignHandlers.get(channelLabel);
         SmsSignHandler smsSignHandler =registerBeanHandler.getBean(stringSmsSignHandler,SmsSignHandler.class);

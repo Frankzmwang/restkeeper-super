@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @MapperScan(basePackages = "com.itheima.restkeeper.mapper")
 public class SecurityProducerStart {
+
     public static void main(String[] args) {
         SpringApplication.run(SecurityProducerStart.class, args);
     }

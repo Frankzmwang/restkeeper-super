@@ -1,6 +1,7 @@
 package com.itheima.restkeeper;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.req.UserVo;
 
 import java.util.List;
@@ -17,28 +18,30 @@ public interface UserFace {
      * @return Page<UserVo>
      * @Description 用户列表
      */
-    Page<UserVo> findUserVoPage(UserVo userVo, int pageNum, int pageSize);
+    Page<UserVo> findUserVoPage(UserVo userVo,
+                                int pageNum,
+                                int pageSize)throws ProjectException;
 
     /**
      * @param userVo 对象信息
      * @return UserVo
      * @Description 创建用户
      */
-    UserVo createUser(UserVo userVo);
+    UserVo createUser(UserVo userVo)throws ProjectException;
 
     /**
      * @param userVo 对象信息
      * @return Boolean
      * @Description 修改用户
      */
-    Boolean updateUser(UserVo userVo);
+    Boolean updateUser(UserVo userVo)throws ProjectException;
 
     /**
      * @param checkedIds 选择对象信息Id
      * @return Boolean
      * @Description 删除用户
      */
-    Boolean deleteUser(String[] checkedIds);
+    Boolean deleteUser(String[] checkedIds)throws ProjectException;
 
 
     /**
@@ -46,11 +49,11 @@ public interface UserFace {
      * @return
      * @Description 查找用户
      */
-    UserVo findUserByUserId(Long userId);
+    UserVo findUserByUserId(Long userId)throws ProjectException;
 
     /**
      * @return List<UserVo>
      * @Description 查找用户list
      */
-    List<UserVo> findUserVoList();
+    List<UserVo> findUserVoList()throws ProjectException;
 }

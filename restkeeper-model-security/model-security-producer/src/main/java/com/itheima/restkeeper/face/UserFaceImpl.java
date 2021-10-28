@@ -53,7 +53,9 @@ public class UserFaceImpl implements UserFace {
     AffixFace affixFace;
 
     @Override
-    public Page<UserVo> findUserVoPage(UserVo userVo, int pageNum, int pageSize) {
+    public Page<UserVo> findUserVoPage(UserVo userVo,
+                                       int pageNum,
+                                       int pageSize)throws ProjectException {
         try {
             Page<User> page = userService.findUserVoPage(userVo, pageNum, pageSize);
             Page<UserVo> pageVo = new Page<>();
@@ -88,7 +90,7 @@ public class UserFaceImpl implements UserFace {
     }
 
     @Override
-    public UserVo createUser(UserVo userVo) {
+    public UserVo createUser(UserVo userVo)throws ProjectException {
         try {
             String plainPassword = userVo.getPassword();
             //必须要加{bcrypt}要不认证不通过
@@ -114,7 +116,7 @@ public class UserFaceImpl implements UserFace {
     }
 
     @Override
-    public Boolean updateUser(UserVo userVo) {
+    public Boolean updateUser(UserVo userVo)throws ProjectException {
         try {
             Boolean flag = userService.updateUser(userVo);
             if (flag){
@@ -135,7 +137,7 @@ public class UserFaceImpl implements UserFace {
     }
 
     @Override
-    public Boolean deleteUser(String[] checkedIds) {
+    public Boolean deleteUser(String[] checkedIds)throws ProjectException {
         try {
             Boolean flag = userService.deleteUser(checkedIds);
             if (flag){
@@ -153,7 +155,7 @@ public class UserFaceImpl implements UserFace {
     }
 
     @Override
-    public UserVo findUserByUserId(Long userId) {
+    public UserVo findUserByUserId(Long userId)throws ProjectException {
         try {
             User user = userService.getById(userId);
             if (!EmptyUtil.isNullOrEmpty(user)){
@@ -167,7 +169,7 @@ public class UserFaceImpl implements UserFace {
     }
 
     @Override
-    public List<UserVo> findUserVoList() {
+    public List<UserVo> findUserVoList()throws ProjectException {
         try {
             return BeanConv.toBeanList(userService.findUserVoList(),UserVo.class);
         } catch (Exception e) {
@@ -177,7 +179,7 @@ public class UserFaceImpl implements UserFace {
     }
 
     @Override
-    public Boolean updateUserEnableFlag(UserVo userVo) {
+    public Boolean updateUserEnableFlag(UserVo userVo)throws ProjectException {
         try {
             return userService.updateUserEnableFlag(userVo);
         } catch (Exception e) {

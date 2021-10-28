@@ -24,6 +24,11 @@ public class AffixVo extends BasicVo {
 
     private static final long serialVersionUID = 1L;
 
+    public AffixVo(Long id, Long businessId) {
+        super(id);
+        this.businessId = businessId;
+    }
+
     @Builder
     public AffixVo(Long id,Long businessId,String businessType,
                    String suffix,String fileName,String pathUrl){
@@ -33,6 +38,7 @@ public class AffixVo extends BasicVo {
         this.suffix=suffix;
         this.fileName=fileName;
         this.pathUrl=pathUrl;
+        this.url=pathUrl;
     }
 
     @ApiModelProperty(value = "业务ID")
@@ -51,7 +57,13 @@ public class AffixVo extends BasicVo {
     @ApiModelProperty(value = "访问路径")
     private String pathUrl;
 
+    @ApiModelProperty(value = "访问路径")
+    private String url;
+
     @ApiModelProperty(value = "选中节点")
     private String[] checkedIds;
+
+    @ApiModelProperty(value = "base64图片")
+    private String base64Image;
 
 }

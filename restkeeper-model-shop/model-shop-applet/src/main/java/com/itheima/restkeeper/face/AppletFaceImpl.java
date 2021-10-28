@@ -91,7 +91,7 @@ public class AppletFaceImpl implements AppletFace {
     IStoreService storeService;
 
     @Override
-    public Boolean isOpen(Long tableId) {
+    public Boolean isOpen(Long tableId) throws ProjectException{
         try {
             //1、查询桌台信息，是否为使用中
             Table table = tableService.getById(tableId);
@@ -110,7 +110,7 @@ public class AppletFaceImpl implements AppletFace {
     }
 
     @Override
-    public AppletInfoVo findAppletInfoVoByTableId(Long tableId) {
+    public AppletInfoVo findAppletInfoVoByTableId(Long tableId)throws ProjectException {
         try {
             //1、查询桌台信息
             Table table = tableService.getById(tableId);
@@ -165,7 +165,7 @@ public class AppletFaceImpl implements AppletFace {
 
     @Override
     @Transactional
-    public OrderVo openTable(Long tableId,Integer personNumbers)  {
+    public OrderVo openTable(Long tableId,Integer personNumbers) throws ProjectException {
         //1、开台状态定义
         boolean flag = true;
         //2、锁定桌台，防止并发重复创建订单
@@ -215,7 +215,7 @@ public class AppletFaceImpl implements AppletFace {
     }
 
     @Override
-    public OrderVo showOrderVoforTable(Long tableId)  {
+    public OrderVo showOrderVoforTable(Long tableId) throws ProjectException {
         try {
             //查询订单信息
             OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
@@ -248,7 +248,7 @@ public class AppletFaceImpl implements AppletFace {
      * @return
      */
     @Override
-    public OrderVo handlerOrderVo(OrderVo orderVo){
+    public OrderVo handlerOrderVo(OrderVo orderVo)throws ProjectException {
         if (!EmptyUtil.isNullOrEmpty(orderVo)) {
             //1、查询MySQL:可核算订单项
             List<OrderItem> orderItemList = orderItemService.findOrderItemByOrderNo(orderVo.getOrderNo());
@@ -278,7 +278,7 @@ public class AppletFaceImpl implements AppletFace {
     }
 
     @Override
-    public BigDecimal reducePriceHandler(List<OrderItemVo> orderItemVos ){
+    public BigDecimal reducePriceHandler(List<OrderItemVo> orderItemVos )throws ProjectException{
         return orderItemVos.stream().map(orderItemVo -> {
             BigDecimal price = orderItemVo.getPrice();
             BigDecimal reducePrice = orderItemVo.getReducePrice();
@@ -293,7 +293,7 @@ public class AppletFaceImpl implements AppletFace {
     }
 
     @Override
-    public DishVo findDishVoById(Long dishId) {
+    public DishVo findDishVoById(Long dishId)throws ProjectException {
         try {
             //1、查询菜品
             Dish dish = dishService.getById(dishId);
@@ -318,7 +318,10 @@ public class AppletFaceImpl implements AppletFace {
 
     @Override
     @Transactional
-    public OrderVo opertionShoppingCart(Long dishId, Long orderNo,String dishFlavor, String opertionType)  {
+    public OrderVo opertionShoppingCart(Long dishId,
+                                        Long orderNo,
+                                        String dishFlavor,
+                                        String opertionType) throws ProjectException {
         //1、获得订单加锁
         String keyOrder = AppletCacheConstant.ADD_TO_ORDERITEM_LOCK + orderNo;
         RLock lockOrder = redissonClient.getLock(keyOrder);
@@ -360,7 +363,10 @@ public class AppletFaceImpl implements AppletFace {
      * @return
      * @description 添加购物车订单项
      */
-    private void addToShoppingCart(Long dishId, Long orderNo,String dishFlavor, RAtomicLong atomicLong)  {
+    private void addToShoppingCart(Long dishId,
+                                   Long orderNo,
+                                   String dishFlavor,
+                                   RAtomicLong atomicLong)  {
         //1、如果库存够，redis减库存
         if (atomicLong.decrementAndGet() >= 0) {
             //2、mysql菜品表库存
@@ -534,7 +540,7 @@ public class AppletFaceImpl implements AppletFace {
 
     @Override
     @Transactional
-    public OrderVo placeOrder(Long orderNo)  {
+    public OrderVo placeOrder(Long orderNo) throws ProjectException {
         try {
             //1、锁定订单
             String key = AppletCacheConstant.ADD_TO_ORDERITEM_LOCK + orderNo;
@@ -596,7 +602,7 @@ public class AppletFaceImpl implements AppletFace {
 
     @Override
     @Transactional
-    public Boolean rotaryTable(Long sourceTableId, Long targetTableId, Long orderNo)  {
+    public Boolean rotaryTable(Long sourceTableId, Long targetTableId, Long orderNo) throws ProjectException {
         try {
             Boolean flag = true;
             //1、锁定目标桌台
@@ -641,7 +647,7 @@ public class AppletFaceImpl implements AppletFace {
 
 
     @Override
-    public Boolean clearShoppingCart(Long orderNo) {
+    public Boolean clearShoppingCart(Long orderNo) throws ProjectException{
         try {
             String key = AppletCacheConstant.ORDERITEMVO_STATISTICS + orderNo;
             RMapCache<Long, OrderItemVo> orderItemVoRMap = redissonClient.getMapCache(key);

@@ -1,6 +1,7 @@
 package com.itheima.restkeeper;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.req.LogBusinessVo;
 import com.itheima.restkeeper.req.LogBusinessVo;
 
@@ -15,6 +16,8 @@ public interface LogBusinessFace {
      * @param logBusinessVo 查询条件
      * @return
      */
-    Page<LogBusinessVo> findLogBusinessVoPage(LogBusinessVo logBusinessVo, int pageNum, int pageSize);
+    Page<LogBusinessVo> findLogBusinessVoPage(LogBusinessVo logBusinessVo,
+                                              int pageNum,
+                                              int pageSize) throws ProjectException;
 
 }

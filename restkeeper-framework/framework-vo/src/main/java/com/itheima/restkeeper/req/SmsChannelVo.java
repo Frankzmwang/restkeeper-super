@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @ClassName SmsChannelVo.java
  * @Description TODO
@@ -21,7 +23,7 @@ public class SmsChannelVo extends BasicVo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public SmsChannelVo(Long id,String channelName,String channelLabel,String channelType,String domain,String accessKeyId,String accessKeySecret,String otherConfig,String isActive,String level,String remark){
+    public SmsChannelVo(Long id,String channelName,String channelLabel,String channelType,String domain,String accessKeyId,String accessKeySecret,String otherConfig,String level,String remark){
         super(id);
         this.channelName=channelName;
         this.channelLabel=channelLabel;
@@ -30,7 +32,6 @@ public class SmsChannelVo extends BasicVo {
         this.accessKeyId=accessKeyId;
         this.accessKeySecret=accessKeySecret;
         this.otherConfig=otherConfig;
-        this.isActive=isActive;
         this.level=level;
         this.remark=remark;
     }
@@ -56,13 +57,16 @@ public class SmsChannelVo extends BasicVo {
     @ApiModelProperty(value = "其他配置")
     private String otherConfig;
 
-    @ApiModelProperty(value = "是否活跃")
-    private String isActive;
-
     @ApiModelProperty(value = "优先级")
     private String level;
 
-    @ApiModelProperty(value = "			短信申请说明")
+    @ApiModelProperty(value = "短信申请说明")
     private String remark;
+
+    @ApiModelProperty(value = "选中节点")
+    private String[] checkedIds;
+
+    @ApiModelProperty(value = "扩展配置",dataType = "OtherConfigVo")
+    private List<OtherConfigVo> otherConfigs;
 
 }

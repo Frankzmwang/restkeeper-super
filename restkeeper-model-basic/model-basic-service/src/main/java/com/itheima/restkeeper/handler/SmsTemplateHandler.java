@@ -14,28 +14,28 @@ public interface SmsTemplateHandler {
      * @param smsTemplateVo 模板信息
      * @return
      */
-    SmsTemplate addSmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception;
+    SmsTemplate addSmsTemplate(SmsTemplateVo smsTemplateVo);
 
     /***
      * @description 删除模板
      * @param smsTemplateVo 模板信息
      * @return
      */
-    Boolean deleteSmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception;
+    Boolean deleteSmsTemplate(SmsTemplateVo smsTemplateVo);
 
     /***
      * @description 修改模板
      * @param smsTemplateVo 模板信息
      * @return
      */
-    Boolean modifySmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception;
+    Boolean modifySmsTemplate(SmsTemplateVo smsTemplateVo);
 
     /***
      * @description 查询模板审核状态
      * @param smsTemplateVo 模板信息
      * @return
      */
-    Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception;
+    Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo);
 
 
 }

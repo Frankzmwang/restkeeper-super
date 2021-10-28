@@ -4,6 +4,7 @@ import com.baidubce.services.sms.SmsClient;
 import com.baidubce.services.sms.model.v3.*;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.handler.SmsTemplateHandler;
+import com.itheima.restkeeper.handler.baidu.config.BaiduSmsConfig;
 import com.itheima.restkeeper.pojo.SmsTemplate;
 import com.itheima.restkeeper.req.SmsTemplateVo;
 import com.itheima.restkeeper.service.ISmsSignService;
@@ -20,15 +21,14 @@ import org.springframework.stereotype.Service;
 @Service("baiduTemplateHandler")
 public class BaiduTemplateHandlerImpl implements SmsTemplateHandler {
 
-    @Lazy
     @Autowired
-    SmsClient baiduSmsConfig;
+    BaiduSmsConfig baiduSmsConfig;
 
     @Autowired
     ISmsTemplateService smsTemplateService;
 
     @Override
-    public SmsTemplate addSmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public SmsTemplate addSmsTemplate(SmsTemplateVo smsTemplateVo) {
         CreateTemplateRequest request = new CreateTemplateRequest()
             //模板名称
             .withName(smsTemplateVo.getTemplateName())
@@ -43,7 +43,8 @@ public class BaiduTemplateHandlerImpl implements SmsTemplateHandler {
             .withCountryType(smsTemplateVo.getInternational())
             //模板描述
             .withDescription(smsTemplateVo.getRemark());
-        CreateTemplateResponse response = baiduSmsConfig.createTemplate(request);
+        SmsClient client = baiduSmsConfig.queryClient();
+        CreateTemplateResponse response = client.createTemplate(request);
         String status = response.getStatus();
         if ("SUBMITTED".equals(status)) {
             //受理成功
@@ -68,15 +69,16 @@ public class BaiduTemplateHandlerImpl implements SmsTemplateHandler {
     }
 
     @Override
-    public Boolean deleteSmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public Boolean deleteSmsTemplate(SmsTemplateVo smsTemplateVo) {
         DeleteTemplateRequest request =new DeleteTemplateRequest()
             .withTemplateId(smsTemplateVo.getTemplateCode());
-        baiduSmsConfig.deleteTemplate(request);
+        SmsClient client = baiduSmsConfig.queryClient();
+        client.deleteTemplate(request);
         return smsTemplateService.removeById(smsTemplateVo.getId());
     }
 
     @Override
-    public Boolean modifySmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public Boolean modifySmsTemplate(SmsTemplateVo smsTemplateVo) {
         ModifyTemplateRequest request = new ModifyTemplateRequest()
             //模板id
             .withTemplateId(smsTemplateVo.getTemplateCode())
@@ -93,7 +95,8 @@ public class BaiduTemplateHandlerImpl implements SmsTemplateHandler {
             .withCountryType(smsTemplateVo.getInternational())
             //模板描述
             .withDescription(smsTemplateVo.getRemark());
-        baiduSmsConfig.modifyTemplate(request);
+        SmsClient client = baiduSmsConfig.queryClient();
+        client.modifyTemplate(request);
         //受理成功
         smsTemplateVo.setAcceptStatus(SuperConstant.YES);
         smsTemplateVo.setAcceptMsg("受理成功");
@@ -105,10 +108,11 @@ public class BaiduTemplateHandlerImpl implements SmsTemplateHandler {
     }
 
     @Override
-    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) {
         GetTemplateRequest request = new GetTemplateRequest()
                 .withTemplateId(smsTemplateVo.getTemplateCode());
-        GetTemplateResponse response = baiduSmsConfig.getTemplate(request);
+        SmsClient client = baiduSmsConfig.queryClient();
+        GetTemplateResponse response = client.getTemplate(request);
         //处理返回结果
         String status = response.getStatus();
         //审核通过

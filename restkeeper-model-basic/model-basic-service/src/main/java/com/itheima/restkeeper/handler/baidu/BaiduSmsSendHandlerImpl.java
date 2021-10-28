@@ -10,11 +10,14 @@ import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.SmsSendEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.SmsSendHandler;
+import com.itheima.restkeeper.handler.baidu.config.BaiduSmsConfig;
 import com.itheima.restkeeper.pojo.SmsChannel;
 import com.itheima.restkeeper.pojo.SmsSendRecord;
+import com.itheima.restkeeper.pojo.SmsSign;
 import com.itheima.restkeeper.pojo.SmsTemplate;
 import com.itheima.restkeeper.service.ISmsChannelService;
 import com.itheima.restkeeper.service.ISmsSendRecordService;
+import com.itheima.restkeeper.service.ISmsSignService;
 import com.itheima.restkeeper.service.ISmsTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +34,8 @@ import java.util.*;
 @Service("baiduSmsSendHandler")
 public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
 
-    @Lazy
     @Autowired
-    SmsClient baiduSmsConfig;
+    BaiduSmsConfig baiduSmsConfig;
 
     @Autowired
     ISmsSendRecordService smsSendRecordService;
@@ -44,9 +46,13 @@ public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
     @Autowired
     ISmsChannelService smsChannelService;
 
+    @Autowired
+    ISmsSignService smsSignService;
+
     @Override
     public Boolean SendSms(SmsTemplate smsTemplate,
                            SmsChannel smsChannel,
+                           SmsSign smsSign,
                            Set<String> mobiles,
                            LinkedHashMap<String, String> templateParam) throws Exception {
         //超过发送上限
@@ -65,9 +71,10 @@ public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
         //模板id
         request.setTemplate(smsTemplate.getTemplateCode());
         //签名Id
-        request.setSignatureId(smsTemplate.getSignCode());
+        request.setSignatureId(smsSign.getSignCode());
         request.setContentVar(templateParam);
-        SendMessageV3Response response = baiduSmsConfig.sendMessage(request);
+        SmsClient client = baiduSmsConfig.queryClient();
+        SendMessageV3Response response = client.sendMessage(request);
         //处理返回结果
         String content = smsTemplate.getContent();
         for (Map.Entry<String, String> entry : templateParam.entrySet()) {
@@ -100,8 +107,8 @@ public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
                 .sendStatus(sendStatus)
                 .sendMsg(sendMsg)
                 .mobile(sendMessageItem.getMobile())
-                .signCode(smsTemplate.getSignCode())
-                .signName(smsTemplate.getSignName())
+                .signCode(smsSign.getSignCode())
+                .signName(smsSign.getSignName())
                 .templateCode(smsTemplate.getTemplateCode())
                 .templateId(smsTemplate.getId())
                 .templateType(smsTemplate.getTemplateType())
@@ -127,10 +134,11 @@ public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
         }
         SmsTemplate smsTemplate = smsTemplateService.getById(smsSendRecord.getTemplateId());
         SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(smsSendRecord.getChannelLabel());
+        SmsSign smsSign = smsSignService.findSmsSignBySignCodeAndChannelLabel(smsSendRecord.getSignCode(), smsSendRecord.getChannelLabel());
         Set<String> mobiles = new HashSet<>();
         mobiles.add(smsSendRecord.getMobile());
         LinkedHashMap<String, String> templateParam =
                 JSON.parseObject(smsSendRecord.getTemplateParams(), LinkedHashMap.class);
-        return SendSms(smsTemplate,smsChannel,mobiles,templateParam);
+        return SendSms(smsTemplate,smsChannel,smsSign,mobiles,templateParam);
     }
 }

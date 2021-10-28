@@ -12,9 +12,8 @@ public enum SmsSignEnum implements IBasicEnum {
     PAGE_FAIL("46001", "查询签名列表失败"),
     CREATE_FAIL("46002", "保存签名失败"),
     UPDATE_FAIL("46003", "修改签名失败"),
-    DELETE_FAIL("46004", "修改签名失败"),
+    DELETE_FAIL("46004", "删除签名失败"),
     SELECT_FAIL("46005", "查询签名失败");
-
     private String code;
     private String msg;
 

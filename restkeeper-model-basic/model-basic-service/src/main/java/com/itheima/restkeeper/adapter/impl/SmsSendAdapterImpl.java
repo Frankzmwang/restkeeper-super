@@ -4,12 +4,10 @@ import com.itheima.restkeeper.adapter.SmsSendAdapter;
 import com.itheima.restkeeper.balancer.SendLoadBalancer;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.handler.SmsSendHandler;
-import com.itheima.restkeeper.pojo.SmsBlacklist;
-import com.itheima.restkeeper.pojo.SmsChannel;
-import com.itheima.restkeeper.pojo.SmsSendRecord;
-import com.itheima.restkeeper.pojo.SmsTemplate;
+import com.itheima.restkeeper.pojo.*;
 import com.itheima.restkeeper.service.ISmsBlacklistService;
 import com.itheima.restkeeper.service.ISmsChannelService;
+import com.itheima.restkeeper.service.ISmsSignService;
 import com.itheima.restkeeper.service.ISmsTemplateService;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.RegisterBeanHandler;
@@ -38,6 +36,9 @@ public class SmsSendAdapterImpl implements SmsSendAdapter {
     ISmsChannelService smsChannelService;
 
     @Autowired
+    ISmsSignService smsSignService;
+
+    @Autowired
     RegisterBeanHandler registerBeanHandler;
 
     private static Map<String,String> sendHandlers =new HashMap<>();
@@ -57,10 +58,11 @@ public class SmsSendAdapterImpl implements SmsSendAdapter {
 
     @Override
     public Boolean SendSms(
-                    String templateNo,
-                    String loadBalancerType,
-                    Set<String> mobiles,
-                    LinkedHashMap<String, String> templateParam) throws Exception {
+        String templateNo,
+        String sginNo,
+        String loadBalancerType,
+        Set<String> mobiles,
+        LinkedHashMap<String, String> templateParam) throws Exception {
         //过滤黑名单中电话号码
         List<SmsBlacklist> smsBlacklists = smsBlacklistService.list();
         if (!EmptyUtil.isNullOrEmpty(smsBlacklists)){
@@ -73,7 +75,7 @@ public class SmsSendAdapterImpl implements SmsSendAdapter {
         //获得审核通过模板模板
         List<SmsTemplate> smsTemplates = smsTemplateService.findSmsTemplateByTemplateNo(templateNo);
         if (EmptyUtil.isNullOrEmpty(smsTemplates)){
-            log.warn("模板templateNo：{}，未定义",templateNo);
+            log.warn("模板templateNo：{}，不能使用",templateNo);
             return flag;
         }
         //负载均衡器选择对应通道
@@ -88,12 +90,18 @@ public class SmsSendAdapterImpl implements SmsSendAdapter {
         SmsChannel smsChannel= smsChannelService.findChannelByChannelLabel(channelLabel);
         //选择模板
         SmsTemplate smsTemplate = smsTemplates.stream()
-            .filter(n->n.getChannelLabel().equals(smsChannel.getChannelLabel()))
-            .findFirst().get();
+                .filter(n->n.getChannelLabel().equals(smsChannel.getChannelLabel()))
+                .findFirst().get();
+        //查询签名
+        SmsSign smsSign = smsSignService.findSmsSignBySignNoAndChannelLabel(sginNo, channelLabel);
+        if (EmptyUtil.isNullOrEmpty(smsSign)){
+            log.warn("渠道smsChannel：{}，签名：{}，不能使用",channelLabel,sginNo);
+            return flag;
+        }
         //发送短信
         String stringSendHandler = sendHandlers.get(channelLabel);
         SmsSendHandler smsSendHandler =registerBeanHandler.getBean(stringSendHandler,SmsSendHandler.class);
-        return smsSendHandler.SendSms(smsTemplate,smsChannel,mobiles,templateParam);
+        return smsSendHandler.SendSms(smsTemplate,smsChannel,smsSign,mobiles,templateParam);
     }
 
     @Override

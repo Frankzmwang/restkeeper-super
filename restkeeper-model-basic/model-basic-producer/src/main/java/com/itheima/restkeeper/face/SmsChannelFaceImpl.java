@@ -1,11 +1,12 @@
 package com.itheima.restkeeper.face;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.SmsChannelFace;
 import com.itheima.restkeeper.enums.SmsChannelEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.SmsChannel;
-import com.itheima.restkeeper.req.SmsChannelVo;
+import com.itheima.restkeeper.req.OtherConfigVo;
 import com.itheima.restkeeper.req.SmsChannelVo;
 import com.itheima.restkeeper.service.ISmsChannelService;
 import com.itheima.restkeeper.utils.BeanConv;
@@ -14,8 +15,11 @@ import com.itheima.restkeeper.utils.ExceptionsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
+import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,14 +42,26 @@ public class SmsChannelFaceImpl implements SmsChannelFace {
 
 
     @Override
-    public Page<SmsChannelVo> findSmsChannelVoPage(SmsChannelVo smsChannelVo, int pageNum, int pageSize) {
+    public Page<SmsChannelVo> findSmsChannelVoPage(SmsChannelVo smsChannelVo,
+                                                   int pageNum,
+                                                   int pageSize) throws ProjectException{
         try {
             Page<SmsChannel> page = smsChannelService.findSmsChannelVoPage(smsChannelVo, pageNum, pageSize);
             Page<SmsChannelVo> pageVo = new Page<>();
             BeanConv.toBean(page,pageVo);
             //结果集转换
             List<SmsChannel> smsChannelList = page.getRecords();
-            List<SmsChannelVo> smsChannelVoList = BeanConv.toBeanList(smsChannelList,SmsChannelVo.class);
+            List<SmsChannelVo> smsChannelVoList = new ArrayList<>();
+            if (!EmptyUtil.isNullOrEmpty(smsChannelList)){
+                smsChannelList.forEach(n->{
+                    SmsChannelVo smsChannelVoHandler = BeanConv.toBean(n, SmsChannelVo.class);
+                    if (!EmptyUtil.isNullOrEmpty(n.getOtherConfig())){
+                        List <OtherConfigVo> list = JSONArray.parseArray(n.getOtherConfig(),OtherConfigVo.class);
+                        smsChannelVoHandler.setOtherConfigs(list);
+                    }
+                    smsChannelVoList.add(smsChannelVoHandler);
+                });
+            }
             pageVo.setRecords(smsChannelVoList);
             return pageVo;
         } catch (Exception e) {
@@ -56,7 +72,8 @@ public class SmsChannelFaceImpl implements SmsChannelFace {
     }
 
     @Override
-    public SmsChannelVo createSmsChannel(SmsChannelVo smsChannelVo) {
+    @Transactional
+    public SmsChannelVo createSmsChannel(SmsChannelVo smsChannelVo) throws ProjectException{
         try {
             return BeanConv.toBean( smsChannelService.createSmsChannel(smsChannelVo), SmsChannelVo.class);
         } catch (Exception e) {
@@ -66,7 +83,8 @@ public class SmsChannelFaceImpl implements SmsChannelFace {
     }
 
     @Override
-    public Boolean updateSmsChannel(SmsChannelVo smsChannelVo) {
+    @Transactional
+    public Boolean updateSmsChannel(SmsChannelVo smsChannelVo) throws ProjectException{
         try {
             return smsChannelService.updateSmsChannel(smsChannelVo);
         } catch (Exception e) {
@@ -76,7 +94,8 @@ public class SmsChannelFaceImpl implements SmsChannelFace {
     }
 
     @Override
-    public Boolean deleteSmsChannel(String[] checkedIds) {
+    @Transactional
+    public Boolean deleteSmsChannel(String[] checkedIds) throws ProjectException{
         try {
             return smsChannelService.deleteSmsChannel(checkedIds);
         } catch (Exception e) {
@@ -86,7 +105,7 @@ public class SmsChannelFaceImpl implements SmsChannelFace {
     }
 
     @Override
-    public SmsChannelVo findSmsChannelBySmsChannelId(Long smsChannelId) {
+    public SmsChannelVo findSmsChannelBySmsChannelId(Long smsChannelId)throws ProjectException {
         try {
             SmsChannel smsChannel = smsChannelService.getById(smsChannelId);
             if (!EmptyUtil.isNullOrEmpty(smsChannel)){
@@ -100,7 +119,7 @@ public class SmsChannelFaceImpl implements SmsChannelFace {
     }
 
     @Override
-    public List<SmsChannelVo> findSmsChannelVoList() {
+    public List<SmsChannelVo> findSmsChannelVoList() throws ProjectException{
         try {
             return BeanConv.toBeanList(smsChannelService.findSmsChannelVoList(),SmsChannelVo.class);
         } catch (Exception e) {

@@ -19,7 +19,9 @@ public interface OrderFace {
      * @param dishVo 查询条件
      * @return
      */
-    Page<OrderVo> findOrderVoPage(OrderVo dishVo, int pageNum, int pageSize);
+    Page<OrderVo> findOrderVoPage(OrderVo dishVo,
+                                  int pageNum,
+                                  int pageSize)throws ProjectException;
 
 
     /***
@@ -29,34 +31,36 @@ public interface OrderFace {
      * @param opertionType 操作类型
      * @return
      */
-    OrderVo opertionToOrderItem(Long dishId, Long orderNo, String opertionType) throws ProjectException;
+    OrderVo opertionToOrderItem(Long dishId,
+                                Long orderNo,
+                                String opertionType) throws ProjectException;
 
     /***
      * @description 订单结算
      * @param orderVo 订单信息
      * @return: com.itheima.restkeeper.req.TradingVo
      */
-    TradingVo handleTrading(OrderVo orderVo);
+    TradingVo handleTrading(OrderVo orderVo)throws ProjectException;
 
     /***
      * @description 订单退款
      * @param orderVo 订单信息
      * @return: com.itheima.restkeeper.req.TradingVo
      */
-    Boolean handleTradingRefund(OrderVo orderVo);
+    Boolean handleTradingRefund(OrderVo orderVo)throws ProjectException;
 
     /***
      * @description 查询已支付订单
      * @param orderNo d订单编号
      * @return
      */
-    OrderVo findOrderVoPaid(Long orderNo);
+    OrderVo findOrderVoPaid(Long orderNo)throws ProjectException;
 
     /***
      * @description 查询FKZ的订单
      * @return
      */
-    List<OrderVo> findOrderVoPaying();
+    List<OrderVo> findOrderVoPaying()throws ProjectException;
 
     /***
      * @description 同步交易状态
@@ -65,5 +69,5 @@ public interface OrderFace {
      * @param tradingState 交易状态
      * @return
      */
-    Boolean synchTradingState(Long orderNo,String tradingState);
+    Boolean synchTradingState(Long orderNo,String tradingState)throws ProjectException;
 }

@@ -9,7 +9,8 @@ import com.itheima.restkeeper.basic.IBasicEnum;
 public enum BasicEnum implements IBasicEnum {
 
     SUCCEED("200","操作成功"),
-    SYSYTEM_FAIL("111000","系统运行异常")
+    SYSYTEM_FAIL("1503","系统运行异常"),
+    DUBBO_FAIL("1504","dubbo远程调用异常")
     ;
 
     private String code;

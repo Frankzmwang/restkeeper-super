@@ -16,28 +16,28 @@ public interface SmsSignAdapter {
      * @param smsSign 签名
      * @return 请求成功
      */
-    SmsSignVo addSmsSign(SmsSignVo smsSign) throws Exception;
+    SmsSignVo addSmsSign(SmsSignVo smsSign);
 
     /***
      * @description 删除签名
-     * @param smsSign 签名
+     * @param checkedIds 签名ids
      * @return 请求成功
      */
-    Boolean deleteSmsSign(SmsSignVo smsSign) throws Exception;
+    Boolean deleteSmsSign(String[] checkedIds);
 
     /***
      * @description 修改签名
      * @param smsSign 签名
      * @return 请求成功
      */
-    Boolean modifySmsSign(SmsSignVo smsSign) throws Exception;
+    Boolean modifySmsSign(SmsSignVo smsSign);
 
     /***
      * @description 查询签名审核状态
      * @param smsSign 签名
      * @return 请求成功
      */
-    Boolean querySmsSign(SmsSignVo smsSign) throws Exception;
+    Boolean querySmsSign(SmsSignVo smsSign);
 
 
 }

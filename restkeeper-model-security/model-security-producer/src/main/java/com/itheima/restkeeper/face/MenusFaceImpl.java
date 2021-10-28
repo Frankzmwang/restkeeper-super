@@ -23,7 +23,7 @@ public class MenusFaceImpl implements MenusFace {
     @Autowired
     IMenusService menusService;
     @Override
-    public List<MenuVo> findMenusBySystemCode(String systemCode) {
+    public List<MenuVo> findMenusBySystemCode(String systemCode)throws ProjectException {
         try {
             return menusService.findMenusBySystemCode(systemCode);
         } catch (Exception e) {

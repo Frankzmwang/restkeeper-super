@@ -22,7 +22,7 @@ public class SmsChannel extends BasicPojo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public SmsChannel(Long id,String channelName,String channelLabel,String channelType,String domain,String accessKeyId,String accessKeySecret,String otherConfig,String isActive,String level,String remark){
+    public SmsChannel(Long id,String channelName,String channelLabel,String channelType,String domain,String accessKeyId,String accessKeySecret,String otherConfig,String level,String remark){
         super(id);
         this.channelName=channelName;
         this.channelLabel=channelLabel;
@@ -31,7 +31,6 @@ public class SmsChannel extends BasicPojo {
         this.accessKeyId=accessKeyId;
         this.accessKeySecret=accessKeySecret;
         this.otherConfig=otherConfig;
-        this.isActive=isActive;
         this.level=level;
         this.remark=remark;
     }
@@ -56,9 +55,6 @@ public class SmsChannel extends BasicPojo {
 
     @ApiModelProperty(value = "其他配置")
     private String otherConfig;
-
-    @ApiModelProperty(value = "是否活跃")
-    private String isActive;
 
     @ApiModelProperty(value = "优先级")
     private String level;

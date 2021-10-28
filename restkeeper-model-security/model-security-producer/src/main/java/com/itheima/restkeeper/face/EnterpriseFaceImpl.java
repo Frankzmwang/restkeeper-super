@@ -40,7 +40,9 @@ public class EnterpriseFaceImpl implements EnterpriseFace {
     InitEnterpriseWebSiteInfo initEnterpriseWebSiteInfo;
 
     @Override
-    public Page<EnterpriseVo> findEnterpriseVoPage(EnterpriseVo enterpriseVo, int pageNum, int pageSize) {
+    public Page<EnterpriseVo> findEnterpriseVoPage(EnterpriseVo enterpriseVo,
+                                                   int pageNum,
+                                                   int pageSize)throws ProjectException {
         try {
             Page<Enterprise> page = EnterpriseService.findEnterpriseVoPage(enterpriseVo, pageNum, pageSize);
             Page<EnterpriseVo> pageVo = new Page<>();
@@ -54,11 +56,10 @@ public class EnterpriseFaceImpl implements EnterpriseFace {
             log.error("查询企业列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(EnterpriseEnum.PAGE_FAIL);
         }
-
     }
 
     @Override
-    public EnterpriseVo createEnterprise(EnterpriseVo eterperiseVo) {
+    public EnterpriseVo createEnterprise(EnterpriseVo eterperiseVo)throws ProjectException {
         try {
             Enterprise enterpriseResult = EnterpriseService.createEnterprise(eterperiseVo);
             //同步缓存
@@ -74,7 +75,7 @@ public class EnterpriseFaceImpl implements EnterpriseFace {
     }
 
     @Override
-    public Boolean updateEnterprise(EnterpriseVo enterpriseVo) {
+    public Boolean updateEnterprise(EnterpriseVo enterpriseVo)throws ProjectException {
         try {
             Boolean flag = EnterpriseService.updateEnterprise(enterpriseVo);
             //同步缓存
@@ -94,7 +95,7 @@ public class EnterpriseFaceImpl implements EnterpriseFace {
     }
 
     @Override
-    public Boolean deleteEnterprise(String[] checkedIds) {
+    public Boolean deleteEnterprise(String[] checkedIds)throws ProjectException {
         try {
             //同步缓存
             for (String checkedId : checkedIds) {
@@ -110,7 +111,7 @@ public class EnterpriseFaceImpl implements EnterpriseFace {
     }
 
     @Override
-    public List<EnterpriseVo> initEnterpriseIdOptions() {
+    public List<EnterpriseVo> initEnterpriseIdOptions() throws ProjectException{
         try {
             List<Enterprise> enterprises = EnterpriseService.initEnterpriseIdOptions();
             return BeanConv.toBeanList(enterprises,EnterpriseVo.class);

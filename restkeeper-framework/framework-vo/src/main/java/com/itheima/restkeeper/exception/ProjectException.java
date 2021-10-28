@@ -17,7 +17,13 @@ public class ProjectException extends RuntimeException {
     private IBasicEnum basicEnumIntface;
 
     public ProjectException() {
+
     }
+    public ProjectException(String code,String message) {
+        this.code = code;
+        this.message = message;
+    }
+
 
     public ProjectException(IBasicEnum basicEnumIntface) {
         this.code = basicEnumIntface.getCode();

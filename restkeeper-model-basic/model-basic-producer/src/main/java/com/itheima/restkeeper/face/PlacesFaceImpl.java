@@ -25,7 +25,7 @@ public class PlacesFaceImpl implements PlacesFace {
     IPlacesService placesService;
 
     @Override
-    public List<PlacesVo> findPlacesVoListByParentId(Long parentId) {
+    public List<PlacesVo> findPlacesVoListByParentId(Long parentId)throws ProjectException {
         try {
             return BeanConv.toBeanList(placesService.
                     findPlacesVoListByParentId(parentId),PlacesVo.class);

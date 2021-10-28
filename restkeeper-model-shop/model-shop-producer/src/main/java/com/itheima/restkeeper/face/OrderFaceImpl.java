@@ -77,7 +77,9 @@ public class OrderFaceImpl implements OrderFace {
     IDishService dishService;
 
     @Override
-    public Page<OrderVo> findOrderVoPage(OrderVo orderVo, int pageNum, int pageSize) {
+    public Page<OrderVo> findOrderVoPage(OrderVo orderVo,
+                                         int pageNum,
+                                         int pageSize) throws ProjectException{
         try {
             Page<Order> page = orderService.findOrderVoPage(orderVo, pageNum, pageSize);
             Page<OrderVo> pageVo = new Page<>();
@@ -103,7 +105,9 @@ public class OrderFaceImpl implements OrderFace {
 
     @Override
     @GlobalTransactional
-    public OrderVo opertionToOrderItem(Long dishId, Long orderNo, String opertionType) {
+    public OrderVo opertionToOrderItem(Long dishId,
+                                       Long orderNo,
+                                       String opertionType)throws ProjectException {
         //1、判定订单待支付状态才可操作
         OrderVo orderVoResult = orderService.findOrderByOrderNo(orderNo);
         if (!SuperConstant.DFK.equals(orderVoResult.getOrderState())){
@@ -150,7 +154,9 @@ public class OrderFaceImpl implements OrderFace {
                 ).reduce(BigDecimal.ZERO, BigDecimal::add);
                 orderVoResult.setPayableAmountSum(sumPrice);
                 //6、修改订单总金额
-                OrderVo orderVoHandler = OrderVo.builder().id(orderVoResult.getId()).payableAmountSum(sumPrice).build();
+                OrderVo orderVoHandler = OrderVo.builder()
+                        .id(orderVoResult.getId())
+                        .payableAmountSum(sumPrice).build();
                 boolean flag = orderService.updateById(BeanConv.toBean(orderVoHandler, Order.class));
                 if (!flag){
                     throw new ProjectException(OrderItemEnum.SAVE_ORDER_FAIL);
@@ -317,7 +323,7 @@ public class OrderFaceImpl implements OrderFace {
 
     @Override
     @GlobalTransactional
-    public TradingVo handleTrading(OrderVo orderVo) {
+    public TradingVo handleTrading(OrderVo orderVo) throws ProjectException{
         //2、根据订单生成交易单
         TradingVo tradingVo = tradingConvertor(orderVo);
         if (EmptyUtil.isNullOrEmpty(tradingVo)){
@@ -343,7 +349,7 @@ public class OrderFaceImpl implements OrderFace {
 
     @Override
     @GlobalTransactional
-    public Boolean handleTradingRefund(OrderVo orderVo) {
+    public Boolean handleTradingRefund(OrderVo orderVo)throws ProjectException {
         //2、获取当前交易单信息
         OrderVo orderVoBefore = findOrderVoPaid(orderVo.getOrderNo());
         //3、退款收款人不为同一人，退款操作拒绝
@@ -374,7 +380,7 @@ public class OrderFaceImpl implements OrderFace {
      * @param orderVo 订单信息
      * @return: com.itheima.restkeeper.req.TradingVo
      */
-    private TradingVo tradingConvertor(OrderVo orderVo) {
+    private TradingVo tradingConvertor(OrderVo orderVo)throws ProjectException {
         //免单渠道，交易单生成
         if (orderVo.getTradingChannel().equals(SuperConstant.TRADING_CHANNEL_FREE_CHARGE)){
             return freeChargeTradingVo(orderVo);
@@ -388,18 +394,18 @@ public class OrderFaceImpl implements OrderFace {
     }
 
     @Override
-    public OrderVo findOrderVoPaid(Long orderNo) {
+    public OrderVo findOrderVoPaid(Long orderNo)throws ProjectException {
         return orderService.findOrderVoPaid(orderNo);
     }
 
     @Override
-    public List<OrderVo> findOrderVoPaying() {
+    public List<OrderVo> findOrderVoPaying() throws ProjectException{
         return orderService.findOrderVoPaying();
     }
 
     @Override
     @GlobalTransactional
-    public Boolean synchTradingState(Long orderNo, String tradingState) {
+    public Boolean synchTradingState(Long orderNo, String tradingState)throws ProjectException {
         OrderVo orderVo = orderService.findOrderByOrderNo(orderNo);
         orderVo.setOrderState(tradingState);
         return orderService.saveOrUpdate(BeanConv.toBean(orderVo,Order.class));

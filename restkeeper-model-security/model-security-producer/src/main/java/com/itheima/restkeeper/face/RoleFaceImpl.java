@@ -40,7 +40,9 @@ public class RoleFaceImpl implements RoleFace {
     IRoleResourceService roleResourceService;
 
     @Override
-    public Page<RoleVo> findRoleVoPage(RoleVo roleVo, int pageNum, int pageSize) {
+    public Page<RoleVo> findRoleVoPage(RoleVo roleVo,
+                                       int pageNum,
+                                       int pageSize) throws ProjectException{
         try {
             Page<Role> page = roleService.findRoleVoPage(roleVo, pageNum, pageSize);
             Page<RoleVo> pageVo = new Page<>();
@@ -66,7 +68,7 @@ public class RoleFaceImpl implements RoleFace {
     }
 
     @Override
-    public RoleVo createRole(RoleVo roleVo) {
+    public RoleVo createRole(RoleVo roleVo) throws ProjectException{
         try {
             return BeanConv.toBean(roleService.createRole(roleVo),RoleVo.class);
         } catch (Exception e) {
@@ -77,7 +79,7 @@ public class RoleFaceImpl implements RoleFace {
     }
 
     @Override
-    public Boolean updateRole(RoleVo roleVo) {
+    public Boolean updateRole(RoleVo roleVo) throws ProjectException{
         try {
             return roleService.updateRole(roleVo);
         } catch (Exception e) {
@@ -87,7 +89,7 @@ public class RoleFaceImpl implements RoleFace {
     }
 
     @Override
-    public Boolean deleteRole(String[] checkedIds) {
+    public Boolean deleteRole(String[] checkedIds)throws ProjectException {
         try {
             return roleService.deleteRole(checkedIds);
         } catch (Exception e) {
@@ -97,7 +99,7 @@ public class RoleFaceImpl implements RoleFace {
     }
 
     @Override
-    public List<RoleVo> initRoleIdOptions() {
+    public List<RoleVo> initRoleIdOptions()throws ProjectException {
         try {
             List<Role> roles = roleService.initRoleIdOptions();
             return BeanConv.toBeanList(roles,RoleVo.class);

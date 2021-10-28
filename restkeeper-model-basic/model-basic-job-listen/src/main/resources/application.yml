@@ -9,6 +9,12 @@ server:
 spring:
   main:
     allow-bean-definition-overriding: true
+  redis:
+    redisson:
+      config: classpath:singleServerConfig.yaml
+    host: 192.168.112.77
+    port: 6379
+    password: pass
   cloud:
     alicloud:
       access-key: LTAI4G2g6WqYBZyZMovev1pd
@@ -60,10 +66,20 @@ mybatis-plus:
     - tab_affix
     - tab_log_business
     - tab_data_dict
+    - tab_sms_blacklist
+    - tab_sms_channel
+    - tab_sms_send_record
+    - tab_sms_sign
+    - tab_sms_template
     - undo_log
   #忽略门店号表
   ignore-store-tables:
     - tab_affix
     - tab_log_business
     - tab_data_dict
+    - tab_sms_blacklist
+    - tab_sms_channel
+    - tab_sms_send_record
+    - tab_sms_sign
+    - tab_sms_template
     - undo_log

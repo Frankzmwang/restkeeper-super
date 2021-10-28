@@ -8,13 +8,17 @@ import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.SmsSendEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.SmsSendHandler;
+import com.itheima.restkeeper.handler.aliyun.config.AliyunSmsConfig;
 import com.itheima.restkeeper.pojo.SmsChannel;
 import com.itheima.restkeeper.pojo.SmsSendRecord;
+import com.itheima.restkeeper.pojo.SmsSign;
 import com.itheima.restkeeper.pojo.SmsTemplate;
 import com.itheima.restkeeper.service.ISmsChannelService;
 import com.itheima.restkeeper.service.ISmsSendRecordService;
+import com.itheima.restkeeper.service.ISmsSignService;
 import com.itheima.restkeeper.service.ISmsTemplateService;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -30,9 +34,8 @@ import java.util.*;
 @Service("aliyunSmsSendHandler")
 public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
 
-    @Lazy
     @Autowired
-    Client aliyunSmsConfig;
+    AliyunSmsConfig aliyunSmsConfig;
 
     @Autowired
     ISmsSendRecordService smsSendRecordService;
@@ -43,9 +46,13 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
     @Autowired
     ISmsChannelService smsChannelService;
 
+    @Autowired
+    ISmsSignService smsSignService;
+
     @Override
     public Boolean SendSms(SmsTemplate smsTemplate,
                            SmsChannel smsChannel,
+                           SmsSign smsSign,
                            Set<String> mobiles,
                            LinkedHashMap<String, String> templateParam) throws Exception {
         //超过发送上限
@@ -56,7 +63,7 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
         //接收短信的手机号码，JSON数组格式。
         request.setPhoneNumberJson(JSONObject.toJSONString(mobiles));
         //请在控制台国内消息或国际/港澳台消息页面中的签名管理页签下签名名称一列查看
-        String signCode = smsTemplate.getSignCode();
+        String signCode = smsSign.getSignCode();
         List<String> signNames = new ArrayList<>();
         for (String mobile : mobiles) {
             signNames.add(signCode);
@@ -70,7 +77,8 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
             templateParams.add(templateParam);
         }
         request.setTemplateParamJson(JSONObject.toJSONString(templateParams));
-        SendBatchSmsResponse response = aliyunSmsConfig.sendBatchSms(request);
+        Client client =aliyunSmsConfig.queryClient();
+        SendBatchSmsResponse response = client.sendBatchSms(request);
         //返回请求状态
         String code = response.getBody().getCode();
         String acceptStatus = null;
@@ -106,8 +114,8 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
             .sendStatus(sendStatus)
             .sendMsg(sendMsg)
             .mobile(mobile)
-            .signCode(smsTemplate.getSignCode())
-            .signName(smsTemplate.getSignName())
+            .signCode(smsSign.getSignCode())
+            .signName(smsSign.getSignName())
             .templateCode(smsTemplate.getTemplateCode())
             .templateId(smsTemplate.getId())
             .templateType(smsTemplate.getTemplateType())
@@ -129,7 +137,8 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
         request.setPageSize(50L);
         request.setCurrentPage(1L);
         // 复制代码运行请自行打印 API 的返回值
-        QuerySendDetailsResponse response = aliyunSmsConfig.querySendDetails(request);
+        Client client =aliyunSmsConfig.queryClient();
+        QuerySendDetailsResponse response = client.querySendDetails(request);
         String code = response.getBody().getCode();
         //处理结果
         if ("OK".equals(code)){
@@ -162,10 +171,11 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
         }
         SmsTemplate smsTemplate = smsTemplateService.getById(smsSendRecord.getTemplateId());
         SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(smsSendRecord.getChannelLabel());
+        SmsSign smsSign = smsSignService.findSmsSignBySignCodeAndChannelLabel(smsSendRecord.getSignCode(), smsSendRecord.getChannelLabel());
         Set<String> mobiles = new HashSet<>();
         mobiles.add(smsSendRecord.getMobile());
         LinkedHashMap<String, String> templateParam =
             JSON.parseObject(smsSendRecord.getTemplateParams(), LinkedHashMap.class);
-        return SendSms(smsTemplate,smsChannel,mobiles,templateParam);
+        return SendSms(smsTemplate,smsChannel,smsSign,mobiles,templateParam);
     }
 }

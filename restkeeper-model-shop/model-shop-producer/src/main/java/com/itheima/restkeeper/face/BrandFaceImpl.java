@@ -42,7 +42,9 @@ public class BrandFaceImpl implements BrandFace {
     AffixFace affixFace;
 
     @Override
-    public Page<BrandVo> findBrandVoPage(BrandVo brandVo, int pageNum, int pageSize) {
+    public Page<BrandVo> findBrandVoPage(BrandVo brandVo,
+                                         int pageNum,
+                                         int pageSize) throws ProjectException{
         try {
             //查询Page<Brand>图片分页
             Page<Brand> page = brandService.findBrandVoPage(brandVo, pageNum, pageSize);
@@ -71,7 +73,7 @@ public class BrandFaceImpl implements BrandFace {
     }
 
     @Override
-    public BrandVo createBrand(BrandVo brandVo) {
+    public BrandVo createBrand(BrandVo brandVo) throws ProjectException{
         try {
             BrandVo brandVoResult = BeanConv.toBean(brandService.createBrand(brandVo), BrandVo.class);
             //绑定附件
@@ -94,7 +96,7 @@ public class BrandFaceImpl implements BrandFace {
     }
 
     @Override
-    public Boolean updateBrand(BrandVo brandVo) {
+    public Boolean updateBrand(BrandVo brandVo)throws ProjectException {
         try {
             Boolean flag = brandService.updateBrand(brandVo);
             if (flag){
@@ -119,7 +121,7 @@ public class BrandFaceImpl implements BrandFace {
     }
 
     @Override
-    public Boolean deleteBrand(String[] checkedIds) {
+    public Boolean deleteBrand(String[] checkedIds) throws ProjectException{
         try {
             Boolean flag = brandService.deleteBrand(checkedIds);
             //删除图片
@@ -134,7 +136,7 @@ public class BrandFaceImpl implements BrandFace {
     }
 
     @Override
-    public BrandVo findBrandByBrandId(Long brandId) {
+    public BrandVo findBrandByBrandId(Long brandId)throws ProjectException {
         try {
             Brand brand = brandService.getById(brandId);
             return BeanConv.toBean(brand,BrandVo.class);
@@ -145,7 +147,7 @@ public class BrandFaceImpl implements BrandFace {
     }
 
     @Override
-    public List<BrandVo> findBrandVoList() {
+    public List<BrandVo> findBrandVoList()throws ProjectException {
         try {
             return BeanConv.toBeanList(brandService.findBrandVoList(),BrandVo.class);
         } catch (Exception e) {

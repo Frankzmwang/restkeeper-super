@@ -14,28 +14,28 @@ public interface SmsSignHandler {
      * @param smsSignVo 签名
      * @return 请求成功
      */
-    SmsSign addSmsSign(SmsSignVo smsSignVo) throws Exception;
+    SmsSign addSmsSign(SmsSignVo smsSignVo);
 
     /***
      * @description 删除签名
      * @param smsSignVo 签名
      * @return 请求成功
      */
-    Boolean deleteSmsSign(SmsSignVo smsSignVo) throws Exception;
+    Boolean deleteSmsSign(SmsSignVo smsSignVo);
 
     /***
      * @description 修改签名
      * @param smsSignVo 签名
      * @return 请求成功
      */
-    Boolean modifySmsSign(SmsSignVo smsSignVo) throws Exception;
+    Boolean modifySmsSign(SmsSignVo smsSignVo);
 
     /***
      * @description 查询签名审核状态
      * @param smsSignVo 签名
      * @return 请求成功
      */
-    Boolean querySmsSign(SmsSignVo smsSignVo) throws Exception;
+    Boolean querySmsSign(SmsSignVo smsSignVo);
 
 
 }

@@ -4,10 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.SmsTemplateFace;
 import com.itheima.restkeeper.adapter.SmsTemplateAdapter;
 import com.itheima.restkeeper.enums.SmsTemplateEnum;
-import com.itheima.restkeeper.enums.SmsTemplateEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.SmsTemplate;
-import com.itheima.restkeeper.req.SmsTemplateVo;
 import com.itheima.restkeeper.req.SmsTemplateVo;
 import com.itheima.restkeeper.service.ISmsTemplateService;
 import com.itheima.restkeeper.utils.BeanConv;
@@ -61,7 +59,7 @@ public class SmsTemplateFaceImpl implements SmsTemplateFace {
     }
 
     @Override
-    public SmsTemplateVo addSmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public SmsTemplateVo addSmsTemplate(SmsTemplateVo smsTemplateVo) throws ProjectException {
         try {
             return smsTemplateAdapter.addSmsTemplate(smsTemplateVo);
         } catch (Exception e) {
@@ -71,9 +69,9 @@ public class SmsTemplateFaceImpl implements SmsTemplateFace {
     }
 
     @Override
-    public Boolean deleteSmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public Boolean deleteSmsTemplate(String[] checkedIds) throws ProjectException {
         try {
-            return smsTemplateAdapter.deleteSmsTemplate(smsTemplateVo);
+            return smsTemplateAdapter.deleteSmsTemplate(checkedIds);
         } catch (Exception e) {
             log.error("删除签名异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(SmsTemplateEnum.DELETE_FAIL);
@@ -81,7 +79,7 @@ public class SmsTemplateFaceImpl implements SmsTemplateFace {
     }
 
     @Override
-    public Boolean modifySmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public Boolean modifySmsTemplate(SmsTemplateVo smsTemplateVo) throws ProjectException {
         try {
             return smsTemplateAdapter.modifySmsTemplate(smsTemplateVo);
         } catch (Exception e) {
@@ -91,7 +89,7 @@ public class SmsTemplateFaceImpl implements SmsTemplateFace {
     }
 
     @Override
-    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) throws ProjectException {
         try {
             return smsTemplateAdapter.querySmsTemplate(smsTemplateVo);
         } catch (Exception e) {
@@ -99,4 +97,15 @@ public class SmsTemplateFaceImpl implements SmsTemplateFace {
             throw new ProjectException(SmsTemplateEnum.SELECT_FAIL);
         }
     }
+
+    @Override
+    public Boolean updateSmsTemplateEnableFlag(SmsTemplateVo smsTemplateVo) {
+        try {
+            return smsTemplateService.updateById(BeanConv.toBean(smsTemplateVo,SmsTemplate.class));
+        } catch (Exception e) {
+            log.error("修改签名状态异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(SmsTemplateEnum.UPDATE_FAIL);
+        }
+    }
+
 }

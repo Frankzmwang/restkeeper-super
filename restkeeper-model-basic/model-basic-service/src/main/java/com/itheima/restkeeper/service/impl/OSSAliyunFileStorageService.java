@@ -22,8 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -117,7 +116,7 @@ public class OSSAliyunFileStorageService implements FileStorageService {
 	 * @see FileStorageService#downloadFile(java.lang.String)
 	 */
 	@Override
-	public InputStream downloadFile(String pathUrl) {
+	public InputStream downloadFile(String pathUrl) throws IOException {
 		// ossObject包含文件所在的存储空间名称、文件名称、文件元信息以及一个输入流。
 		OSSObject ossObject = ossClient.getObject(ossAliyunConfigProperties.getBucketName(), pathUrl);
 		InputStream inputStream =  ossObject.getObjectContent();

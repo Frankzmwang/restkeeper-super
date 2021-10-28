@@ -36,7 +36,9 @@ public class StoreFaceImpl implements StoreFace {
     IStoreService storeService;
 
     @Override
-    public Page<StoreVo> findStoreVoPage(StoreVo storeVo, int pageNum, int pageSize) {
+    public Page<StoreVo> findStoreVoPage(StoreVo storeVo,
+                                         int pageNum,
+                                         int pageSize) throws ProjectException{
         try {
             //构建分页对象
             Page<Store> page = storeService.findStoreVoPage(storeVo, pageNum, pageSize);
@@ -54,7 +56,7 @@ public class StoreFaceImpl implements StoreFace {
     }
 
     @Override
-    public StoreVo createStore(StoreVo storeVo) {
+    public StoreVo createStore(StoreVo storeVo) throws ProjectException{
         try {
             return BeanConv.toBean( storeService.createStore(storeVo), StoreVo.class);
         } catch (Exception e) {
@@ -64,7 +66,7 @@ public class StoreFaceImpl implements StoreFace {
     }
 
     @Override
-    public Boolean updateStore(StoreVo storeVo) {
+    public Boolean updateStore(StoreVo storeVo)throws ProjectException {
         try {
             return storeService.updateStore(storeVo);
         } catch (Exception e) {
@@ -74,7 +76,7 @@ public class StoreFaceImpl implements StoreFace {
     }
 
     @Override
-    public Boolean deleteStore(String[] checkedIds) {
+    public Boolean deleteStore(String[] checkedIds) throws ProjectException{
         try {
             return storeService.deleteStore(checkedIds);
         } catch (Exception e) {
@@ -84,7 +86,7 @@ public class StoreFaceImpl implements StoreFace {
     }
 
     @Override
-    public StoreVo findStoreByStoreId(Long storeId) {
+    public StoreVo findStoreByStoreId(Long storeId)throws ProjectException {
         try {
             Store store = storeService.getById(storeId);
             if (!EmptyUtil.isNullOrEmpty(store)){
@@ -99,7 +101,7 @@ public class StoreFaceImpl implements StoreFace {
     }
 
     @Override
-    public List<StoreVo> findStoreVoList() {
+    public List<StoreVo> findStoreVoList()throws ProjectException {
         try {
             return BeanConv.toBeanList(storeService.findStoreVoList(),StoreVo.class);
         } catch (Exception e) {

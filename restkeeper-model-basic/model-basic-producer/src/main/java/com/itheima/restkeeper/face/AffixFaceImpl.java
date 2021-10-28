@@ -15,6 +15,7 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -24,6 +25,7 @@ import java.util.List;
 @Slf4j
 @DubboService(version = "${dubbo.application.version}",timeout = 5000,
     methods ={
+        @Method(name = "downLoad",retries = 2),
         @Method(name = "upLoad",retries = 0),
         @Method(name = "bindBusinessId",retries = 0),
         @Method(name = "findAffixVoByBusinessId",retries = 2),
@@ -37,7 +39,12 @@ public class AffixFaceImpl implements AffixFace {
     IAffixService affixService;
 
     @Override
-    public AffixVo upLoad(UploadMultipartFile multipartFile, AffixVo affixVo)  {
+    public AffixVo downLoad(Long affixId) throws ProjectException {
+        return affixService.downLoad(affixId);
+    }
+
+    @Override
+    public AffixVo upLoad(UploadMultipartFile multipartFile, AffixVo affixVo) throws ProjectException {
         try {
             Affix affix = affixService.upLoad(multipartFile, affixVo);
             return BeanConv.toBean(affix,AffixVo.class);
@@ -48,7 +55,7 @@ public class AffixFaceImpl implements AffixFace {
     }
 
     @Override
-    public AffixVo bindBusinessId(AffixVo affixVo) {
+    public AffixVo bindBusinessId(AffixVo affixVo) throws ProjectException {
         try {
             return BeanConv.toBean(affixService.bindBusinessId(affixVo),AffixVo.class);
         } catch (Exception e) {
@@ -58,7 +65,17 @@ public class AffixFaceImpl implements AffixFace {
     }
 
     @Override
-    public List<AffixVo> findAffixVoByBusinessId(Long businessId) {
+    public List<AffixVo> bindBatchBusinessId(List<AffixVo> affixVos) throws ProjectException {
+        try {
+            return BeanConv.toBeanList(affixService.bindBatchBusinessId(affixVos),AffixVo.class);
+        } catch (Exception e) {
+            log.error("绑定业务：{}异常：{}", affixVos.toString(),ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(AffixEnum.UPLOAD_FAIL);
+        }
+    }
+
+    @Override
+    public List<AffixVo> findAffixVoByBusinessId(Long businessId) throws ProjectException {
         try {
             List<Affix> affixes = affixService.findAffixVoByBusinessId(businessId);
             return BeanConv.toBeanList(affixes,AffixVo.class);
@@ -69,7 +86,7 @@ public class AffixFaceImpl implements AffixFace {
     }
 
     @Override
-    public Boolean deleteAffixVoByBusinessId(Long businessId) {
+    public Boolean deleteAffixVoByBusinessId(Long businessId) throws ProjectException {
         try {
             return affixService.deleteAffixVoByBusinessId(businessId);
         }catch (Exception e){
@@ -79,7 +96,7 @@ public class AffixFaceImpl implements AffixFace {
     }
 
     @Override
-    public Page<AffixVo> findAffixVoPage(AffixVo affixVo, int pageNum, int pageSize) {
+    public Page<AffixVo> findAffixVoPage(AffixVo affixVo, int pageNum, int pageSize) throws ProjectException {
         try {
             Page<Affix> page = affixService.findAffixVoPage(affixVo, pageNum, pageSize);
             Page<AffixVo> pageVo = new Page<>();
@@ -96,7 +113,7 @@ public class AffixFaceImpl implements AffixFace {
     }
 
     @Override
-    public Boolean deleteAffix(String[] checkedIds) {
+    public Boolean deleteAffix(String[] checkedIds) throws ProjectException {
         try {
             return affixService.deleteAffix(checkedIds);
         }catch (Exception e){

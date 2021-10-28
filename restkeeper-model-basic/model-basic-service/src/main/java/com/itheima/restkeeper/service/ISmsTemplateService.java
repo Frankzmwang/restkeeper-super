@@ -27,4 +27,5 @@ public interface ISmsTemplateService extends IService<SmsTemplate> {
      * @return Page<SmsSignVo>
      */
     Page<SmsTemplate> findSmsTemplateVoPage(SmsTemplateVo smsTemplateVo, int pageNum, int pageSize);
+
 }

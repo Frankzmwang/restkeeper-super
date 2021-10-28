@@ -13,7 +13,7 @@ public class TradingCacheConstant {
     public static final int REDIS_LEASETIME = 4;
 
     //安全组前缀
-    public static final String REDIS_GROUP = "Trading:";
+    public static final String REDIS_GROUP = "trading:";
 
     //运营组
     public static final String DO_PAY = REDIS_GROUP+ "doPay:";

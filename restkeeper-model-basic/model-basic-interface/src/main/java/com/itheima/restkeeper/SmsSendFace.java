@@ -1,5 +1,6 @@
 package com.itheima.restkeeper;
 
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.req.SmsSendRecordVo;
 
 import java.util.LinkedHashMap;
@@ -22,19 +23,19 @@ public interface SmsSendFace {
         String templateNo,
         String loadBalancerType,
         Set<String> mobiles,
-        LinkedHashMap<String, String> templateParam) throws Exception;
+        LinkedHashMap<String, String> templateParam) throws ProjectException;
 
     /***
      * @description 查询短信接受情况
      * @param smsSendRecord 发送记录
      * @return
      */
-    Boolean querySendSms(SmsSendRecordVo smsSendRecord) throws Exception;
+    Boolean querySendSms(SmsSendRecordVo smsSendRecord) throws ProjectException;
 
     /***
      * @description 重试发送
      * @param smsSendRecord
      * @return
      */
-    Boolean retrySendSms(SmsSendRecordVo smsSendRecord) throws Exception;
+    Boolean retrySendSms(SmsSendRecordVo smsSendRecord) throws ProjectException;
 }

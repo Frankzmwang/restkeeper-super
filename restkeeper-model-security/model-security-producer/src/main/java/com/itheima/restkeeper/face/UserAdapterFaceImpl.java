@@ -30,7 +30,7 @@ public class UserAdapterFaceImpl implements UserAdapterFace {
     IUserAdapterService userAdapterService;
 
     @Override
-    public UserVo findUserByUsernameAndEnterpriseId(String username,Long enterpriseId) {
+    public UserVo findUserByUsernameAndEnterpriseId(String username,Long enterpriseId) throws ProjectException{
         try {
             User user = userAdapterService.findUserByUsernameAndEnterpriseId(username,enterpriseId);
             return BeanConv.toBean(user,UserVo.class);
@@ -41,7 +41,7 @@ public class UserAdapterFaceImpl implements UserAdapterFace {
     }
 
     @Override
-    public List<RoleVo> findRoleByUserId(Long userId) {
+    public List<RoleVo> findRoleByUserId(Long userId)throws ProjectException {
         try {
             List<Role> roles = userAdapterService.findRoleByUserId(userId);
             return BeanConv.toBeanList(roles,RoleVo.class);
@@ -53,7 +53,7 @@ public class UserAdapterFaceImpl implements UserAdapterFace {
     }
 
     @Override
-    public List<ResourceVo> findResourceByUserId(Long userId) {
+    public List<ResourceVo> findResourceByUserId(Long userId)throws ProjectException {
         try {
             List<Resource> resources = userAdapterService.findResourceByUserId(userId);
             return BeanConv.toBeanList(resources,ResourceVo.class);

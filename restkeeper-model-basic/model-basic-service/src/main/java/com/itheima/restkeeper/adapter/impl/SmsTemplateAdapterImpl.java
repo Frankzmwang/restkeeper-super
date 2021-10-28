@@ -6,6 +6,7 @@ import com.itheima.restkeeper.handler.SmsSignHandler;
 import com.itheima.restkeeper.handler.SmsTemplateHandler;
 import com.itheima.restkeeper.pojo.SmsTemplate;
 import com.itheima.restkeeper.req.SmsTemplateVo;
+import com.itheima.restkeeper.service.ISmsTemplateService;
 import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.RegisterBeanHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +25,19 @@ public class SmsTemplateAdapterImpl implements SmsTemplateAdapter {
     @Autowired
     RegisterBeanHandler registerBeanHandler;
 
+    @Autowired
+    ISmsTemplateService smsTemplateService;
+
     private static Map<String,String> smsTemplateHandlers =new HashMap<>();
 
     static {
-        smsTemplateHandlers.put(SuperConstant.ALIYUN_SMS,"aliyunSmsTemplateHandler");
-        smsTemplateHandlers.put(SuperConstant.TENCENT_SMS,"tencentSmsTemplateHandler");
-        smsTemplateHandlers.put(SuperConstant.BAIDU_SMS,"baiduSmsTemplateHandler");
+        smsTemplateHandlers.put(SuperConstant.ALIYUN_SMS,"aliyunTemplateHandler");
+        smsTemplateHandlers.put(SuperConstant.TENCENT_SMS,"tencentTemplateHandler");
+        smsTemplateHandlers.put(SuperConstant.BAIDU_SMS,"baiduTemplateHandler");
     }
     
     @Override
-    public SmsTemplateVo addSmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public SmsTemplateVo addSmsTemplate(SmsTemplateVo smsTemplateVo) {
         String channelLabel = smsTemplateVo.getChannelLabel();
         String stringSmsTemplateHandler = smsTemplateHandlers.get(channelLabel);
         SmsTemplateHandler smsTemplateHandler =registerBeanHandler
@@ -42,16 +46,20 @@ public class SmsTemplateAdapterImpl implements SmsTemplateAdapter {
     }
 
     @Override
-    public Boolean deleteSmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
-        String channelLabel = smsTemplateVo.getChannelLabel();
-        String stringSmsTemplateHandler = smsTemplateHandlers.get(channelLabel);
-        SmsTemplateHandler smsTemplateHandler =registerBeanHandler
-                .getBean(stringSmsTemplateHandler,SmsTemplateHandler.class);
-        return smsTemplateHandler.deleteSmsTemplate(smsTemplateVo);
+    public Boolean deleteSmsTemplate(String[] checkedIds) {
+        for (String checkedId : checkedIds) {
+            SmsTemplateVo smsTemplateVo = BeanConv.toBean(smsTemplateService.getById(checkedId), SmsTemplateVo.class);
+            String channelLabel = smsTemplateVo.getChannelLabel();
+            String stringSmsTemplateHandler = smsTemplateHandlers.get(channelLabel);
+            SmsTemplateHandler smsTemplateHandler = registerBeanHandler
+                    .getBean(stringSmsTemplateHandler, SmsTemplateHandler.class);
+            smsTemplateHandler.deleteSmsTemplate(smsTemplateVo);
+        }
+        return true;
     }
 
     @Override
-    public Boolean modifySmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public Boolean modifySmsTemplate(SmsTemplateVo smsTemplateVo) {
         String channelLabel = smsTemplateVo.getChannelLabel();
         String stringSmsTemplateHandler = smsTemplateHandlers.get(channelLabel);
         SmsTemplateHandler smsTemplateHandler =registerBeanHandler
@@ -60,7 +68,7 @@ public class SmsTemplateAdapterImpl implements SmsTemplateAdapter {
     }
 
     @Override
-    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) throws Exception {
+    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) {
         String channelLabel = smsTemplateVo.getChannelLabel();
         String stringSmsTemplateHandler = smsTemplateHandlers.get(channelLabel);
         SmsTemplateHandler smsTemplateHandler =registerBeanHandler

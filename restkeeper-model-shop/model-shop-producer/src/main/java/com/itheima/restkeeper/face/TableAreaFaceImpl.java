@@ -35,7 +35,9 @@ public class TableAreaFaceImpl implements TableAreaFace {
     ITableAreaService tableAreaService;
 
     @Override
-    public Page<TableAreaVo> findTableAreaVoPage(TableAreaVo tableAreaVo, int pageNum, int pageSize) {
+    public Page<TableAreaVo> findTableAreaVoPage(TableAreaVo tableAreaVo,
+                                                 int pageNum,
+                                                 int pageSize)throws ProjectException {
         try {
             Page<TableArea> page = tableAreaService.findTableAreaVoPage(tableAreaVo, pageNum, pageSize);
             Page<TableAreaVo> pageVo = new Page<>();
@@ -53,7 +55,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     }
 
     @Override
-    public TableAreaVo createTableArea(TableAreaVo tableAreaVo) {
+    public TableAreaVo createTableArea(TableAreaVo tableAreaVo) throws ProjectException{
         try {
             return BeanConv.toBean( tableAreaService.createTableArea(tableAreaVo), TableAreaVo.class);
         } catch (Exception e) {
@@ -63,7 +65,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     }
 
     @Override
-    public Boolean updateTableArea(TableAreaVo tableAreaVo) {
+    public Boolean updateTableArea(TableAreaVo tableAreaVo) throws ProjectException{
         try {
             return tableAreaService.updateTableArea(tableAreaVo);
         } catch (Exception e) {
@@ -73,7 +75,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     }
 
     @Override
-    public Boolean deleteTableArea(String[] checkedIds) {
+    public Boolean deleteTableArea(String[] checkedIds)throws ProjectException {
         try {
             return tableAreaService.deleteTableArea(checkedIds);
         } catch (Exception e) {
@@ -83,7 +85,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     }
 
     @Override
-    public TableAreaVo findTableAreaByTableAreaId(Long tableAreaId) {
+    public TableAreaVo findTableAreaByTableAreaId(Long tableAreaId)throws ProjectException {
         try {
             TableArea tableArea = tableAreaService.getById(tableAreaId);
             if (!EmptyUtil.isNullOrEmpty(tableArea)){
@@ -97,7 +99,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     }
 
     @Override
-    public List<TableAreaVo> findTableAreaVoList() {
+    public List<TableAreaVo> findTableAreaVoList()throws ProjectException {
         try {
             return BeanConv.toBeanList(tableAreaService.findTableAreaVoList(),TableAreaVo.class);
         } catch (Exception e) {

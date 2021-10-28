@@ -8,6 +8,7 @@ import com.itheima.restkeeper.utils.ExceptionsUtil;
 import com.itheima.restkeeper.utils.ResponseWrapBuild;
 import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.rpc.RpcException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -31,7 +32,9 @@ public class BaseController {
         if (ex instanceof ProjectException){
             ProjectException projectException = (ProjectException) ex;
             responseWrap = ResponseWrapBuild.build(projectException.getBasicEnumIntface(), null);
-        }else {
+        }else if (ex instanceof RpcException){
+            responseWrap = ResponseWrapBuild.build(BasicEnum.DUBBO_FAIL, null);
+        } else {
         //系统异常
             responseWrap = ResponseWrapBuild.build(BasicEnum.SYSYTEM_FAIL, null);
             log.error("系统异常：{}",ExceptionsUtil.getStackTraceAsString(ex));

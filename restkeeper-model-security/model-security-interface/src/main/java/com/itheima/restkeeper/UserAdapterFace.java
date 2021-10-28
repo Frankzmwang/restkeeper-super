@@ -1,5 +1,6 @@
 package com.itheima.restkeeper;
 
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.req.ResourceVo;
 import com.itheima.restkeeper.req.RoleVo;
 import com.itheima.restkeeper.req.UserVo;
@@ -16,20 +17,20 @@ public interface UserAdapterFace {
      * @param username 登录名
      * @return
      */
-    UserVo findUserByUsernameAndEnterpriseId(String username, Long enterpriseId);
+    UserVo findUserByUsernameAndEnterpriseId(String username, Long enterpriseId)throws ProjectException;
 
     /**
      * @Description 查找用户所有角色
      * @param userId 用户Id
      * @return
      */
-    List<RoleVo> findRoleByUserId(Long userId);
+    List<RoleVo> findRoleByUserId(Long userId)throws ProjectException;
 
     /**
      * @Description 查询用户有资源
      * @param userId 用户Id
      * @return
      */
-    List<ResourceVo> findResourceByUserId(Long userId);
+    List<ResourceVo> findResourceByUserId(Long userId)throws ProjectException;
 
 }

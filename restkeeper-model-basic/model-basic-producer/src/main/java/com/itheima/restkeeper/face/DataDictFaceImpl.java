@@ -46,7 +46,7 @@ public class DataDictFaceImpl implements DataDictFace {
     RedissonClient redissonClient;
 
     @Override
-    public Page<DataDictVo> findDataDictVoPage(DataDictVo dataDictVo,int pageNum, int pageSize) {
+    public Page<DataDictVo> findDataDictVoPage(DataDictVo dataDictVo,int pageNum, int pageSize)  throws ProjectException{
         try {
             Page<DataDict> page = dataDictService.findDataDictVoPage(dataDictVo, pageNum, pageSize);
             Page<DataDictVo> pageVo = new Page<>();
@@ -63,7 +63,7 @@ public class DataDictFaceImpl implements DataDictFace {
     }
 
     @Override
-    public DataDictVo saveDataDict(DataDictVo dataDictVo) {
+    public DataDictVo saveDataDict(DataDictVo dataDictVo) throws ProjectException{
         String dataKey = dataDictVo.getDataKey();
         //添加锁
         RLock lock = redissonClient.getLock(DictCacheConstant.LOCK_PREFIX + dataKey);
@@ -91,7 +91,7 @@ public class DataDictFaceImpl implements DataDictFace {
     }
 
     @Override
-    public Boolean updateDataDict(DataDictVo dataDictVo) {
+    public Boolean updateDataDict(DataDictVo dataDictVo) throws ProjectException{
         Boolean flag = false;
         String dataKey = dataDictVo.getDataKey();
         //添加锁
@@ -119,7 +119,7 @@ public class DataDictFaceImpl implements DataDictFace {
     }
 
     @Override
-    public DataDictVo findDataDictVoById(String dataDictId) {
+    public DataDictVo findDataDictVoById(String dataDictId) throws ProjectException{
         try {
             return BeanConv.toBean(dataDictService.getById(dataDictId), DataDictVo.class);
         }catch (Exception e){
@@ -129,7 +129,7 @@ public class DataDictFaceImpl implements DataDictFace {
     }
 
     @Override
-    public Boolean updateByDataKey(List<String> dataKeys,String enableFlag) {
+    public Boolean updateByDataKey(List<String> dataKeys,String enableFlag) throws ProjectException{
         try {
             return dataDictService.updateByDataKey(dataKeys,enableFlag);
         }catch (Exception e){
@@ -139,12 +139,12 @@ public class DataDictFaceImpl implements DataDictFace {
     }
 
     @Override
-    public Boolean checkByDataKey(String dataKey) {
+    public Boolean checkByDataKey(String dataKey) throws ProjectException{
         return dataDictService.checkByDataKey(dataKey);
     }
 
     @Override
-    public String findValueByDataKey(String dataKey) {
+    public String findValueByDataKey(String dataKey) throws ProjectException{
         try {
             return dataDictService.findValueByDataKey(dataKey);
         }catch (Exception e){
@@ -154,7 +154,7 @@ public class DataDictFaceImpl implements DataDictFace {
     }
 
     @Override
-    public List<DataDictVo> findValueByDataKeys(List<String> dataKeys) {
+    public List<DataDictVo> findValueByDataKeys(List<String> dataKeys) throws ProjectException{
         try {
             return BeanConv.toBeanList(dataDictService.findValueByDataKeys(dataKeys),DataDictVo.class);
         }catch (Exception e){
@@ -164,7 +164,7 @@ public class DataDictFaceImpl implements DataDictFace {
     }
 
     @Override
-    public List<DataDictVo> findDataDictVoByParentKey(String parentKey) {
+    public List<DataDictVo> findDataDictVoByParentKey(String parentKey) throws ProjectException{
         try {
             return BeanConv.toBeanList(dataDictService.findDataDictByParentKey(parentKey),DataDictVo.class);
         }catch (Exception e){

@@ -36,7 +36,9 @@ public class ResourceFaceImpl implements ResourceFace {
     IResourceService resourceService;
 
     @Override
-    public Page<ResourceVo> findResourceVoPage(ResourceVo resourceVo, int pageNum, int pageSize) {
+    public Page<ResourceVo> findResourceVoPage(ResourceVo resourceVo,
+                                               int pageNum,
+                                               int pageSize) throws ProjectException{
         try {
             Page<Resource> page = resourceService.findResourceVoPage(resourceVo, pageNum, pageSize);
             Page<ResourceVo> pageVo = new Page<>();
@@ -53,7 +55,7 @@ public class ResourceFaceImpl implements ResourceFace {
     }
 
     @Override
-    public TreeVo initResourceTreeVo(String[] checkedIds) {
+    public TreeVo initResourceTreeVo(String[] checkedIds)throws ProjectException {
         try {
             return resourceService.initResourceTreeVo(checkedIds);
         } catch (Exception e) {
@@ -63,7 +65,7 @@ public class ResourceFaceImpl implements ResourceFace {
     }
 
     @Override
-    public ResourceVo createResource(ResourceVo resourceVo) {
+    public ResourceVo createResource(ResourceVo resourceVo)throws ProjectException {
         try {
             return BeanConv.toBean(resourceService.createResource(resourceVo),ResourceVo.class);
         } catch (Exception e) {
@@ -74,7 +76,7 @@ public class ResourceFaceImpl implements ResourceFace {
     }
 
     @Override
-    public Boolean updateResource(ResourceVo resourceVo) {
+    public Boolean updateResource(ResourceVo resourceVo)throws ProjectException {
         try {
             return resourceService.updateResource(resourceVo);
         } catch (Exception e) {
@@ -84,7 +86,7 @@ public class ResourceFaceImpl implements ResourceFace {
     }
 
     @Override
-    public Boolean deleteResource(String[] checkedIds) {
+    public Boolean deleteResource(String[] checkedIds) throws ProjectException{
         try {
             return resourceService.deleteResource(checkedIds);
         } catch (Exception e) {

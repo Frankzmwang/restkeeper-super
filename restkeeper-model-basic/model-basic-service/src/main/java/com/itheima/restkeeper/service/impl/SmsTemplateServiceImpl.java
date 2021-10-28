@@ -36,12 +36,16 @@ public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTe
         //构建查询条件
         QueryWrapper<SmsTemplate> queryWrapper = new QueryWrapper<>();
         //按模板名称查询
-        if (!EmptyUtil.isNullOrEmpty(smsTemplateVo.getSignName())) {
-            queryWrapper.lambda().likeRight(SmsTemplate::getSignName,smsTemplateVo.getSignName());
+        if (!EmptyUtil.isNullOrEmpty(smsTemplateVo.getTemplateName())) {
+            queryWrapper.lambda().likeRight(SmsTemplate::getTemplateName,smsTemplateVo.getTemplateName());
+        }
+        //按模板名称查询
+        if (!EmptyUtil.isNullOrEmpty(smsTemplateVo.getChannelLabel())) {
+            queryWrapper.lambda().eq(SmsTemplate::getChannelLabel,smsTemplateVo.getChannelLabel());
         }
         //按模板发送状态查询
         if (!EmptyUtil.isNullOrEmpty(smsTemplateVo.getAcceptStatus())) {
-            queryWrapper.lambda().likeRight(SmsTemplate::getAcceptStatus,smsTemplateVo.getAcceptStatus());
+            queryWrapper.lambda().eq(SmsTemplate::getAcceptStatus,smsTemplateVo.getAcceptStatus());
         }
         //按模板审核状态查询
         if (!EmptyUtil.isNullOrEmpty(smsTemplateVo.getAuditStatus())) {

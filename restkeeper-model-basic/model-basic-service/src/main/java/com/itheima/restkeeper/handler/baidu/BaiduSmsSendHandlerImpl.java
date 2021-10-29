@@ -111,7 +111,7 @@ public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
                 .signName(smsSign.getSignName())
                 .templateCode(smsTemplate.getTemplateCode())
                 .templateId(smsTemplate.getId())
-                .templateType(smsTemplate.getTemplateType())
+                .templateType(smsTemplate.getSmsType())
                 .templateParams(JSONObject.toJSONString(templateParam))
                 .build();
             sendRecords.add(smsSendRecord);

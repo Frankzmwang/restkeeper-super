@@ -55,7 +55,7 @@ public class AliyunSmsSignHandlerImpl implements SmsSignHandler {
                 if (SignStatus==1){
                     smsSignVo.setAuditStatus(SuperConstant.STATUS_PASS_AUDIT);
                     smsSignVo.setAuditMsg("审核通过");
-                    //审核失败
+                //审核失败
                 }else if (SignStatus==2){
                     smsSignVo.setAuditStatus(SuperConstant.STATUS_FAIL_AUDIT);
                     smsSignVo.setAuditMsg(querySmsSignResponse.getBody().getReason());

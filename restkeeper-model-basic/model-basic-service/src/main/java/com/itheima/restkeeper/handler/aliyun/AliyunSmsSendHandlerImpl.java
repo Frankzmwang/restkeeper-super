@@ -118,7 +118,7 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
             .signName(smsSign.getSignName())
             .templateCode(smsTemplate.getTemplateCode())
             .templateId(smsTemplate.getId())
-            .templateType(smsTemplate.getTemplateType())
+            .templateType(smsTemplate.getSmsType())
             .serialNo(bizId)
             .templateParams(JSONObject.toJSONString(templateParam))
             .build();

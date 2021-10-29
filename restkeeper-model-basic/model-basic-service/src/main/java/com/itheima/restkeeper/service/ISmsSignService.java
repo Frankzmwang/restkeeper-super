@@ -36,10 +36,18 @@ public interface ISmsSignService extends IService<SmsSign> {
     SmsSign findSmsSignBySignNameAndChannelLabel(String signName, String channelLabel);
 
     /***
-     * @description 按签名Code和渠道查询签名信息
+     * @description 按签名No和渠道查询签名信息
      * @param signNo
      * @param channelLabel
      * @return
      */
     SmsSign findSmsSignBySignNoAndChannelLabel(String signNo, String channelLabel);
+
+    /***
+     * @description 按签名Code和渠道查询签名信息
+     * @param signCode
+     * @param channelLabel
+     * @return
+     */
+    SmsSign findSmsSignBySignCodeAndChannelLabel(String signCode, String channelLabel);
 }

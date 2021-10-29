@@ -76,4 +76,13 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
                 .eq(SmsSign::getAuditStatus,SuperConstant.YES);
         return getOne(queryWrapper);
     }
+
+    @Override
+    public SmsSign findSmsSignBySignCodeAndChannelLabel(String signCode, String channelLabel) {
+        QueryWrapper<SmsSign> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(SmsSign::getSignCode, signCode)
+                .eq(SmsSign::getChannelLabel, channelLabel)
+                .eq(SmsSign::getAuditStatus,SuperConstant.YES);
+        return getOne(queryWrapper);
+    }
 }

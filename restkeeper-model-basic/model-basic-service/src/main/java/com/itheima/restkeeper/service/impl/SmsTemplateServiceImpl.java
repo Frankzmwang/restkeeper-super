@@ -60,4 +60,12 @@ public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTe
         //执行分页查询
         return page(page, queryWrapper);
     }
+
+    @Override
+    public SmsTemplate findSmsTemplateByTemplateNameAndChannelLabel(String templateName, String channelLabel) {
+        QueryWrapper<SmsTemplate> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(SmsTemplate::getTemplateName,templateName)
+                .eq(SmsTemplate::getChannelLabel, channelLabel);
+        return getOne(queryWrapper);
+    }
 }

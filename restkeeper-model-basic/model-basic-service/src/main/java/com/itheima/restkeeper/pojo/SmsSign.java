@@ -57,7 +57,7 @@ public class SmsSign extends BasicPojo {
     @ApiModelProperty(value = "是否国际/港澳台短信")
     private String international;
 
-    @ApiModelProperty(value = "签名用途：	0：自用。	1：他用。")
+    @ApiModelProperty(value = "签名用途：0：自用。1：他用。")
     private String signPurpose;
 
     @ApiModelProperty(value = "			短信申请说明")
@@ -75,7 +75,7 @@ public class SmsSign extends BasicPojo {
     @ApiModelProperty(value = "审核信息")
     private String auditMsg;
 
-    @ApiModelProperty(value = "三方签名code:发送短信可能用到")
+    @ApiModelProperty(value = "应用签名编号：多签名编号相同则认为是一个签名多个通道公用")
     private String signNo;
 
 

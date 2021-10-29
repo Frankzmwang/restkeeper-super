@@ -20,11 +20,11 @@ public class SmsTemplateVo extends BasicVo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public SmsTemplateVo(Long id,String channelLabel,String templateName,String templateType,String templateNo,String templateCode,String content,String international,String remark,String acceptStatus,String acceptMsg,String auditStatus,String auditMsg){
+    public SmsTemplateVo(Long id,String channelLabel,String templateName,String smsType,String templateNo,String templateCode,String content,String international,String remark,String acceptStatus,String acceptMsg,String auditStatus,String auditMsg){
         super(id);
         this.channelLabel=channelLabel;
         this.templateName=templateName;
-        this.templateType=templateType;
+        this.smsType=smsType;
         this.templateNo=templateNo;
         this.templateCode=templateCode;
         this.content=content;
@@ -43,7 +43,7 @@ public class SmsTemplateVo extends BasicVo {
     private String templateName;
 
     @ApiModelProperty(value = "短信类型： 0、通知 1、营销")
-    private String templateType;
+    private String smsType;
 
     @ApiModelProperty(value = "应用模板编号：多通道编号相同则认为是一个模板多个通道公用")
     private String templateNo;
@@ -57,7 +57,7 @@ public class SmsTemplateVo extends BasicVo {
     @ApiModelProperty(value = "是否国际/港澳台短信：	0：表示国内短信。	1：表示国际/港澳台短信。")
     private String international;
 
-    @ApiModelProperty(value = "			短信申请说明")
+    @ApiModelProperty(value = "短信申请说明")
     private String remark;
 
     @ApiModelProperty(value = "是否受理成功")

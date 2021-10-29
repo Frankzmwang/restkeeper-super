@@ -28,4 +28,11 @@ public interface ISmsTemplateService extends IService<SmsTemplate> {
      */
     Page<SmsTemplate> findSmsTemplateVoPage(SmsTemplateVo smsTemplateVo, int pageNum, int pageSize);
 
+    /***
+     * @description 按照模板名称和通道查询模板
+     * @param templateName 模板名称
+     * @param channelLabel 通道表示
+     * @return
+     */
+    SmsTemplate findSmsTemplateByTemplateNameAndChannelLabel(String templateName, String channelLabel);
 }

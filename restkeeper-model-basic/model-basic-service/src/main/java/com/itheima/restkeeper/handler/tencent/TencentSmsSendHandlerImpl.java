@@ -126,7 +126,7 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
                 .signName(smsSign.getSignName())
                 .templateCode(smsTemplate.getTemplateCode())
                 .templateId(smsTemplate.getId())
-                .templateType(smsTemplate.getTemplateType())
+                .templateType(smsTemplate.getSmsType())
                 .serialNo(sendStatusHandler.getSerialNo())
                 .templateParams(JSONObject.toJSONString(templateParam))
                 .build();

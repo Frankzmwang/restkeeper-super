@@ -46,7 +46,7 @@ public class TencentTemplateHandlerImpl implements SmsTemplateHandler {
         //模板内容
         request.setTemplateContent(smsTemplateVo.getContent());
         //短信类型，0表示普通短信, 1表示营销短信。
-        request.setSmsType(Long.valueOf(smsTemplateVo.getTemplateType()));
+        request.setSmsType(Long.valueOf(smsTemplateVo.getSmsType()));
         //是否国际/港澳台短信：
         //0：表示国内短信。
         //1：表示国际/港澳台短信。
@@ -116,7 +116,7 @@ public class TencentTemplateHandlerImpl implements SmsTemplateHandler {
         //模板内容
         request.setTemplateContent(smsTemplateVo.getContent());
         //短信类型，0表示普通短信, 1表示营销短信。
-        request.setSmsType(Long.valueOf(smsTemplateVo.getTemplateType()));
+        request.setSmsType(Long.valueOf(smsTemplateVo.getSmsType()));
         //是否国际/港澳台短信：
         //0：表示国内短信。
         //1：表示国际/港澳台短信。

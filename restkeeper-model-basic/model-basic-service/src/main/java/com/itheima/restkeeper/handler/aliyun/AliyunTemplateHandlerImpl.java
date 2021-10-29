@@ -5,7 +5,6 @@ import com.aliyun.dysmsapi20170525.models.*;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.SmsSignEnum;
 import com.itheima.restkeeper.enums.SmsTemplateEnum;
-import com.itheima.restkeeper.enums.SmsTemplateEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.SmsTemplateHandler;
 import com.itheima.restkeeper.handler.aliyun.config.AliyunSmsConfig;
@@ -13,10 +12,10 @@ import com.itheima.restkeeper.pojo.SmsTemplate;
 import com.itheima.restkeeper.req.SmsTemplateVo;
 import com.itheima.restkeeper.service.ISmsTemplateService;
 import com.itheima.restkeeper.utils.BeanConv;
+import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,13 +34,47 @@ public class AliyunTemplateHandlerImpl implements SmsTemplateHandler {
 
     @Override
     public SmsTemplate addSmsTemplate(SmsTemplateVo smsTemplateVo) {
+        //查询是否添加过模板
+        SmsTemplate smsTemplateHandler = smsTemplateService.findSmsTemplateByTemplateNameAndChannelLabel(
+                smsTemplateVo.getTemplateName(),
+                smsTemplateVo.getChannelLabel());
+        if (!EmptyUtil.isNullOrEmpty(smsTemplateHandler)){
+            smsTemplateVo = BeanConv.toBean(smsTemplateHandler,SmsTemplateVo.class);
+            QuerySmsTemplateResponse response = query(smsTemplateVo);
+            //受理状态
+            String code = response.getBody().getCode();
+            String message = response.getBody().getMessage();
+            if ("OK".equals(code)){
+                Integer templateStatus =response.getBody().getTemplateStatus();
+                smsTemplateVo.setTemplateCode(response.getBody().getTemplateCode());
+                //审核通过
+                if (templateStatus == 1) {
+                    smsTemplateVo.setAuditStatus(SuperConstant.STATUS_PASS_AUDIT);
+                    smsTemplateVo.setAuditMsg("审核通过");
+                //审核失败
+                } else if (templateStatus == 2) {
+                    smsTemplateVo.setAuditStatus(SuperConstant.STATUS_FAIL_AUDIT);
+                    smsTemplateVo.setAuditMsg(response.getBody().getReason());
+                } else {
+                    log.info("阿里云模板：{},审核中", response.getBody().getTemplateCode());
+                    smsTemplateVo.setAuditStatus(SuperConstant.STATUS_IN_AUDIT);
+                    smsTemplateVo.setAuditMsg(response.getBody().getReason());
+                }
+                SmsTemplate smsTemplate = BeanConv.toBean(smsTemplateVo, SmsTemplate.class);
+                boolean flag = smsTemplateService.saveOrUpdate(smsTemplate);
+                if (flag){
+                    return smsTemplate;
+                }
+                throw new ProjectException(SmsTemplateEnum.CREATE_FAIL);
+            }
+        }
         AddSmsTemplateRequest request = new AddSmsTemplateRequest();
         //短信类型。取值：
         //0：验证码。
         //1：短信通知。
         //2：推广短信。
         //3：国际/港澳台消息。
-        request.setTemplateType(Integer.valueOf(smsTemplateVo.getTemplateType()));
+        request.setTemplateType(Integer.valueOf(smsTemplateVo.getSmsType()));
         request.setTemplateName(smsTemplateVo.getTemplateName());
         request.setTemplateContent(smsTemplateVo.getContent());
         request.setRemark(smsTemplateVo.getRemark());
@@ -106,7 +139,7 @@ public class AliyunTemplateHandlerImpl implements SmsTemplateHandler {
         //1：短信通知。
         //2：推广短信。
         //3：国际/港澳台消息。
-        request.setTemplateType(Integer.valueOf(smsTemplateVo.getTemplateType()));
+        request.setTemplateType(Integer.valueOf(smsTemplateVo.getSmsType()));
         request.setTemplateName(smsTemplateVo.getTemplateName());
         request.setTemplateCode(smsTemplateVo.getTemplateCode());
         request.setTemplateContent(smsTemplateVo.getContent());
@@ -144,8 +177,7 @@ public class AliyunTemplateHandlerImpl implements SmsTemplateHandler {
         return smsTemplateService.updateById(BeanConv.toBean(smsTemplateVo, SmsTemplate.class));
     }
 
-    @Override
-    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) {
+    private QuerySmsTemplateResponse query(SmsTemplateVo smsTemplateVo) {
         QuerySmsTemplateRequest request = new QuerySmsTemplateRequest();
         request.setTemplateCode(smsTemplateVo.getTemplateCode());
         Client client =aliyunSmsConfig.queryClient();
@@ -156,6 +188,12 @@ public class AliyunTemplateHandlerImpl implements SmsTemplateHandler {
             log.error("请求查询阿里云模板出错：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(SmsSignEnum.SELECT_FAIL);
         }
+        return response;
+    }
+
+    @Override
+    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) {
+        QuerySmsTemplateResponse response =query(smsTemplateVo);
         //受理状态
         String code = response.getBody().getCode();
         String message = response.getBody().getMessage();

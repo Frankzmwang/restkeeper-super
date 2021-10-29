@@ -35,7 +35,7 @@ public class BaiduTemplateHandlerImpl implements SmsTemplateHandler {
             //模板内容
             .withContent(smsTemplateVo.getContent())
             //短信类型
-            .withSmsType(smsTemplateVo.getTemplateType())
+            .withSmsType(smsTemplateVo.getSmsType())
             //适用国家类型
             //DOMESTIC：国内
             //INTERNATIONAL：国际/港澳台
@@ -87,7 +87,7 @@ public class BaiduTemplateHandlerImpl implements SmsTemplateHandler {
             //模板内容
             .withContent(smsTemplateVo.getContent())
             //短信类型
-            .withSmsType(smsTemplateVo.getTemplateType())
+            .withSmsType(smsTemplateVo.getSmsType())
             //适用国家类型
             //DOMESTIC：国内
             //INTERNATIONAL：国际/港澳台

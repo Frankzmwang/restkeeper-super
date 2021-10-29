@@ -86,6 +86,7 @@ public class SmsSignVo extends BasicVo {
 
     @ApiModelProperty(value = "三方签名code:发送短信可能用到")
     private String signNo;
+
     @ApiModelProperty(value = "选中节点")
     private String[] checkedIds;
 

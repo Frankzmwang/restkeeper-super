@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.handler.tencent;
 
+import com.alibaba.fastjson.JSONObject;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.SmsSignEnum;
 import com.itheima.restkeeper.enums.SmsTemplateEnum;
@@ -39,6 +40,41 @@ public class TencentTemplateHandlerImpl implements SmsTemplateHandler {
 
     @Override
     public SmsTemplate addSmsTemplate(SmsTemplateVo smsTemplateVo) {
+        //查询是否添加过模板
+        SmsTemplate smsTemplateHandler = smsTemplateService.findSmsTemplateByTemplateNameAndChannelLabel(
+                smsTemplateVo.getTemplateName(),
+                smsTemplateVo.getChannelLabel());
+        if (!EmptyUtil.isNullOrEmpty(smsTemplateHandler)){
+            smsTemplateVo = BeanConv.toBean(smsTemplateHandler,SmsTemplateVo.class);
+            DescribeSmsTemplateListResponse response = query(smsTemplateVo);
+            //处理结果
+            DescribeTemplateListStatus[] describeTemplateStatusSet = response.getDescribeTemplateStatusSet();
+            response.getDescribeTemplateStatusSet();
+            if (!EmptyUtil.isNullOrEmpty(describeTemplateStatusSet)){
+                DescribeTemplateListStatus describeTemplateListStatus = describeTemplateStatusSet[0];
+                Long statusCode = describeTemplateListStatus.getStatusCode();
+                //审核通过
+                if (statusCode == 0) {
+                    smsTemplateVo.setAuditStatus(SuperConstant.STATUS_PASS_AUDIT);
+                    smsTemplateVo.setAuditMsg("审核通过");
+                //审核失败
+                } else if (statusCode == -1) {
+                    smsTemplateVo.setAuditStatus(SuperConstant.STATUS_FAIL_AUDIT);
+                    smsTemplateVo.setAuditMsg(describeTemplateListStatus.getReviewReply());
+                } else {
+                    log.info("腾讯云模板：{},审核中", describeTemplateListStatus.getTemplateId());
+                    smsTemplateVo.setAuditStatus(SuperConstant.STATUS_IN_AUDIT);
+                    smsTemplateVo.setAuditMsg(describeTemplateListStatus.getReviewReply());
+                }
+                SmsTemplate smsTemplate = BeanConv.toBean(smsTemplateVo, SmsTemplate.class);
+                smsTemplate.setOtherConfig(JSONObject.toJSONString(smsTemplateVo.getOtherConfigs()));
+                boolean flag = smsTemplateService.saveOrUpdate(smsTemplate);
+                if (flag){
+                    return smsTemplate;
+                }
+                throw new ProjectException(SmsTemplateEnum.CREATE_FAIL);
+            }
+        }
         // 实例化一个请求对象,每个接口都会对应一个request对象
         AddSmsTemplateRequest request = new AddSmsTemplateRequest();
         //模板名称
@@ -151,17 +187,19 @@ public class TencentTemplateHandlerImpl implements SmsTemplateHandler {
             smsTemplateVo.setTemplateCode(null);
         }
         //本地持久化
-        return smsTemplateService.updateById(BeanConv.toBean(smsTemplateVo, SmsTemplate.class));
+        SmsTemplate smsTemplate = BeanConv.toBean(smsTemplateVo, SmsTemplate.class);
+        smsTemplate.setOtherConfig(JSONObject.toJSONString(smsTemplateVo.getOtherConfigs()));
+        return smsTemplateService.updateById(smsTemplate);
     }
 
-    @Override
-    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) {
+    private DescribeSmsTemplateListResponse query(SmsTemplateVo smsTemplateVo) {
         // 实例化一个请求对象,每个接口都会对应一个request对象
         DescribeSmsTemplateListRequest request = new DescribeSmsTemplateListRequest();
         //模板 ID 数组。 注：默认数组最大长度100。
         List<Long> templateCodes = new ArrayList<>();
         templateCodes.add(Long.valueOf(smsTemplateVo.getTemplateCode()));
         request.setTemplateIdSet(templateCodes.stream().toArray(Long[]::new));
+        request.setInternational(Long.valueOf(smsTemplateVo.getInternational()));
         // 返回的resp是一个DescribeSmsTemplateListResponse的实例，与请求对象对应
         SmsClient smsClient = tencentSmsConfig.queryClient();
         DescribeSmsTemplateListResponse response = null;
@@ -171,6 +209,12 @@ public class TencentTemplateHandlerImpl implements SmsTemplateHandler {
             log.error("请求查询腾讯云模板出错：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(SmsSignEnum.SELECT_FAIL);
         }
+        return response;
+    }
+
+    @Override
+    public Boolean querySmsTemplate(SmsTemplateVo smsTemplateVo) {
+        DescribeSmsTemplateListResponse response = query(smsTemplateVo);
         //处理结果
         DescribeTemplateListStatus[] describeTemplateStatusSet = response.getDescribeTemplateStatusSet();
         response.getDescribeTemplateStatusSet();
@@ -188,11 +232,11 @@ public class TencentTemplateHandlerImpl implements SmsTemplateHandler {
                 smsTemplateVo.setAuditMsg(describeTemplateListStatus.getReviewReply());
                 return smsTemplateService.updateById(BeanConv.toBean(smsTemplateVo, SmsTemplate.class));
             } else {
-                log.info("阿里云模板：{},审核中", describeTemplateListStatus.getTemplateId());
+                log.info("腾讯云模板：{},审核中", describeTemplateListStatus.getTemplateId());
                 return true;
             }
         }else {
-            log.warn("受理查询阿里云签名出错");
+            log.warn("受理查询腾讯云签名出错");
             throw new ProjectException(SmsSignEnum.SELECT_FAIL);
         }
     }

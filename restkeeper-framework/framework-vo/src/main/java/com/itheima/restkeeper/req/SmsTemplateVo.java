@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @Description：模板表
  */
@@ -20,7 +22,7 @@ public class SmsTemplateVo extends BasicVo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public SmsTemplateVo(Long id,String channelLabel,String templateName,String smsType,String templateNo,String templateCode,String content,String international,String remark,String acceptStatus,String acceptMsg,String auditStatus,String auditMsg){
+    public SmsTemplateVo(Long id,String channelLabel,String templateName,String smsType,String templateNo,String templateCode,String content,String otherConfig,String international,String remark,String acceptStatus,String acceptMsg,String auditStatus,String auditMsg){
         super(id);
         this.channelLabel=channelLabel;
         this.templateName=templateName;
@@ -28,6 +30,7 @@ public class SmsTemplateVo extends BasicVo {
         this.templateNo=templateNo;
         this.templateCode=templateCode;
         this.content=content;
+        this.otherConfig=otherConfig;
         this.international=international;
         this.remark=remark;
         this.acceptStatus=acceptStatus;
@@ -42,7 +45,7 @@ public class SmsTemplateVo extends BasicVo {
     @ApiModelProperty(value = "魔板名称")
     private String templateName;
 
-    @ApiModelProperty(value = "短信类型： 0、通知 1、营销")
+    @ApiModelProperty(value = "短信类型")
     private String smsType;
 
     @ApiModelProperty(value = "应用模板编号：多通道编号相同则认为是一个模板多个通道公用")
@@ -54,7 +57,10 @@ public class SmsTemplateVo extends BasicVo {
     @ApiModelProperty(value = "模板内容")
     private String content;
 
-    @ApiModelProperty(value = "是否国际/港澳台短信：	0：表示国内短信。	1：表示国际/港澳台短信。")
+    @ApiModelProperty(value = "变量配置")
+    private String otherConfig;
+
+    @ApiModelProperty(value = "是否国际/港澳台短信")
     private String international;
 
     @ApiModelProperty(value = "短信申请说明")
@@ -74,5 +80,8 @@ public class SmsTemplateVo extends BasicVo {
 
     @ApiModelProperty(value = "选中节点")
     private String[] checkedIds;
+
+    @ApiModelProperty(value = "变量配置",dataType = "OtherConfigVo")
+    private List<OtherConfigVo> otherConfigs;
 
 }

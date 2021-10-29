@@ -22,7 +22,7 @@ public class SmsTemplate extends BasicPojo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public SmsTemplate(Long id,String channelLabel,String templateName,String smsType,String templateNo,String templateCode,String content,String international,String remark,String acceptStatus,String acceptMsg,String auditStatus,String auditMsg){
+    public SmsTemplate(Long id,String channelLabel,String templateName,String smsType,String templateNo,String templateCode,String content,String otherConfig,String international,String remark,String acceptStatus,String acceptMsg,String auditStatus,String auditMsg){
         super(id);
         this.channelLabel=channelLabel;
         this.templateName=templateName;
@@ -30,6 +30,7 @@ public class SmsTemplate extends BasicPojo {
         this.templateNo=templateNo;
         this.templateCode=templateCode;
         this.content=content;
+        this.otherConfig=otherConfig;
         this.international=international;
         this.remark=remark;
         this.acceptStatus=acceptStatus;
@@ -56,10 +57,13 @@ public class SmsTemplate extends BasicPojo {
     @ApiModelProperty(value = "模板内容")
     private String content;
 
+    @ApiModelProperty(value = "变量配置")
+    private String otherConfig;
+
     @ApiModelProperty(value = "是否国际/港澳台短信")
     private String international;
 
-    @ApiModelProperty(value = "			短信申请说明")
+    @ApiModelProperty(value = "短信申请说明")
     private String remark;
 
     @ApiModelProperty(value = "是否受理成功")

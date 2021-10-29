@@ -1,20 +1,24 @@
 package com.itheima.restkeeper.face;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.SmsTemplateFace;
 import com.itheima.restkeeper.adapter.SmsTemplateAdapter;
 import com.itheima.restkeeper.enums.SmsTemplateEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.SmsTemplate;
+import com.itheima.restkeeper.req.OtherConfigVo;
 import com.itheima.restkeeper.req.SmsTemplateVo;
 import com.itheima.restkeeper.service.ISmsTemplateService;
 import com.itheima.restkeeper.utils.BeanConv;
+import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,9 +51,19 @@ public class SmsTemplateFaceImpl implements SmsTemplateFace {
             Page<SmsTemplateVo> pageVo = new Page<>();
             BeanConv.toBean(page,pageVo);
             //转换List<SmsTemplateVo>为 List<SmsTemplateVo>
-            List<SmsTemplate> smsTemplateVoList = page.getRecords();
-            List<SmsTemplateVo> smsTemplateVoVoList = BeanConv.toBeanList(smsTemplateVoList,SmsTemplateVo.class);
-            pageVo.setRecords(smsTemplateVoVoList);
+            List<SmsTemplate> smsTemplateList = page.getRecords();
+            List<SmsTemplateVo> smsTemplateVoList = new ArrayList<>();
+            if (!EmptyUtil.isNullOrEmpty(smsTemplateList)){
+                smsTemplateList.forEach(n->{
+                    SmsTemplateVo smsTemplateVoHandler = BeanConv.toBean(n, SmsTemplateVo.class);
+                    if (!EmptyUtil.isNullOrEmpty(n.getOtherConfig())){
+                        List <OtherConfigVo> list = JSONArray.parseArray(n.getOtherConfig(), OtherConfigVo.class);
+                        smsTemplateVoHandler.setOtherConfigs(list);
+                    }
+                    smsTemplateVoList.add(smsTemplateVoHandler);
+                });
+            }
+            pageVo.setRecords(smsTemplateVoList);
             //返回结果
             return pageVo;
         } catch (Exception e) {

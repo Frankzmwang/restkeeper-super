@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.handler.aliyun;
 
+import com.alibaba.fastjson.JSONObject;
 import com.aliyun.dysmsapi20170525.Client;
 import com.aliyun.dysmsapi20170525.models.*;
 import com.itheima.restkeeper.constant.SuperConstant;
@@ -106,6 +107,7 @@ public class AliyunTemplateHandlerImpl implements SmsTemplateHandler {
             smsTemplateVo.setAcceptMsg(message);
         }
         SmsTemplate smsTemplate = BeanConv.toBean(smsTemplateVo, SmsTemplate.class);
+        smsTemplate.setOtherConfig(JSONObject.toJSONString(smsTemplateVo.getOtherConfigs()));
         boolean flag = smsTemplateService.save(smsTemplate);
         if (flag){
             return smsTemplate;
@@ -174,7 +176,10 @@ public class AliyunTemplateHandlerImpl implements SmsTemplateHandler {
             smsTemplateVo.setAuditMsg(null);
             smsTemplateVo.setTemplateCode(null);
         }
-        return smsTemplateService.updateById(BeanConv.toBean(smsTemplateVo, SmsTemplate.class));
+        //本地持久化
+        SmsTemplate smsTemplate = BeanConv.toBean(smsTemplateVo, SmsTemplate.class);
+        smsTemplate.setOtherConfig(JSONObject.toJSONString(smsTemplateVo.getOtherConfigs()));
+        return smsTemplateService.updateById(smsTemplate);
     }
 
     private QuerySmsTemplateResponse query(SmsTemplateVo smsTemplateVo) {

@@ -59,7 +59,7 @@ public class SmsChannel extends BasicPojo {
     @ApiModelProperty(value = "优先级")
     private String level;
 
-    @ApiModelProperty(value = "			短信申请说明")
+    @ApiModelProperty(value = "说明")
     private String remark;
 
 

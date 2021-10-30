@@ -16,6 +16,29 @@ spring:
     port: 6379
     password: pass
   cloud:
+    stream:
+      rabbit:
+        bindings:
+          sms-output:
+            producer:
+              routing-key-expression: headers.type  # 生产者配置RabbitMq的动态路由键
+              exchange-type: direct  # 指定交换机类型
+      binders: #需要绑定的rabbitmq的服务信息
+        defaultRabbit:  #定义的名称，用于bidding整合
+          type: rabbit  #消息组件类型
+          environment:  #配置rabbimq连接环境
+            spring:
+              rabbitmq:
+                host: 192.168.112.77   #rabbitmq 服务器的地址
+                port: 5672           #rabbitmq 服务器端口
+                username: admin       #rabbitmq 用户名
+                password: pass       #rabbitmq 密码
+                virtual-host: /       #虚拟路径
+      bindings:        #服务的整合处理
+        sms-output:    #这个是消息通道的名称
+          destination: sms-exchange     #exchange名称,交换模式默认是topic;把SpringCloud stream的消息输出通道绑定到RabbitMQ的sms-exchange交换器。
+          content-type: application/json      #设置消息的类型，本次为json
+          binder: defaultRabbit
     alicloud:
       access-key: LTAI4G2g6WqYBZyZMovev1pd
       secret-key: 2Q4x5TpgHRP8Eo3ehQzCJxPteBl4R4

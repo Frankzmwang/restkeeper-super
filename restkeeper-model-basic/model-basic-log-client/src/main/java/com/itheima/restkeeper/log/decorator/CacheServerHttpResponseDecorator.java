@@ -112,8 +112,8 @@ public class CacheServerHttpResponseDecorator extends ServerHttpResponseDecorato
                 .produceTime(Timestamp.valueOf(LocalDateTime.now()))
                 .sender(sender)
                 .build();
-        Message<MqMessage> message = MessageBuilder.withPayload(mqMessage).build();
-        logSource.logOutput().send(message);
-
+        Message<MqMessage> message = MessageBuilder.withPayload(mqMessage).setHeader("type", "log-key").build();
+        boolean flag = logSource.logOutput().send(message);
+        log.info("发送：{}结果：{}",mqMessage.toString(),flag);
     }
 }

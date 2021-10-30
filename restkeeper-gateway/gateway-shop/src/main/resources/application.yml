@@ -36,22 +36,29 @@ spring:
         namespace: public
         group: SEATA_GROUP
     stream:
-      binders:
-        rabbit-log:
-          type: rabbit
-          environment:
+      rabbit:
+        bindings: #绑定声明
+          log-output: #发出队列
+            producer:
+              #routingKeyExpression: headers.type  # 生产者配置RabbitMq的动态路由键
+              durable-subscription: true #是否持久化队列
+              exchangeType: direct  # 指定交换机类型
+      binders: #需要绑定的rabbitmq的服务信息
+        defaultRabbit:  #定义的名称，用于bindings整合
+          type: rabbit  #消息组件类型
+          environment:  #配置rabbimq连接环境
             spring:
               rabbitmq:
-                host: 192.168.112.77
-                port: 5672
-                username: admin
-                password: pass
-                virtual-host: /
-      bindings: # Binding 配置项，对应 BindingProperties Map
-        log-output:
-          destination: log-output-01 # 目的地。这里使用 RocketMQ Topic
-          content-type: application/json # 内容格式。这里使用 JSON
-          binder: rabbit-log
+                host: 192.168.112.77   #rabbitmq 服务器的地址
+                port: 5672           #rabbitmq 服务器端口
+                username: admin       #rabbitmq 用户名
+                password: pass       #rabbitmq 密码
+                virtual-host: /       #虚拟路径
+      bindings: #服务的整合处理
+        log-output: #这个是消息通道的名称
+          destination: log-exchange #exchange名称,交换模式默认是topic;把SpringCloud stream的消息输出通道绑定到RabbitMQ的exchange-logOutput交换器。
+          content-type: application/json #设置消息的类型，本次为json
+          binder: defaultRabbit
     gateway:
       discovery:
         locator:

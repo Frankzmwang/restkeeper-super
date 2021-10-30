@@ -1,6 +1,7 @@
 package com.itheima.restkeeper;
 
 import com.itheima.restkeeper.exception.ProjectException;
+import com.itheima.restkeeper.req.SendMessageVo;
 import com.itheima.restkeeper.req.SmsSendRecordVo;
 
 import java.util.LinkedHashMap;
@@ -14,18 +15,9 @@ public interface SmsSendFace {
 
     /***
      * @description 发送短信接口
-     * @param templateNo 应用模板编号
-     * @param sginNo 应用签名编号
-     * @param loadBalancerType 通道负载均衡策略
-     * @param mobiles 手机号
-     * @param templateParam 模板动态参数
+     * @param sendMessageVo 发送对象
      */
-    Boolean SendSms(
-            String templateNo,
-            String sginNo,
-            String loadBalancerType,
-            Set<String> mobiles,
-            LinkedHashMap<String,String> templateParam) throws ProjectException;
+    Boolean SendSms(SendMessageVo sendMessageVo) throws ProjectException;
 
     /***
      * @description 查询短信接受情况

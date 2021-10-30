@@ -2,6 +2,7 @@ package com.itheima.restkeeper.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.pojo.SmsSendRecord;
 import com.itheima.restkeeper.pojo.SmsSendRecord;
 import com.itheima.restkeeper.mapper.SmsSendRecordMapper;
@@ -70,5 +71,14 @@ public class SmsSendRecordServiceImpl extends ServiceImpl<SmsSendRecordMapper, S
             idsLong.add(Long.valueOf(n));
         });
         return removeByIds(idsLong);
+    }
+
+    @Override
+    public List<SmsSendRecord> CallBackSmsSendRecords() {
+        QueryWrapper<SmsSendRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(SmsSendRecord::getAcceptStatus, SuperConstant.YES)
+                .eq(SmsSendRecord::getSendStatus,SuperConstant.SENDING)
+                .last("limit 0 , 20");;
+        return list(queryWrapper);
     }
 }

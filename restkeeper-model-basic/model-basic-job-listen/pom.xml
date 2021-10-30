@@ -16,6 +16,11 @@
 
         <dependency>
             <groupId>com.itheima.restkeeper</groupId>
+            <artifactId>framework-xxl-job</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.itheima.restkeeper</groupId>
             <artifactId>framework-stream-rabbitmq</artifactId>
         </dependency>
 

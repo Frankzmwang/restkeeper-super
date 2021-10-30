@@ -6,6 +6,8 @@ import com.itheima.restkeeper.pojo.SmsSendRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.restkeeper.req.SmsSendRecordVo;
 
+import java.util.List;
+
 /**
  * @Description：发送记录表 服务类
  */
@@ -44,4 +46,10 @@ public interface ISmsSendRecordService extends IService<SmsSendRecord> {
      */
     Boolean deleteSmsSendRecord(String[] checkedIds);
 
+    /***
+     * @description 查询受理成功发送中状态的前20条短信
+     * @return
+     * @return: java.util.List<com.itheima.restkeeper.pojo.SmsSendRecord>
+     */
+    List<SmsSendRecord> CallBackSmsSendRecords();
 }

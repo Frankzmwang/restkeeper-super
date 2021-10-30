@@ -4,9 +4,9 @@ import com.itheima.restkeeper.source.LogSource;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 
 /**
- * @ClassName LogBinding.java
- * @Description 日志Binding支持LogSource发送
+ * @ClassName Binding.java
+ * @Description 绑定声明
  */
-@EnableBinding(LogSource.class)
-public class LogSourceBinding {
+@EnableBinding({LogSource.class})
+public class SourceBinding {
 }

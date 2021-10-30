@@ -5,6 +5,7 @@ import com.itheima.restkeeper.SmsSendFace;
 import com.itheima.restkeeper.basic.ResponseWrap;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.SmsSignEnum;
+import com.itheima.restkeeper.req.SendMessageVo;
 import com.itheima.restkeeper.req.SmsSignVo;
 import com.itheima.restkeeper.utils.ResponseWrapBuild;
 import io.swagger.annotations.Api;
@@ -42,6 +43,13 @@ public class SmsSendController {
         mobiles.add("15156403088");
         LinkedHashMap<String,String> templateParam = new LinkedHashMap<>();
         templateParam.put("code","123456");
-        return smsSendFace.SendSms(templateNo,sginNo,loadBalancerType,mobiles,templateParam);
+        SendMessageVo sendMessageVo = SendMessageVo.builder()
+                .templateNo(templateNo)
+                .sginNo(sginNo)
+                .loadBalancerType(loadBalancerType)
+                .mobiles(mobiles)
+                .templateParam(templateParam)
+                .build();
+        return smsSendFace.SendSms(sendMessageVo);
     }
 }

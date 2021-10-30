@@ -18,6 +18,7 @@ import com.itheima.restkeeper.service.ISmsSendRecordService;
 import com.itheima.restkeeper.service.ISmsSignService;
 import com.itheima.restkeeper.service.ISmsTemplateService;
 import com.itheima.restkeeper.utils.EmptyUtil;
+import com.itheima.restkeeper.utils.ExceptionsUtil;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tencentcloudapi.sms.v20210111.SmsClient;
 import com.tencentcloudapi.sms.v20210111.models.*;
@@ -27,11 +28,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * @ClassName TencentSmsSendHandlerImpl.java
- * @Description 阿里云邮件发送处理器接口
+ * @Description 腾讯云邮件发送处理器接口
  */
 @Slf4j
 @Service("tencentSmsSendHandler")
@@ -93,7 +96,7 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
         try {
             response = smsClient.SendSms(request);
         } catch (TencentCloudSDKException e) {
-            log.error("腾讯云发送短信：{}，失败",request.toString());
+            log.error("腾讯云发送短信：{}，失败:{}",request.toString(), ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(SmsSendEnum.SEND_FAIL);
         }
         SendStatus[] sendStatusSet = response.getSendStatusSet();
@@ -151,7 +154,7 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
         PullSmsSendStatusByPhoneNumberRequest request = new PullSmsSendStatusByPhoneNumberRequest();
         //拉取起始时间，UNIX 时间戳（时间：秒）。
         //注：最大可拉取当前时期前7天的数据。
-        request.setBeginTime(smsSendRecord.getCreatedTime().getTime());
+        request.setBeginTime(smsSendRecord.getCreatedTime().getTime()/1000);
         //偏移量。
         //注：目前固定设置为0。
         request.setOffset(0L);
@@ -169,14 +172,14 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
         //下发目的手机号码
         request.setPhoneNumber(smsSendRecord.getMobile());
         //拉取截止时间，UNIX 时间戳（时间：秒）。
-        request.setEndTime(new Date().getTime());
+        request.setEndTime(new Date().getTime()/1000);
         // 返回的resp是一个PullSmsSendStatusByPhoneNumberResponse的实例，与请求对象对应
         SmsClient smsClient = tencentSmsConfig.queryClient();
         PullSmsSendStatusByPhoneNumberResponse response = null;
         try {
             response = smsClient.PullSmsSendStatusByPhoneNumber(request);
         } catch (TencentCloudSDKException e) {
-            log.error("阿里云查询短信发送状态：{}，失败",request.toString());
+            log.error("腾讯云查询短信发送状态：{}，失败",request.toString());
             throw new ProjectException(SmsSendEnum.QUERY_FAIL);
         }
         PullSmsSendStatus[] pullSmsSendStatusSet = response.getPullSmsSendStatusSet();

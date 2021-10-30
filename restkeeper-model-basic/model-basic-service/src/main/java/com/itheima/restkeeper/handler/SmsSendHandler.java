@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.handler;
 
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.SmsChannel;
 import com.itheima.restkeeper.pojo.SmsSendRecord;
 import com.itheima.restkeeper.pojo.SmsSign;
@@ -28,19 +29,19 @@ public interface SmsSendHandler {
         SmsChannel smsChannel,
         SmsSign smsSign,
         Set<String> mobiles,
-        LinkedHashMap<String, String> templateParam) throws Exception;
+        LinkedHashMap<String, String> templateParam) throws ProjectException;
 
     /***
      * @description 查询短信接受情况
      * @param smsSendRecord 发送记录
      * @return
      */
-    Boolean querySendSms(SmsSendRecord smsSendRecord) throws Exception;
+    Boolean querySendSms(SmsSendRecord smsSendRecord) throws ProjectException;
 
     /***
      * @description 重试发送
      * @param smsSendRecord
      * @return
      */
-    Boolean retrySendSms(SmsSendRecord smsSendRecord) throws Exception;
+    Boolean retrySendSms(SmsSendRecord smsSendRecord) throws ProjectException;
 }

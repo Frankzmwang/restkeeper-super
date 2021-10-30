@@ -1,10 +1,13 @@
 package com.itheima.restkeeper.adapter.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.itheima.restkeeper.adapter.SmsSendAdapter;
 import com.itheima.restkeeper.balancer.SendLoadBalancer;
 import com.itheima.restkeeper.constant.SuperConstant;
+import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.SmsSendHandler;
 import com.itheima.restkeeper.pojo.*;
+import com.itheima.restkeeper.req.OtherConfigVo;
 import com.itheima.restkeeper.service.ISmsBlacklistService;
 import com.itheima.restkeeper.service.ISmsChannelService;
 import com.itheima.restkeeper.service.ISmsSignService;
@@ -62,7 +65,7 @@ public class SmsSendAdapterImpl implements SmsSendAdapter {
         String sginNo,
         String loadBalancerType,
         Set<String> mobiles,
-        LinkedHashMap<String, String> templateParam) throws Exception {
+        LinkedHashMap<String, String> templateParam) throws ProjectException {
         //过滤黑名单中电话号码
         List<SmsBlacklist> smsBlacklists = smsBlacklistService.list();
         if (!EmptyUtil.isNullOrEmpty(smsBlacklists)){
@@ -98,14 +101,27 @@ public class SmsSendAdapterImpl implements SmsSendAdapter {
             log.warn("渠道smsChannel：{}，签名：{}，不能使用",channelLabel,sginNo);
             return flag;
         }
+        //应用模板参数转换服务模板参数
+        List <OtherConfigVo> otherConfigVos = JSONArray.parseArray(smsTemplate.getOtherConfig(), OtherConfigVo.class);
+        LinkedHashMap<String,String> otherConfigVoMap = new LinkedHashMap<>();
+        for (OtherConfigVo otherConfigVo : otherConfigVos) {
+            otherConfigVoMap.put(otherConfigVo.getConfigKey(),otherConfigVo.getConfigValue());
+        }
+        LinkedHashMap<String,String> templateParamHandler = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : templateParam.entrySet()) {
+            String value = otherConfigVoMap.get(entry.getKey());
+            if(!EmptyUtil.isNullOrEmpty(value)){
+                templateParamHandler.put(value,entry.getValue());
+            }
+        }
         //发送短信
         String stringSendHandler = sendHandlers.get(channelLabel);
         SmsSendHandler smsSendHandler =registerBeanHandler.getBean(stringSendHandler,SmsSendHandler.class);
-        return smsSendHandler.SendSms(smsTemplate,smsChannel,smsSign,mobiles,templateParam);
+        return smsSendHandler.SendSms(smsTemplate,smsChannel,smsSign,mobiles,templateParamHandler);
     }
 
     @Override
-    public Boolean querySendSms(SmsSendRecord smsSendRecord) throws Exception {
+    public Boolean querySendSms(SmsSendRecord smsSendRecord) throws ProjectException {
         String channelLabel = smsSendRecord.getChannelLabel();
         String stringSendHandler = sendHandlers.get(channelLabel);
         SmsSendHandler smsSendHandler =registerBeanHandler.getBean(stringSendHandler,SmsSendHandler.class);
@@ -113,7 +129,7 @@ public class SmsSendAdapterImpl implements SmsSendAdapter {
     }
 
     @Override
-    public Boolean retrySendSms(SmsSendRecord smsSendRecord) throws Exception {
+    public Boolean retrySendSms(SmsSendRecord smsSendRecord) throws ProjectException {
         String channelLabel = smsSendRecord.getChannelLabel();
         String stringSendHandler = sendHandlers.get(channelLabel);
         SmsSendHandler smsSendHandler =registerBeanHandler.getBean(stringSendHandler,SmsSendHandler.class);

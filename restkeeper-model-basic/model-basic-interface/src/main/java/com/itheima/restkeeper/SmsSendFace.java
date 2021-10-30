@@ -15,27 +15,29 @@ public interface SmsSendFace {
     /***
      * @description 发送短信接口
      * @param templateNo 应用模板编号
+     * @param sginNo 应用签名编号
      * @param loadBalancerType 通道负载均衡策略
      * @param mobiles 手机号
      * @param templateParam 模板动态参数
      */
     Boolean SendSms(
-        String templateNo,
-        String loadBalancerType,
-        Set<String> mobiles,
-        LinkedHashMap<String, String> templateParam) throws ProjectException;
+            String templateNo,
+            String sginNo,
+            String loadBalancerType,
+            Set<String> mobiles,
+            LinkedHashMap<String,String> templateParam) throws ProjectException;
 
     /***
      * @description 查询短信接受情况
-     * @param smsSendRecord 发送记录
+     * @param smsSendRecordVo 发送记录
      * @return
      */
-    Boolean querySendSms(SmsSendRecordVo smsSendRecord) throws ProjectException;
+    Boolean querySendSms(SmsSendRecordVo smsSendRecordVo) throws ProjectException;
 
     /***
      * @description 重试发送
-     * @param smsSendRecord
+     * @param smsSendRecordVo
      * @return
      */
-    Boolean retrySendSms(SmsSendRecordVo smsSendRecord) throws ProjectException;
+    Boolean retrySendSms(SmsSendRecordVo smsSendRecordVo) throws ProjectException;
 }

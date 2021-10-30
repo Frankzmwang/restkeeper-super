@@ -13,26 +13,29 @@ public interface ISmsBlacklistService extends IService<SmsBlacklist> {
 
     /**
      * @Description 黑名单列表
-     * @param smsChannelVo 查询条件
+     * @param smsBlacklistVo 查询条件
      * @param pageNum 当前页
      * @param pageSize 当前页
      * @return Page<SmsBlacklist>
      */
-    Page<SmsBlacklist> findSmsBlacklistVoPage(SmsBlacklistVo smsChannelVo, int pageNum, int pageSize);
+    Page<SmsBlacklist> findSmsBlacklistVoPage(
+            SmsBlacklistVo smsBlacklistVo,
+            int pageNum,
+            int pageSize);
 
     /**
      * @Description 创建黑名单
-     * @param smsChannelVo 对象信息
+     * @param smsBlacklistVo 对象信息
      * @return SmsBlacklist
      */
-    SmsBlacklist createSmsBlacklist(SmsBlacklistVo smsChannelVo);
+    SmsBlacklist createSmsBlacklist(SmsBlacklistVo smsBlacklistVo);
 
     /**
      * @Description 修改黑名单
-     * @param smsChannelVo 对象信息
+     * @param smsBlacklistVo 对象信息
      * @return Boolean
      */
-    Boolean updateSmsBlacklist(SmsBlacklistVo smsChannelVo);
+    Boolean updateSmsBlacklist(SmsBlacklistVo smsBlacklistVo);
 
     /**
      * @Description 删除黑名单

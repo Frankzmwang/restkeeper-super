@@ -60,7 +60,7 @@ public class SmsSign extends BasicPojo {
     @ApiModelProperty(value = "签名用途：0：自用。1：他用。")
     private String signPurpose;
 
-    @ApiModelProperty(value = "			短信申请说明")
+    @ApiModelProperty(value = "短信申请说明")
     private String remark;
 
     @ApiModelProperty(value = "是否受理成功")

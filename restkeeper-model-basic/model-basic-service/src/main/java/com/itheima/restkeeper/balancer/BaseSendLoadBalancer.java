@@ -38,7 +38,7 @@ public class BaseSendLoadBalancer implements SendLoadBalancer {
                 .map(SmsTemplate::getChannelLabel).collect(Collectors.toSet());
         //查询模板对应的渠道
         List<SmsChannel> smsChannels =smsChannelService.findChannelInChannelLabel(channelLabelList);
-        if (EmptyUtil.isNullOrEmpty(smsChannels)){
+        if (!EmptyUtil.isNullOrEmpty(smsChannels)){
             return smsChannels.stream()
                 .collect(Collectors.toMap(SmsChannel::getChannelLabel, SmsChannel::getLevel));
         }

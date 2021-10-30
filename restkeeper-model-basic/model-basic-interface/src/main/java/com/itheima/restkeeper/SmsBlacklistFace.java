@@ -11,37 +11,39 @@ import com.itheima.restkeeper.req.SmsBlacklistVo;
 public interface SmsBlacklistFace {
 
     /**
-     * @Description 渠道列表
+     * @Description 黑名单列表
      * @param smsBlacklistVo 查询条件
      * @param pageNum 页码
      * @param pageSize 每页条数
      * @return Page<SmsBlacklistVo>
      */
-    Page<SmsBlacklistVo> findSmsBlacklistVoPage(SmsBlacklistVo smsBlacklistVo, int pageNum, int pageSize)throws ProjectException;
+    Page<SmsBlacklistVo> findSmsBlacklistVoPage(SmsBlacklistVo smsBlacklistVo,
+                                                int pageNum,
+                                                int pageSize)throws ProjectException;
 
     /**
-     * @Description 创建渠道
+     * @Description 创建黑名单
      * @param smsBlacklistVo 对象信息
      * @return SmsBlacklistVo
      */
     SmsBlacklistVo createSmsBlacklist(SmsBlacklistVo smsBlacklistVo)throws ProjectException;
 
     /**
-     * @Description 修改渠道
+     * @Description 修改黑名单
      * @param smsBlacklistVo 对象信息
      * @return Boolean
      */
     Boolean updateSmsBlacklist(SmsBlacklistVo smsBlacklistVo)throws ProjectException;
 
     /**
-     * @Description 删除渠道
+     * @Description 删除黑名单
      * @param checkedIds 选择中对象Ids
      * @return Boolean
      */
     Boolean deleteSmsBlacklist(String[] checkedIds)throws ProjectException;
 
     /**
-     * @Description 查找渠道
+     * @Description 查找黑名单
      * @param smsBlacklistId 选择对象信息Id
      * @return SmsBlacklistVo
      */

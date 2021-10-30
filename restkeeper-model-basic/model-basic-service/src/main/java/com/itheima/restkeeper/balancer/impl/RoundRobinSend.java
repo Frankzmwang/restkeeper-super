@@ -30,7 +30,7 @@ public class RoundRobinSend extends BaseSendLoadBalancer {
 
         String channelName = null;
         synchronized (pos) {
-            if (pos > keySet.size())
+            if (pos >= keySet.size())
                 pos = 0;
             channelName = keyList.get(pos);
             pos ++;

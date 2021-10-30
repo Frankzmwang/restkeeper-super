@@ -25,7 +25,7 @@ public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTe
         QueryWrapper<SmsTemplate> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(SmsTemplate::getTemplateNo,templateNo)
                 .eq(SmsTemplate::getEnableFlag, SuperConstant.YES)
-                .eq(SmsTemplate::getAuditStatus,SuperConstant.YES);
+                .eq(SmsTemplate::getAuditStatus,SuperConstant.STATUS_PASS_AUDIT);
         return list(queryWrapper);
     }
 

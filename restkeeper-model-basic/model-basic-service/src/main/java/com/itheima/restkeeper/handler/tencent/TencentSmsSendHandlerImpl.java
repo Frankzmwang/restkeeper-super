@@ -58,7 +58,7 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
                            SmsChannel smsChannel,
                            SmsSign smsSign,
                            Set<String> mobiles,
-                           LinkedHashMap<String, String> templateParam) throws Exception {
+                           LinkedHashMap<String, String> templateParam) throws ProjectException {
         //超过发送上限
         if (mobiles.size() > 200) {
             throw new ProjectException(SmsSendEnum.PEXCEED_THE_LIMIT);
@@ -89,7 +89,13 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
         }
         //返回的resp是一个SendSmsResponse的实例，与请求对象对应
         SmsClient smsClient = tencentSmsConfig.queryClient();
-        SendSmsResponse response = smsClient.SendSms(request);
+        SendSmsResponse response = null;
+        try {
+            response = smsClient.SendSms(request);
+        } catch (TencentCloudSDKException e) {
+            log.error("腾讯云发送短信：{}，失败",request.toString());
+            throw new ProjectException(SmsSendEnum.SEND_FAIL);
+        }
         SendStatus[] sendStatusSet = response.getSendStatusSet();
         String content = smsTemplate.getContent();
         for (Map.Entry<String, String> entry : templateParam.entrySet()) {
@@ -102,7 +108,7 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
             String acceptMsg = null;
             String sendStatus = null;
             String sendMsg = null;
-            if ("OK".equals(code)){
+            if ("Ok".equals(code)){
                 //受理成功
                 acceptStatus = SuperConstant.YES;
                 acceptMsg = "受理成功";
@@ -112,6 +118,8 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
                 //受理失败
                 acceptStatus=SuperConstant.NO;
                 acceptMsg = sendStatusHandler.getMessage();
+                sendStatus = SuperConstant.NO;
+                sendMsg = "发送失败";
             }
             SmsSendRecord smsSendRecord = SmsSendRecord.builder()
                 .sendContent(content)
@@ -124,6 +132,8 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
                 .mobile(sendStatusHandler.getPhoneNumber())
                 .signCode(smsSign.getSignCode())
                 .signName(smsSign.getSignName())
+                .templateNo(smsTemplate.getTemplateNo())
+                .templateNo(smsTemplate.getTemplateNo())
                 .templateCode(smsTemplate.getTemplateCode())
                 .templateId(smsTemplate.getId())
                 .templateType(smsTemplate.getSmsType())
@@ -136,7 +146,7 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
     }
 
     @Override
-    public Boolean querySendSms(SmsSendRecord smsSendRecord) throws TencentCloudSDKException {
+    public Boolean querySendSms(SmsSendRecord smsSendRecord) throws ProjectException {
         // 实例化一个请求对象,每个接口都会对应一个request对象
         PullSmsSendStatusByPhoneNumberRequest request = new PullSmsSendStatusByPhoneNumberRequest();
         //拉取起始时间，UNIX 时间戳（时间：秒）。
@@ -162,7 +172,13 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
         request.setEndTime(new Date().getTime());
         // 返回的resp是一个PullSmsSendStatusByPhoneNumberResponse的实例，与请求对象对应
         SmsClient smsClient = tencentSmsConfig.queryClient();
-        PullSmsSendStatusByPhoneNumberResponse response = smsClient.PullSmsSendStatusByPhoneNumber(request);
+        PullSmsSendStatusByPhoneNumberResponse response = null;
+        try {
+            response = smsClient.PullSmsSendStatusByPhoneNumber(request);
+        } catch (TencentCloudSDKException e) {
+            log.error("阿里云查询短信发送状态：{}，失败",request.toString());
+            throw new ProjectException(SmsSendEnum.QUERY_FAIL);
+        }
         PullSmsSendStatus[] pullSmsSendStatusSet = response.getPullSmsSendStatusSet();
         for (PullSmsSendStatus pullSmsSendStatus : pullSmsSendStatusSet) {
             if (pullSmsSendStatus.getSerialNo().equals(smsSendRecord.getSerialNo())){
@@ -184,11 +200,11 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
     }
 
     @Override
-    public Boolean retrySendSms(SmsSendRecord smsSendRecord) throws Exception {
+    public Boolean retrySendSms(SmsSendRecord smsSendRecord) throws ProjectException {
         //已发送，发送中的短信不处理
         if (smsSendRecord.getSendStatus().equals(SuperConstant.SENDING)||
-                smsSendRecord.getSendStatus().equals(SuperConstant.YES)) {
-            return true;
+            smsSendRecord.getSendStatus().equals(SuperConstant.YES)) {
+            throw new ProjectException(SmsSendEnum.SEND_SUCCEED);
         }
         SmsTemplate smsTemplate = smsTemplateService.getById(smsSendRecord.getTemplateId());
         SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(smsSendRecord.getChannelLabel());
@@ -197,6 +213,10 @@ public class TencentSmsSendHandlerImpl implements SmsSendHandler {
         mobiles.add(smsSendRecord.getMobile());
         LinkedHashMap<String, String> templateParam =
                 JSON.parseObject(smsSendRecord.getTemplateParams(), LinkedHashMap.class);
-        return SendSms(smsTemplate,smsChannel,smsSign,mobiles,templateParam);
+        Boolean flag = SendSms(smsTemplate, smsChannel, smsSign, mobiles, templateParam);
+        if (flag){
+            flag = smsTemplateService.removeById(smsSendRecord.getTemplateId());
+        }
+        return flag;
     }
 }

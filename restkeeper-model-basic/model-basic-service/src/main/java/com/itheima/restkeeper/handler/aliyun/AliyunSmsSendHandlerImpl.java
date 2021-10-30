@@ -6,6 +6,7 @@ import com.aliyun.dysmsapi20170525.Client;
 import com.aliyun.dysmsapi20170525.models.*;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.SmsSendEnum;
+import com.itheima.restkeeper.enums.SmsSignEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.SmsSendHandler;
 import com.itheima.restkeeper.handler.aliyun.config.AliyunSmsConfig;
@@ -22,6 +23,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -54,7 +56,7 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
                            SmsChannel smsChannel,
                            SmsSign smsSign,
                            Set<String> mobiles,
-                           LinkedHashMap<String, String> templateParam) throws Exception {
+                           LinkedHashMap<String, String> templateParam) throws ProjectException {
         //超过发送上限
         if (mobiles.size()>1000){
             throw new ProjectException(SmsSendEnum.PEXCEED_THE_LIMIT);
@@ -78,7 +80,13 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
         }
         request.setTemplateParamJson(JSONObject.toJSONString(templateParams));
         Client client =aliyunSmsConfig.queryClient();
-        SendBatchSmsResponse response = client.sendBatchSms(request);
+        SendBatchSmsResponse response = null;
+        try {
+            response = client.sendBatchSms(request);
+        } catch (Exception e) {
+            log.error("阿里云发送短信：{}，失败",request.toString());
+            throw new ProjectException(SmsSendEnum.SEND_FAIL);
+        }
         //返回请求状态
         String code = response.getBody().getCode();
         String acceptStatus = null;
@@ -95,6 +103,8 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
             //受理失败
             acceptStatus=SuperConstant.NO;
             acceptMsg = response.getBody().getMessage();
+            sendStatus = SuperConstant.NO;
+            sendMsg = "发送失败";
         }
         //构建发送记录
         String message = response.getBody().getMessage();
@@ -116,6 +126,7 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
             .mobile(mobile)
             .signCode(smsSign.getSignCode())
             .signName(smsSign.getSignName())
+            .templateNo(smsTemplate.getTemplateNo())
             .templateCode(smsTemplate.getTemplateCode())
             .templateId(smsTemplate.getId())
             .templateType(smsTemplate.getSmsType())
@@ -128,7 +139,7 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
     }
 
     @Override
-    public Boolean querySendSms(SmsSendRecord smsSendRecord) throws Exception {
+    public Boolean querySendSms(SmsSendRecord smsSendRecord) throws ProjectException {
         QuerySendDetailsRequest request = new QuerySendDetailsRequest();
         request.setBizId(smsSendRecord.getSerialNo());
         request.setPhoneNumber(smsSendRecord.getMobile());
@@ -138,7 +149,14 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
         request.setCurrentPage(1L);
         // 复制代码运行请自行打印 API 的返回值
         Client client =aliyunSmsConfig.queryClient();
-        QuerySendDetailsResponse response = client.querySendDetails(request);
+        QuerySendDetailsResponse response = null;
+        try {
+            response = client.querySendDetails(request);
+        } catch (Exception e) {
+            log.error("阿里云查询短信发送状态：{}，失败",request.toString());
+            throw new ProjectException(SmsSendEnum.QUERY_FAIL);
+        }
+
         String code = response.getBody().getCode();
         //处理结果
         if ("OK".equals(code)){
@@ -163,19 +181,25 @@ public class AliyunSmsSendHandlerImpl implements SmsSendHandler {
     }
 
     @Override
-    public Boolean retrySendSms(SmsSendRecord smsSendRecord) throws Exception {
+    @Transactional
+    public Boolean retrySendSms(SmsSendRecord smsSendRecord) throws ProjectException {
         //已发送，发送中的短信不处理
         if (smsSendRecord.getSendStatus().equals(SuperConstant.SENDING)||
             smsSendRecord.getSendStatus().equals(SuperConstant.YES)) {
-            return true;
+            throw new ProjectException(SmsSendEnum.SEND_SUCCEED);
         }
         SmsTemplate smsTemplate = smsTemplateService.getById(smsSendRecord.getTemplateId());
         SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(smsSendRecord.getChannelLabel());
-        SmsSign smsSign = smsSignService.findSmsSignBySignCodeAndChannelLabel(smsSendRecord.getSignCode(), smsSendRecord.getChannelLabel());
+        SmsSign smsSign = smsSignService.findSmsSignBySignCodeAndChannelLabel(
+                smsSendRecord.getSignCode(),
+                smsSendRecord.getChannelLabel());
         Set<String> mobiles = new HashSet<>();
         mobiles.add(smsSendRecord.getMobile());
-        LinkedHashMap<String, String> templateParam =
-            JSON.parseObject(smsSendRecord.getTemplateParams(), LinkedHashMap.class);
-        return SendSms(smsTemplate,smsChannel,smsSign,mobiles,templateParam);
+        LinkedHashMap<String, String> templateParam = JSON.parseObject(smsSendRecord.getTemplateParams(), LinkedHashMap.class);
+        Boolean flag = SendSms(smsTemplate, smsChannel, smsSign, mobiles, templateParam);
+        if (flag){
+            flag = smsSendRecordService.removeById(smsSendRecord.getId());
+        }
+        return flag;
     }
 }

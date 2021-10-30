@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * @ClassName SmsBlacklistFaceImpl.java
- * @Description TODO
+ * @Description 黑名单dubbo实现
  */
 @Slf4j
 @DubboService(version = "${dubbo.application.version}",timeout = 5000,

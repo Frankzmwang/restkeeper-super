@@ -73,7 +73,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
         QueryWrapper<SmsSign> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(SmsSign::getSignNo, signNo)
                 .eq(SmsSign::getChannelLabel, channelLabel)
-                .eq(SmsSign::getAuditStatus,SuperConstant.YES);
+                .eq(SmsSign::getAuditStatus,SuperConstant.STATUS_PASS_AUDIT);
         return getOne(queryWrapper);
     }
 
@@ -82,7 +82,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
         QueryWrapper<SmsSign> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(SmsSign::getSignCode, signCode)
                 .eq(SmsSign::getChannelLabel, channelLabel)
-                .eq(SmsSign::getAuditStatus,SuperConstant.YES);
+                .eq(SmsSign::getAuditStatus,SuperConstant.STATUS_PASS_AUDIT);
         return getOne(queryWrapper);
     }
 }

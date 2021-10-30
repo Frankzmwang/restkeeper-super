@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.req;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.itheima.restkeeper.basic.BasicVo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -47,6 +48,7 @@ public class SmsSendRecordVo extends BasicVo {
     private String channelLabel;
 
     @ApiModelProperty(value = "模板表主键ID")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long templateId;
 
     @ApiModelProperty(value = "应用模板编号：多通道编号相同则认为是一个模板多个通道公用")
@@ -88,5 +90,7 @@ public class SmsSendRecordVo extends BasicVo {
     @ApiModelProperty(value = "模板参数")
     private String templateParams;
 
+    @ApiModelProperty(value = "选中节点")
+    private String[] checkedIds;
 
 }

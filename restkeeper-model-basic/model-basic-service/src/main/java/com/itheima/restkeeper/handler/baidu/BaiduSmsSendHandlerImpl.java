@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -54,7 +55,7 @@ public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
                            SmsChannel smsChannel,
                            SmsSign smsSign,
                            Set<String> mobiles,
-                           LinkedHashMap<String, String> templateParam) throws Exception {
+                           LinkedHashMap<String, String> templateParam) throws ProjectException {
         //超过发送上限
         if (mobiles.size() > 200) {
             throw new ProjectException(SmsSendEnum.PEXCEED_THE_LIMIT);
@@ -109,6 +110,7 @@ public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
                 .mobile(sendMessageItem.getMobile())
                 .signCode(smsSign.getSignCode())
                 .signName(smsSign.getSignName())
+                .templateNo(smsTemplate.getTemplateNo())
                 .templateCode(smsTemplate.getTemplateCode())
                 .templateId(smsTemplate.getId())
                 .templateType(smsTemplate.getSmsType())
@@ -120,17 +122,18 @@ public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
     }
 
     @Override
-    public Boolean querySendSms(SmsSendRecord smsSendRecord) {
+    public Boolean querySendSms(SmsSendRecord smsSendRecord)throws ProjectException {
         log.warn("百度简单短信无主动轮询接口");
         return false;
     }
 
     @Override
-    public Boolean retrySendSms(SmsSendRecord smsSendRecord) throws Exception {
+    @Transactional
+    public Boolean retrySendSms(SmsSendRecord smsSendRecord) throws ProjectException {
         //已发送，发送中的短信不处理
         if (smsSendRecord.getSendStatus().equals(SuperConstant.SENDING)||
                 smsSendRecord.getSendStatus().equals(SuperConstant.YES)) {
-            return true;
+            throw new ProjectException(SmsSendEnum.SEND_SUCCEED);
         }
         SmsTemplate smsTemplate = smsTemplateService.getById(smsSendRecord.getTemplateId());
         SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(smsSendRecord.getChannelLabel());
@@ -139,6 +142,10 @@ public class BaiduSmsSendHandlerImpl implements SmsSendHandler {
         mobiles.add(smsSendRecord.getMobile());
         LinkedHashMap<String, String> templateParam =
                 JSON.parseObject(smsSendRecord.getTemplateParams(), LinkedHashMap.class);
-        return SendSms(smsTemplate,smsChannel,smsSign,mobiles,templateParam);
+        Boolean flag = SendSms(smsTemplate, smsChannel, smsSign, mobiles, templateParam);
+        if (flag){
+            flag = smsTemplateService.removeById(smsSendRecord.getTemplateId());
+        }
+        return flag;
     }
 }

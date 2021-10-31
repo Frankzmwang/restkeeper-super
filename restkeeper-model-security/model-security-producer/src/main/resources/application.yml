@@ -45,6 +45,7 @@ mybatis-plus:
     - tab_resource
     - tab_role
     - tab_user
+    - tab_customer
     - tab_role_resource
     - tab_user_role
     - undo_log
@@ -54,6 +55,7 @@ mybatis-plus:
     - tab_resource
     - tab_role
     - tab_user
+    - tab_customer
     - tab_role_resource
     - tab_user_role
     - undo_log

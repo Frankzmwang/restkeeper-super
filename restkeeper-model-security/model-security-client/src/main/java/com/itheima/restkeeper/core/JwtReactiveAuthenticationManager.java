@@ -47,7 +47,7 @@ public class JwtReactiveAuthenticationManager implements ReactiveAuthenticationM
         String[] principalArray = principal.split(":");
         //域名校验
         RBucket<EnterpriseVo> bucket = redissonClient
-                .getBucket(SecurityCacheConstant.INIT_EWEBSITE+principalArray[1]);
+                .getBucket(SecurityCacheConstant.EWEBSITE+principalArray[1]);
         EnterpriseVo enterpriseVo = bucket.get();
         if (EmptyUtil.isNullOrEmpty(enterpriseVo)){
             return  Mono.error(new BadCredentialsException("Invalid hostName"));

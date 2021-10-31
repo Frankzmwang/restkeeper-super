@@ -14,6 +14,13 @@ import java.util.List;
 public interface IUserAdapterService {
 
 	/**
+	 * @Description 按客户手机查找客户
+	 * @param mobil 手机号码
+	 * @return
+	 */
+	User findUserByMobilAndEnterpriseId(String mobil, Long enterpriseId);
+
+	/**
 	 * @Description 按用户名查找用户
 	 * @param username 登录名
 	 * @return

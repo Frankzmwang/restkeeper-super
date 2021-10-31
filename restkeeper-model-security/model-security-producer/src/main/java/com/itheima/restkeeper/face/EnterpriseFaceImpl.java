@@ -5,7 +5,7 @@ import com.itheima.restkeeper.EnterpriseFace;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.EnterpriseEnum;
 import com.itheima.restkeeper.exception.ProjectException;
-import com.itheima.restkeeper.init.InitEnterpriseWebSiteInfo;
+import com.itheima.restkeeper.init.InitEnterpriseSite;
 import com.itheima.restkeeper.pojo.Enterprise;
 import com.itheima.restkeeper.req.EnterpriseVo;
 import com.itheima.restkeeper.service.IEnterpriseService;
@@ -37,7 +37,7 @@ public class EnterpriseFaceImpl implements EnterpriseFace {
     IEnterpriseService EnterpriseService;
 
     @Autowired
-    InitEnterpriseWebSiteInfo initEnterpriseWebSiteInfo;
+    InitEnterpriseSite initEnterpriseWebSite;
 
     @Override
     public Page<EnterpriseVo> findEnterpriseVoPage(EnterpriseVo enterpriseVo,
@@ -64,7 +64,7 @@ public class EnterpriseFaceImpl implements EnterpriseFace {
             Enterprise enterpriseResult = EnterpriseService.createEnterprise(eterperiseVo);
             //同步缓存
             if (!EmptyUtil.isNullOrEmpty(enterpriseResult)){
-                initEnterpriseWebSiteInfo.addWebSiteforRedis(eterperiseVo.getWebSite(),eterperiseVo);
+                initEnterpriseWebSite.addWebSiteforRedis(eterperiseVo);
             }
             return BeanConv.toBean(enterpriseResult,EnterpriseVo.class);
         } catch (Exception e) {
@@ -81,9 +81,9 @@ public class EnterpriseFaceImpl implements EnterpriseFace {
             //同步缓存
             if (flag){
                 if (enterpriseVo.getEnableFlag().equals(SuperConstant.YES)){
-                    initEnterpriseWebSiteInfo.updataWebSiteforRedis(enterpriseVo.getWebSite(),enterpriseVo);
+                    initEnterpriseWebSite.updataWebSiteforRedis(enterpriseVo);
                 }else {
-                    initEnterpriseWebSiteInfo.deleteWebSiteforRedis(enterpriseVo.getWebSite(),enterpriseVo);
+                    initEnterpriseWebSite.deleteWebSiteforRedis(enterpriseVo);
                 }
             }
             return flag;
@@ -101,7 +101,7 @@ public class EnterpriseFaceImpl implements EnterpriseFace {
             for (String checkedId : checkedIds) {
                 Enterprise enterprise = EnterpriseService.getById(checkedId);
                 EnterpriseVo enterpriseVo = BeanConv.toBean(enterprise, EnterpriseVo.class);
-                initEnterpriseWebSiteInfo.deleteWebSiteforRedis(enterprise.getWebSite(),enterpriseVo);
+                initEnterpriseWebSite.deleteWebSiteforRedis(enterpriseVo);
             }
             return  EnterpriseService.deleteEnterprise(checkedIds);
         } catch (Exception e) {

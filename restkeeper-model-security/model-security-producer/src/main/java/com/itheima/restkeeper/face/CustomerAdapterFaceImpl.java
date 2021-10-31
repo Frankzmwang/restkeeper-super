@@ -1,6 +1,6 @@
 package com.itheima.restkeeper.face;
 
-import com.itheima.restkeeper.UserAdapterFace;
+import com.itheima.restkeeper.CustomerAdapterFace;
 import com.itheima.restkeeper.enums.UserEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.Resource;
@@ -9,6 +9,7 @@ import com.itheima.restkeeper.pojo.User;
 import com.itheima.restkeeper.req.ResourceVo;
 import com.itheima.restkeeper.req.RoleVo;
 import com.itheima.restkeeper.req.UserVo;
+import com.itheima.restkeeper.service.ICustomerAdapterService;
 import com.itheima.restkeeper.service.IUserAdapterService;
 import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
@@ -19,57 +20,56 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 /**
- * @ClassName UserAdapterFaceImpl.java
- * @Description 用户权限适配服务接口定义实现
+ * @ClassName CustomerAdapterFaceImpl.java
+ * @Description 客户权限适配服务接口定义实现
  */
 @Slf4j
 @DubboService(version = "${dubbo.application.version}",retries = 2,timeout = 5000)
-public class UserAdapterFaceImpl implements UserAdapterFace {
+public class CustomerAdapterFaceImpl implements CustomerAdapterFace {
 
     @Autowired
-    IUserAdapterService userAdapterService;
+    ICustomerAdapterService customerAdapterService;
 
     @Override
-    public UserVo findUserByUsernameAndEnterpriseId(String username,Long enterpriseId) throws ProjectException{
+    public UserVo findCustomerByUsernameAndEnterpriseId(String username, Long enterpriseId) throws ProjectException {
         try {
-            User user = userAdapterService.findUserByUsernameAndEnterpriseId(username,enterpriseId);
+            User user = customerAdapterService.findCustomerByUsernameAndEnterpriseId(username,enterpriseId);
             return BeanConv.toBean(user,UserVo.class);
         } catch (Exception e) {
-            log.error("查找用户有角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            log.error("查找客户有角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(UserEnum.SELECT_USER_FAIL);
         }
     }
 
     @Override
-    public UserVo findUserByMobilAndEnterpriseId(String mobil,Long enterpriseId) throws ProjectException{
+    public UserVo findCustomerByMobilAndEnterpriseId(String mobil, Long enterpriseId) throws ProjectException {
         try {
-            User user = userAdapterService.findUserByMobilAndEnterpriseId(mobil,enterpriseId);
+            User user = customerAdapterService.findCustomerByMobilAndEnterpriseId(mobil,enterpriseId);
             return BeanConv.toBean(user,UserVo.class);
         } catch (Exception e) {
-            log.error("查找用户有角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            log.error("查找客户有角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(UserEnum.SELECT_USER_FAIL);
         }
     }
 
     @Override
-    public List<RoleVo> findRoleByUserId(Long userId)throws ProjectException {
+    public List<RoleVo> findRoleByCustomerId(Long customerId)throws ProjectException {
         try {
-            List<Role> roles = userAdapterService.findRoleByUserId(userId);
+            List<Role> roles = customerAdapterService.findRoleByCustomerId(customerId);
             return BeanConv.toBeanList(roles,RoleVo.class);
         } catch (Exception e) {
-            log.error("查找用户有角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            log.error("查找客户有角色异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(UserEnum.SELECT_ROLE_FAIL);
         }
-
     }
 
     @Override
-    public List<ResourceVo> findResourceByUserId(Long userId)throws ProjectException {
+    public List<ResourceVo> findResourceByCustomerId(Long customerId)throws ProjectException {
         try {
-            List<Resource> resources = userAdapterService.findResourceByUserId(userId);
+            List<Resource> resources = customerAdapterService.findResourceByCustomerId(customerId);
             return BeanConv.toBeanList(resources,ResourceVo.class);
         } catch (Exception e) {
-            log.error("查询用户有资源异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            log.error("查询客户有资源异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(UserEnum.SELECT_RESOURCE_FAIL);
         }
     }

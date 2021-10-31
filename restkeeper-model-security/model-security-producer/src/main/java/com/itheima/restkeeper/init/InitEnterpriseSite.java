@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * @Description 初始化企业站点信息到redis
  */
 @Component
-public class InitEnterpriseWebSiteInfo {
+public class InitEnterpriseSite {
 
     @Autowired
     IEnterpriseService enterpriseService;
@@ -45,62 +45,71 @@ public class InitEnterpriseWebSiteInfo {
     public void init(){
         QueryWrapper<Enterprise> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Enterprise::getEnableFlag, SuperConstant.YES)
-                .and(wrapper->wrapper
-                        .eq(Enterprise::getStatus,SuperConstant.TRIAL)
-                        .or()
-                        .eq(Enterprise::getStatus,SuperConstant.OFFICIAL));
+            .and(wrapper->wrapper
+                .eq(Enterprise::getStatus,SuperConstant.TRIAL)
+                .or()
+                .eq(Enterprise::getStatus,SuperConstant.OFFICIAL));
         List<Enterprise> list = enterpriseService.list(queryWrapper);
         List<EnterpriseVo> enterpriseVos = BeanConv.toBeanList(list, EnterpriseVo.class);
         for (EnterpriseVo enterpriseVo : enterpriseVos) {
-            String key = SecurityCacheConstant.INIT_EWEBSITE+enterpriseVo.getWebSite();
-            RBucket<EnterpriseVo> bucket = redissonClient.getBucket(key);
+            String webSiteKey = SecurityCacheConstant.EWEBSITE+enterpriseVo.getWebSite();
+            RBucket<EnterpriseVo> webSiteBucket = redissonClient.getBucket(webSiteKey);
+            String appWebSiteKey = SecurityCacheConstant.APP_WEBSITE+enterpriseVo.getAppWebSite();
+            RBucket<EnterpriseVo> appWebSiteBucket = redissonClient.getBucket(appWebSiteKey);
             Long secondInterval = this.secondInterval(new Date(), enterpriseVo.getExpireTime());
             if (secondInterval.longValue()>0){
-                bucket.set(enterpriseVo,secondInterval, TimeUnit.SECONDS);
+                webSiteBucket.set(enterpriseVo,secondInterval, TimeUnit.SECONDS);
+                appWebSiteBucket.set(enterpriseVo,secondInterval, TimeUnit.SECONDS);
             }
         }
     }
 
     /***
      * @description 添加缓存中的站点
-     * @param webSite 站点
      * @param enterpriseVo 企业号
      * @return:
      */
-    public void addWebSiteforRedis(String webSite,EnterpriseVo enterpriseVo){
-        String key = SecurityCacheConstant.INIT_EWEBSITE+webSite;
-        RBucket<EnterpriseVo> bucket = redissonClient.getBucket(key);
+    public void addWebSiteforRedis(EnterpriseVo enterpriseVo){
+        String webSiteKey = SecurityCacheConstant.EWEBSITE+enterpriseVo.getWebSite();
+        RBucket<EnterpriseVo> webSiteBucket = redissonClient.getBucket(webSiteKey);
+        String appWebSiteKey = SecurityCacheConstant.APP_WEBSITE+enterpriseVo.getAppWebSite();
+        RBucket<EnterpriseVo> appWebSiteBucket = redissonClient.getBucket(appWebSiteKey);
         Long secondInterval = this.secondInterval(new Date(), enterpriseVo.getExpireTime());
         if (secondInterval.longValue()>0){
-            bucket.trySet(enterpriseVo,secondInterval, TimeUnit.SECONDS);
+            webSiteBucket.trySet(enterpriseVo,secondInterval, TimeUnit.SECONDS);
+            appWebSiteBucket.trySet(enterpriseVo,secondInterval, TimeUnit.SECONDS);
         }
     }
 
     /***
      * @description 移除缓存中的站点
-     * @param webSite 站点
      * @param enterpriseVo 企业号
      * @return:
      */
-    public void deleteWebSiteforRedis(String webSite, EnterpriseVo enterpriseVo){
-        String key = SecurityCacheConstant.INIT_EWEBSITE+webSite;
-        RBucket<EnterpriseVo> bucket = redissonClient.getBucket(key);
-        bucket.delete();
+    public void deleteWebSiteforRedis( EnterpriseVo enterpriseVo){
+        String webSiteKey = SecurityCacheConstant.EWEBSITE+enterpriseVo.getWebSite();
+        RBucket<EnterpriseVo> webSiteBucket = redissonClient.getBucket(webSiteKey);
+        String appWebSiteKey = SecurityCacheConstant.APP_WEBSITE+enterpriseVo.getAppWebSite();
+        RBucket<EnterpriseVo> appWebSiteBucket = redissonClient.getBucket(appWebSiteKey);
+        webSiteBucket.delete();
+        appWebSiteBucket.delete();
     }
 
 
     /***
      * @description 更新缓存中的站点
-     * @param webSite 站点
      * @param enterpriseVo 企业号
      * @return:
      */
-    public void updataWebSiteforRedis(String webSite,EnterpriseVo enterpriseVo){
-        String key = SecurityCacheConstant.INIT_EWEBSITE+webSite;
-        RBucket<EnterpriseVo> bucket = redissonClient.getBucket(key);
+    public void updataWebSiteforRedis(EnterpriseVo enterpriseVo){
+        String webSiteKey = SecurityCacheConstant.EWEBSITE+enterpriseVo.getWebSite();
+        RBucket<EnterpriseVo> webSiteBucket = redissonClient.getBucket(webSiteKey);
+        String appWebSiteKey = SecurityCacheConstant.APP_WEBSITE+enterpriseVo.getAppWebSite();
+        RBucket<EnterpriseVo> appWebSiteBucket = redissonClient.getBucket(appWebSiteKey);
         Long secondInterval = this.secondInterval(new Date(), enterpriseVo.getExpireTime());
         if (secondInterval.longValue()>0){
-            bucket.set(enterpriseVo,secondInterval, TimeUnit.SECONDS);
+            webSiteBucket.set(enterpriseVo,secondInterval, TimeUnit.SECONDS);
+            appWebSiteBucket.set(enterpriseVo,secondInterval, TimeUnit.SECONDS);
         }
     }
 }

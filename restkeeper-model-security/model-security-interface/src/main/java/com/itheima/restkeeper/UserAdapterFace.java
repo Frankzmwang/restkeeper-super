@@ -20,6 +20,13 @@ public interface UserAdapterFace {
     UserVo findUserByUsernameAndEnterpriseId(String username, Long enterpriseId)throws ProjectException;
 
     /**
+     * @Description 按用户手机查找用户
+     * @param mobil 登录名
+     * @return
+     */
+    UserVo findUserByMobilAndEnterpriseId(String mobil, Long enterpriseId) throws ProjectException;
+
+    /**
      * @Description 查找用户所有角色
      * @param userId 用户Id
      * @return

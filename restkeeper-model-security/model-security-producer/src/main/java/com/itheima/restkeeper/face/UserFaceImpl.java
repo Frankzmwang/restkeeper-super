@@ -31,13 +31,13 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @DubboService(version = "${dubbo.application.version}",timeout = 5000,
-        methods ={
-                @Method(name = "findUserVoPage",retries = 2),
-                @Method(name = "createUser",retries = 0),
-                @Method(name = "updateUser",retries = 0),
-                @Method(name = "deleteUser",retries = 0),
-                @Method(name = "updateUserEnableFlag",retries = 0)
-        })
+    methods ={
+        @Method(name = "findUserVoPage",retries = 2),
+        @Method(name = "createUser",retries = 0),
+        @Method(name = "updateUser",retries = 0),
+        @Method(name = "deleteUser",retries = 0),
+        @Method(name = "updateUserEnableFlag",retries = 0)
+    })
 public class UserFaceImpl implements UserFace {
 
     @Autowired

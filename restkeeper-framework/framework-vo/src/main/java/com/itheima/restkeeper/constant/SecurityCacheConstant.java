@@ -8,7 +8,10 @@ public class SecurityCacheConstant {
     //安全组前缀
     public static final String REDIS_GROUP = "security:";
 
-    //运营组
-    public static final String INIT_EWEBSITE = REDIS_GROUP+ "initWebsite:";
+    //运营商后台站点
+    public static final String EWEBSITE = REDIS_GROUP+ "webSite:";
+
+    //运营商app站点
+    public static final String APP_WEBSITE = REDIS_GROUP+ "appWebSite:";
 
 }

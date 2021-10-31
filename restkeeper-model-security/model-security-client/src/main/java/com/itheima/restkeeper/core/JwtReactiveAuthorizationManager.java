@@ -27,7 +27,7 @@ import java.util.Set;
 @Slf4j
 @Component
 @EnableConfigurationProperties(SecurityProperties.class)
-public class JwtReactiveAuthorizeManager implements ReactiveAuthorizationManager<AuthorizationContext> {
+public class JwtReactiveAuthorizationManager implements ReactiveAuthorizationManager<AuthorizationContext> {
 
     private AntPathMatcher antPathMatcher = new AntPathMatcher();
 

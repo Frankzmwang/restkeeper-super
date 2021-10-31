@@ -36,6 +36,16 @@ public class UserAdapterServiceImpl implements IUserAdapterService {
     private ResourceMapper resourceMapper;
 
     @Override
+    public User findUserByMobilAndEnterpriseId(String mobil, Long enterpriseId) {
+        QueryWrapper<User> queryWrapper =new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(User::getEnableFlag, SuperConstant.YES)
+                .eq(User::getMobil, mobil)
+                .eq(User::getEnterpriseId, enterpriseId);
+        return userMapper.selectOne(queryWrapper);
+    }
+
+    @Override
     public User findUserByUsernameAndEnterpriseId(String username,Long enterpriseId) {
         QueryWrapper<User> queryWrapper =new QueryWrapper<>();
         queryWrapper.lambda()

@@ -1,8 +1,5 @@
 package com.itheima.restkeeper.config;
 
-import com.itheima.restkeeper.core.JwtReactiveAuthorizeManager;
-import com.itheima.restkeeper.core.JwtReactiveAuthenticationManager;
-import com.itheima.restkeeper.handler.*;
 import com.itheima.restkeeper.properties.SecurityProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,10 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
@@ -60,7 +55,7 @@ public class ReactiveSecurityConfig {
 
     //鉴权
     @Autowired
-    ReactiveAuthorizationManager jwtReactiveAuthorizeManager;
+    ReactiveAuthorizationManager jwtReactiveAuthorizationManager;
 
     //匿名用户无权限
     @Autowired
@@ -131,7 +126,7 @@ public class ReactiveSecurityConfig {
                 // 匿名资源放行
                 .authorizeExchange().pathMatchers(securityProperties.getIgnoreUrl().toArray(new String[securityProperties.getIgnoreUrl().size()])).permitAll()
                 // 访问权限控制
-                .anyExchange().access(jwtReactiveAuthorizeManager)
+                .anyExchange().access(jwtReactiveAuthorizationManager)
             .and()
                 // 无访问权限处理
                 .exceptionHandling().accessDeniedHandler(jsonServerAccessDeniedHandler)

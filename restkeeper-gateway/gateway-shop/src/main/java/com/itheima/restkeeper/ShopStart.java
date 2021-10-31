@@ -6,7 +6,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * @ClassName GateWayStart.java
- * @Description 网关启动类
+ * @Description 运营商网关启动类
  */
 @SpringBootApplication
 @EnableDiscoveryClient

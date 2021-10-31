@@ -1,13 +1,18 @@
 package com.itheima.restkeeper.face;
 
+import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.AffixFace;
+import com.itheima.restkeeper.SmsSendFace;
 import com.itheima.restkeeper.UserFace;
+import com.itheima.restkeeper.constant.SmsCacheConstant;
+import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.enums.UserEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.Role;
 import com.itheima.restkeeper.pojo.User;
 import com.itheima.restkeeper.req.AffixVo;
+import com.itheima.restkeeper.req.SendMessageVo;
 import com.itheima.restkeeper.req.UserVo;
 import com.itheima.restkeeper.service.IUserAdapterService;
 import com.itheima.restkeeper.service.IUserService;
@@ -18,11 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +58,36 @@ public class UserFaceImpl implements UserFace {
 
     @DubboReference(version = "${dubbo.application.version}",check = false)
     AffixFace affixFace;
+
+    @DubboReference(version = "${dubbo.application.version}",check = false)
+    SmsSendFace smsSendFace;
+
+    @Autowired
+    RedissonClient redissonClient;
+
+    @Override
+    public Boolean SendloginCode(String mobile) throws ProjectException {
+        String key = SmsCacheConstant.LOGIN_CODE+mobile;
+        //存储手机发送的验证码到存在中
+        RBucket<String> bucket = redissonClient.getBucket(key);
+        String code = String.valueOf((int)((Math.random()*9+1)*100000));
+        bucket.set(code,300,TimeUnit.SECONDS);
+        String templateNo = "template_00001";
+        String sginNo= "sign_0001";
+        String loadBalancerType= SuperConstant.ROUND_ROBIN;
+        Set<String> mobiles=new HashSet<>();
+        mobiles.add(mobile);
+        LinkedHashMap<String,String> templateParam = new LinkedHashMap<>();
+        templateParam.put("code",code);
+        SendMessageVo sendMessageVo = SendMessageVo.builder()
+            .templateNo(templateNo)
+            .sginNo(sginNo)
+            .loadBalancerType(loadBalancerType)
+            .mobiles(mobiles)
+            .templateParam(templateParam)
+            .build();
+        return smsSendFace.SendSms(sendMessageVo);
+    }
 
     @Override
     public Page<UserVo> findUserVoPage(UserVo userVo,

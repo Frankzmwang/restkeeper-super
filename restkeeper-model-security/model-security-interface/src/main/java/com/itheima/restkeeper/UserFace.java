@@ -2,6 +2,7 @@ package com.itheima.restkeeper;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.exception.ProjectException;
+import com.itheima.restkeeper.req.SendMessageVo;
 import com.itheima.restkeeper.req.UserVo;
 
 import java.util.List;
@@ -10,6 +11,13 @@ import java.util.List;
  * @Description：用户接口
  */
 public interface UserFace {
+
+    /***
+     * @description 发送登录验证码
+     * @param mobile  手机号码
+     * @return
+     */
+    Boolean SendloginCode(String mobile) throws ProjectException;
 
     /**
      * @Description 用户列表

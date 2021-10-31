@@ -207,9 +207,7 @@ public class SuperConstant {
 	 */
 	public static final String BAIDU_SMS = "BAIDU_SMS";
 
-	/***
-	 * 邮件负载均衡
-	 */
+	//邮件负载均衡
     public static final String HASH = "HASH";
 	public static final String RANDOM = "RANDOM ";
 	public static final String ROUND_ROBIN ="ROUND_ROBIN" ;
@@ -217,12 +215,18 @@ public class SuperConstant {
 	public static final String WEIGHT_ROUND_ROBIN = "WEIGHT_ROUND_ROBIN";
 	//发送状态
     public static final String SENDING ="SENDING" ;
-    //审核状态
-	//审核中
+    //审核状态:审核中
 	public static final String STATUS_IN_AUDIT = "IN_AUDIT";
 	//审核通过
     public static final String STATUS_PASS_AUDIT = "PASS_AUDIT";
     //审核失败
 	public static final String STATUS_FAIL_AUDIT = "FAIL_AUDIT";
 
+	//站点类型
+    public static final String WEBSITE = "webSite";
+	public static final String APP_WEBSITE ="appWebSite" ;
+
+	//登录类型
+	public static final String USERNAME_LOGIN = "usernameLogin";
+	public static final String MOBIL_LOGIN = "mobilLogin";
 }

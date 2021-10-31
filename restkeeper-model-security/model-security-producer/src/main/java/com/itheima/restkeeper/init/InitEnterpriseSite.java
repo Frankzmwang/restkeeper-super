@@ -52,7 +52,7 @@ public class InitEnterpriseSite {
         List<Enterprise> list = enterpriseService.list(queryWrapper);
         List<EnterpriseVo> enterpriseVos = BeanConv.toBeanList(list, EnterpriseVo.class);
         for (EnterpriseVo enterpriseVo : enterpriseVos) {
-            String webSiteKey = SecurityCacheConstant.EWEBSITE+enterpriseVo.getWebSite();
+            String webSiteKey = SecurityCacheConstant.WEBSITE+enterpriseVo.getWebSite();
             RBucket<EnterpriseVo> webSiteBucket = redissonClient.getBucket(webSiteKey);
             String appWebSiteKey = SecurityCacheConstant.APP_WEBSITE+enterpriseVo.getAppWebSite();
             RBucket<EnterpriseVo> appWebSiteBucket = redissonClient.getBucket(appWebSiteKey);
@@ -70,7 +70,7 @@ public class InitEnterpriseSite {
      * @return:
      */
     public void addWebSiteforRedis(EnterpriseVo enterpriseVo){
-        String webSiteKey = SecurityCacheConstant.EWEBSITE+enterpriseVo.getWebSite();
+        String webSiteKey = SecurityCacheConstant.WEBSITE+enterpriseVo.getWebSite();
         RBucket<EnterpriseVo> webSiteBucket = redissonClient.getBucket(webSiteKey);
         String appWebSiteKey = SecurityCacheConstant.APP_WEBSITE+enterpriseVo.getAppWebSite();
         RBucket<EnterpriseVo> appWebSiteBucket = redissonClient.getBucket(appWebSiteKey);
@@ -87,7 +87,7 @@ public class InitEnterpriseSite {
      * @return:
      */
     public void deleteWebSiteforRedis( EnterpriseVo enterpriseVo){
-        String webSiteKey = SecurityCacheConstant.EWEBSITE+enterpriseVo.getWebSite();
+        String webSiteKey = SecurityCacheConstant.WEBSITE+enterpriseVo.getWebSite();
         RBucket<EnterpriseVo> webSiteBucket = redissonClient.getBucket(webSiteKey);
         String appWebSiteKey = SecurityCacheConstant.APP_WEBSITE+enterpriseVo.getAppWebSite();
         RBucket<EnterpriseVo> appWebSiteBucket = redissonClient.getBucket(appWebSiteKey);
@@ -102,7 +102,7 @@ public class InitEnterpriseSite {
      * @return:
      */
     public void updataWebSiteforRedis(EnterpriseVo enterpriseVo){
-        String webSiteKey = SecurityCacheConstant.EWEBSITE+enterpriseVo.getWebSite();
+        String webSiteKey = SecurityCacheConstant.WEBSITE+enterpriseVo.getWebSite();
         RBucket<EnterpriseVo> webSiteBucket = redissonClient.getBucket(webSiteKey);
         String appWebSiteKey = SecurityCacheConstant.APP_WEBSITE+enterpriseVo.getAppWebSite();
         RBucket<EnterpriseVo> appWebSiteBucket = redissonClient.getBucket(appWebSiteKey);

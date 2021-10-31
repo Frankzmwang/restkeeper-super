@@ -35,7 +35,7 @@ public class ReactiveSecurityConfig {
 
     //表单转换器
     @Autowired
-    ServerAuthenticationConverter ReactiveFormLoginAuthenticationConverter;
+    ServerAuthenticationConverter reactiveServerAuthenticationConverter;
 
     //认证
     @Autowired
@@ -137,7 +137,7 @@ public class ReactiveSecurityConfig {
                 .filter(webFilter -> webFilter instanceof AuthenticationWebFilter)
                 .subscribe(webFilter -> {
                     AuthenticationWebFilter filter = (AuthenticationWebFilter) webFilter;
-                    filter.setServerAuthenticationConverter(ReactiveFormLoginAuthenticationConverter);
+                    filter.setServerAuthenticationConverter(reactiveServerAuthenticationConverter);
                 });
         return chain;
     }

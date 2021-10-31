@@ -5,10 +5,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.UserAdapterFace;
 import com.itheima.restkeeper.UserFace;
 import com.itheima.restkeeper.basic.ResponseWrap;
+import com.itheima.restkeeper.constant.SuperConstant;
+import com.itheima.restkeeper.enums.BasicEnum;
 import com.itheima.restkeeper.enums.UserEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.req.ResourceVo;
 import com.itheima.restkeeper.req.RoleVo;
+import com.itheima.restkeeper.req.SendMessageVo;
 import com.itheima.restkeeper.req.UserVo;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
 import com.itheima.restkeeper.utils.ResponseWrapBuild;
@@ -21,7 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @ClassName UserController.java
@@ -178,6 +184,19 @@ public class UserController {
     ResponseWrap<Boolean> updateUserEnableFlag(@RequestBody UserVo userVo)  {
         Boolean flag = userFace.updateUserEnableFlag(userVo);
         return ResponseWrapBuild.build(UserEnum.SUCCEED,flag);
+    }
+
+    /**
+     * @Description 登录验证码
+     * @param mobile 手机号码
+     * @return
+     */
+    @PostMapping("loginCode/{mobile}")
+    @ApiOperation(value = "登录验证码",notes = "登录验证码")
+    @ApiImplicitParam(name = "mobile",value = "手机号",required = true,dataType = "String")
+    ResponseWrap<Boolean> loginCode(@PathVariable("mobile")String mobile) {
+        Boolean flag = userFace.SendloginCode(mobile);
+        return ResponseWrapBuild.build(BasicEnum.SUCCEED,flag);
     }
 
 }

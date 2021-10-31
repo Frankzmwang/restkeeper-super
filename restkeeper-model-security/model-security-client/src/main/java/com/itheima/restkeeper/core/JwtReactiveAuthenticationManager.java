@@ -1,6 +1,8 @@
 package com.itheima.restkeeper.core;
 
 import com.itheima.restkeeper.constant.SecurityCacheConstant;
+import com.itheima.restkeeper.constant.SmsCacheConstant;
+import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.req.EnterpriseVo;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import org.redisson.api.RBucket;
@@ -11,6 +13,7 @@ import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -35,46 +38,59 @@ public class JwtReactiveAuthenticationManager implements ReactiveAuthenticationM
 
     //用户明细信息服务
     @Autowired
-    private ReactiveUserDetailsService userDetailsService;
+    private ReactiveUserDetailsService reactiveUserDetailsService;
 
-    //redisson客户端
     @Autowired
     RedissonClient redissonClient;
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
         final String principal = authentication.getName();
-        String[] principalArray = principal.split(":");
-        //域名校验
-        RBucket<EnterpriseVo> bucket = redissonClient
-                .getBucket(SecurityCacheConstant.EWEBSITE+principalArray[1]);
-        EnterpriseVo enterpriseVo = bucket.get();
-        if (EmptyUtil.isNullOrEmpty(enterpriseVo)){
-            return  Mono.error(new BadCredentialsException("Invalid hostName"));
-        }
-        String username_enterpriseId = principalArray[0]+":"+enterpriseVo.getEnterpriseId();
-        //校验密码
-        final String presentedPassword = (String) authentication.getCredentials();
-        return this.userDetailsService.findByUsername(username_enterpriseId)
-            .publishOn(this.scheduler)
-            //密码比较
-            .filter(u -> this.passwordEncoder.matches(presentedPassword, u.getPassword()))
-            //失败处理
-            .switchIfEmpty(Mono.defer(() ->
+        final String password = (String) authentication.getCredentials();
+        String[] principals = principal.split(":");
+        //mobile+":"+enterpriseId+":"+loginType+":"+siteType
+        String mobile =principals[0];
+        String enterpriseId =principals[1];
+        String loginType =principals[2];
+        String siteType =principals[3];
+        Mono<UserDetails> userDetailsMono = this.reactiveUserDetailsService.findByUsername(principal);
+        //密码校验
+        if (loginType.equals(SuperConstant.USERNAME_LOGIN)){
+            return userDetailsMono.publishOn(this.scheduler)
+                //密码比较
+                .filter(u -> this.passwordEncoder.matches(password, u.getPassword()))
+                //失败处理
+                .switchIfEmpty(Mono.defer(()->
                     Mono.error(new BadCredentialsException("Invalid Credentials"))))
-            //成功处理
-            .map(u ->
-                    new UsernamePasswordAuthenticationToken(u, u.getPassword(), u.getAuthorities()) );
+                //成功处理
+                .map(u ->
+                    new UsernamePasswordAuthenticationToken(u, u.getPassword(), u.getAuthorities()));
+        }
+        //短信校验
+        if (loginType.equals(SuperConstant.MOBIL_LOGIN)){
+            //redis中获得验证码
+            String key = SmsCacheConstant.LOGIN_CODE+principals[0];
+            RBucket<String> bucket = redissonClient.getBucket(key);
+            String authCode = bucket.get();
+            if (EmptyUtil.isNullOrEmpty(authCode)){
+                Mono.error(new BadCredentialsException("Invalid Credentials"));
+            }
+            return userDetailsMono.publishOn(this.scheduler)
+                //密码比较
+                .filter(u -> authCode.equals(password))
+                //失败处理
+                .switchIfEmpty(Mono.defer(()->
+                    Mono.error(new BadCredentialsException("Invalid Credentials"))))
+                //成功处理
+                .map(u ->
+                    new UsernamePasswordAuthenticationToken(u, u.getPassword(), u.getAuthorities()));
+        }
+        throw new BadCredentialsException("Invalid Credentials");
     }
 
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         Assert.notNull(passwordEncoder, "passwordEncoder cannot be null");
         this.passwordEncoder = passwordEncoder;
-    }
-
-    public void setScheduler(Scheduler scheduler) {
-        Assert.notNull(scheduler, "scheduler cannot be null");
-        this.scheduler = scheduler;
     }
 
 }

@@ -45,7 +45,11 @@ public class SmsSendRecordController {
         @RequestBody SmsSendRecordVo smsSendRecordVo,
         @PathVariable("pageNum") int pageNum,
         @PathVariable("pageSize") int pageSize) {
-        Page<SmsSendRecordVo> smsSendRecordVoPage = smsSendRecordFace.findSmsSendRecordVoPage(smsSendRecordVo, pageNum, pageSize);
+        Page<SmsSendRecordVo> smsSendRecordVoPage =
+            smsSendRecordFace.findSmsSendRecordVoPage(
+                smsSendRecordVo,
+                pageNum,
+                pageSize);
         return ResponseWrapBuild.build(SmsSendRecordEnum.SUCCEED,smsSendRecordVoPage);
     }
 

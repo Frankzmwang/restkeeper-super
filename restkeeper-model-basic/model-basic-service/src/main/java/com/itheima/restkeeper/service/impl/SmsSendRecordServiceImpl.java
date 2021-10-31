@@ -43,7 +43,7 @@ public class SmsSendRecordServiceImpl extends ServiceImpl<SmsSendRecordMapper, S
         if (!EmptyUtil.isNullOrEmpty(smsSendRecordVo.getEnableFlag())) {
             queryWrapper.lambda().eq(SmsSendRecord::getEnableFlag,smsSendRecordVo.getEnableFlag());
         }
-        queryWrapper.lambda().orderByAsc(SmsSendRecord::getCreatedTime);
+        queryWrapper.lambda().orderByDesc(SmsSendRecord::getCreatedTime);
         return page(page, queryWrapper);
     }
 

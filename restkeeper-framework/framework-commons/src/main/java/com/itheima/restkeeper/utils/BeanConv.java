@@ -12,6 +12,7 @@ import ma.glasnost.orika.metadata.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -111,7 +112,7 @@ public class BeanConv {
      */
     public static <T> List<T> toBeanList(List<?> sourceList, Class<T> destinationClass) {
         if (EmptyUtil.isNullOrEmpty(sourceList)){
-            return null;
+            return new ArrayList<>();
         }
         return mapper.mapAsList(sourceList,destinationClass);
     }

@@ -32,6 +32,7 @@ public class BaseController {
         if (ex instanceof ProjectException){
             ProjectException projectException = (ProjectException) ex;
             responseWrap = ResponseWrapBuild.build(projectException.getBasicEnumIntface(), null);
+        //远程调用异常
         }else if (ex instanceof RpcException){
             responseWrap = ResponseWrapBuild.build(BasicEnum.DUBBO_FAIL, null);
         } else {

@@ -16,6 +16,7 @@ spring:
   security:
     #匿名资源配置
     ignore-url:
+      - /security/user/loginCode/**
       - /security/user/login
       - /doc.html
       - /basic-swagger/**

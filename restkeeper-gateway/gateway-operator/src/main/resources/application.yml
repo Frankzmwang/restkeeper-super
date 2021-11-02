@@ -14,7 +14,7 @@ spring:
       config: classpath:singleServerConfig.yaml
   security:
     ignore-url:
-      - /**
+      - /security/user/loginCode/**
       - /security/user/login
       - /doc.html
       - /security-swagger/**

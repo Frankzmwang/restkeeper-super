@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
     })
 @Slf4j
 public class BrandFaceImpl implements BrandFace {
-    
+
     @Autowired
     IBrandService brandService;
 
@@ -79,15 +79,15 @@ public class BrandFaceImpl implements BrandFace {
             //绑定附件
             if (!EmptyUtil.isNullOrEmpty(brandVoResult)){
                 affixFace.bindBusinessId(
-                        AffixVo.builder()
-                                .businessId(brandVoResult.getId())
-                                .id(brandVo.getAffixVo().getId())
-                                .build());
+                    AffixVo.builder()
+                        .businessId(brandVoResult.getId())
+                        .id(brandVo.getAffixVo().getId())
+                        .build());
             }
             brandVoResult.setAffixVo(AffixVo.builder()
-                    .pathUrl(brandVo.getAffixVo().getPathUrl())
-                    .businessId(brandVoResult.getId())
-                    .id(brandVo.getAffixVo().getId()).build());
+                .pathUrl(brandVo.getAffixVo().getPathUrl())
+                .businessId(brandVoResult.getId())
+                .id(brandVo.getAffixVo().getId()).build());
             return brandVoResult;
         } catch (Exception e) {
             log.error("保存品牌异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -107,9 +107,9 @@ public class BrandFaceImpl implements BrandFace {
                     flag = affixFace.deleteAffixVoByBusinessId(brandVo.getId());
                     //绑定新图片
                     affixFace.bindBusinessId(AffixVo.builder()
-                            .businessId(brandVo.getId())
-                            .id(brandVo.getAffixVo().getId())
-                            .build());
+                        .businessId(brandVo.getId())
+                        .id(brandVo.getAffixVo().getId())
+                        .build());
                 }
             }
             return flag;

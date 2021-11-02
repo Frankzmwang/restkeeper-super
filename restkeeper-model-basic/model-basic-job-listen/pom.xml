@@ -47,7 +47,7 @@
     </dependencies>
 
     <build>
-        <finalName>model-basic-job-listen</finalName>
+        <finalName>basic-job-listen</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

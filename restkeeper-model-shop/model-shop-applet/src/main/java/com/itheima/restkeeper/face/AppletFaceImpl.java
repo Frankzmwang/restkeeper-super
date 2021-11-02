@@ -219,20 +219,6 @@ public class AppletFaceImpl implements AppletFace {
         try {
             //查询订单信息
             OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
-            if (!EmptyUtil.isNullOrEmpty(orderVoResult)){
-                //订单项目[可核算订单项目]附件
-                List<OrderItemVo> orderItemVoStatisticsList = orderVoResult.getOrderItemVoStatisticsList();
-                orderItemVoStatisticsList.forEach(n->{
-                    List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(n.getDishId());
-                    n.setAffixVo(affixVoListDish.get(0));
-                });
-                //订单项目[购物车中订单项目]附件
-                List<OrderItemVo> orderItemVoTemporaryList = orderVoResult.getOrderItemVoTemporaryList();
-                orderItemVoTemporaryList.forEach(n->{
-                    List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(n.getDishId());
-                    n.setAffixVo(affixVoListDish.get(0));
-                });
-            }
             return handlerOrderVo(orderVoResult);
         }catch (Exception e){
             log.error("查询桌台订单信息异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -259,6 +245,9 @@ public class AppletFaceImpl implements AppletFace {
             if (EmptyUtil.isNullOrEmpty(orderItemVoStatisticsList)) {
                 orderItemVoStatisticsList = new ArrayList<>();
             }else {
+                orderItemVoStatisticsList.forEach(n->{
+                   n.setAffixVo(affixFace.findAffixVoByBusinessId(n.getDishId()).get(0));
+                });
                 //2.2、计算可核算订单项总金额
                 reducePriceStatistics = reducePriceHandler(orderItemVoStatisticsList);
             }
@@ -383,6 +372,7 @@ public class AppletFaceImpl implements AppletFace {
             //4.1、如果以往购物车订单项中无则新增
             if (EmptyUtil.isNullOrEmpty(orderItemHandler)) {
                 Dish dish = dishService.getById(dishId);
+                List<AffixVo> affixVoList = affixFace.findAffixVoByBusinessId(dish.getId());
                 OrderVo orderVo = orderService.findOrderByOrderNo(orderNo);
                 OrderItemVo orderItemVo = OrderItemVo.builder()
                         .productOrderNo(orderNo)
@@ -394,6 +384,7 @@ public class AppletFaceImpl implements AppletFace {
                         .price(dish.getPrice())
                         .reducePrice(dish.getReducePrice())
                         .build();
+                orderItemVo.setAffixVo(affixVoList.get(0));
                 //沿用订单中的分库键
                 orderItemVo.setShardingId(orderVo.getShardingId());
                 orderItemVoRMap.put(dishId, orderItemVo);

@@ -82,6 +82,7 @@ public class DishController {
     @ApiOperation(value = "删除菜品",notes = "删除菜品")
     @ApiImplicitParam(name = "dishVo",value = "菜品查询对象",required = true,dataType = "DishVo")
     ResponseWrap<Boolean> deleteDish(@RequestBody DishVo dishVo ) {
+        //获得所有选中的菜品IDS
         String[] checkedIds = dishVo.getCheckedIds();
         Boolean flag = dishFace.deleteDish(checkedIds);
         return ResponseWrapBuild.build(DishEnum.SUCCEED,flag);

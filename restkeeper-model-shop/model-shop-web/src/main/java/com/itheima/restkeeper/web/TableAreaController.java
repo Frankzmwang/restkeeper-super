@@ -62,13 +62,8 @@ public class TableAreaController {
     @ApiOperation(value = "添加区域",notes = "添加区域")
     @ApiImplicitParam(name = "tableAreaVo",value = "区域对象",required = true,dataType = "TableAreaVo")
     ResponseWrap<TableAreaVo> createTableArea(@RequestBody TableAreaVo tableAreaVo) {
-        try {
-            TableAreaVo tableAreaVoResult = tableAreaFace.createTableArea(tableAreaVo);
-            return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,tableAreaVoResult);
-        } catch (Exception e) {
-            log.error("保存区域异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-            throw new ProjectException(TableAreaEnum.CREATE_FAIL);
-        }
+        TableAreaVo tableAreaVoResult = tableAreaFace.createTableArea(tableAreaVo);
+        return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,tableAreaVoResult);
     }
 
     /**
@@ -93,6 +88,7 @@ public class TableAreaController {
     @ApiOperation(value = "删除区域",notes = "删除区域")
     @ApiImplicitParam(name = "tableAreaVo",value = "区域查询对象",required = true,dataType = "TableAreaVo")
     ResponseWrap<Boolean> deleteTableArea(@RequestBody TableAreaVo tableAreaVo ) {
+        //获得所有选择的区域IDS
         String[] checkedIds = tableAreaVo.getCheckedIds();
         Boolean flag = tableAreaFace.deleteTableArea(checkedIds);
         return ResponseWrapBuild.build(TableAreaEnum.SUCCEED,flag);

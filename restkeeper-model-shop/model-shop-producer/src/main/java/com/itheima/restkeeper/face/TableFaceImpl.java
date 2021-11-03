@@ -34,12 +34,13 @@ public class TableFaceImpl implements TableFace {
 
     @Autowired
     ITableService tableService;
-    
+
     @Override
     public Page<TableVo> findTableVoPage(TableVo tableVo,
                                          int pageNum,
                                          int pageSize) throws ProjectException{
         try {
+            //查询所有桌台
             Page<Table> page = tableService.findTableVoPage(tableVo, pageNum, pageSize);
             Page<TableVo> pageVo = new Page<>();
             BeanConv.toBean(page,pageVo);
@@ -57,6 +58,7 @@ public class TableFaceImpl implements TableFace {
     @Override
     public TableVo createTable(TableVo tableVo) throws ProjectException{
         try {
+            //添加桌台
             return BeanConv.toBean( tableService.createTable(tableVo), TableVo.class);
         } catch (Exception e) {
             log.error("保存桌台异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -68,6 +70,7 @@ public class TableFaceImpl implements TableFace {
     @GlobalTransactional
     public Boolean updateTable(TableVo tableVo) throws ProjectException{
         try {
+            //修改桌台
             return tableService.updateTable(tableVo);
         } catch (Exception e) {
             log.error("保存桌台异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -78,6 +81,7 @@ public class TableFaceImpl implements TableFace {
     @Override
     public Boolean deleteTable(String[] checkedIds) throws ProjectException{
         try {
+            //删除桌台
             return tableService.deleteTable(checkedIds);
         } catch (Exception e) {
             log.error("删除桌台异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -88,6 +92,7 @@ public class TableFaceImpl implements TableFace {
     @Override
     public TableVo findTableByTableId(Long tableId)throws ProjectException {
         try {
+            //按ID查询桌台
             Table table = tableService.getById(tableId);
             if (!EmptyUtil.isNullOrEmpty(table)){
                 return BeanConv.toBean(table,TableVo.class);
@@ -102,6 +107,7 @@ public class TableFaceImpl implements TableFace {
     @Override
     public List<TableVo> findTableVoList()throws ProjectException {
         try {
+            //查询桌台列表，用在哪里？是否要注意状态
             return BeanConv.toBeanList(tableService.findTableVoList(),TableVo.class);
         } catch (Exception e) {
             log.error("查找桌台所有桌台异常：{}", ExceptionsUtil.getStackTraceAsString(e));

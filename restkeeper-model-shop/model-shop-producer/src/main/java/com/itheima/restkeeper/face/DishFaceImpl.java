@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
                 @Method(name = "deleteDish",retries = 0)
         })
 public class DishFaceImpl implements DishFace {
-    
+
     @Autowired
     IDishService dishService;
 
@@ -60,6 +60,7 @@ public class DishFaceImpl implements DishFace {
                                        int pageNum,
                                        int pageSize)throws ProjectException {
         try {
+            //查询菜品分页
             Page<Dish> page = dishService.findDishVoPage(dishVo, pageNum, pageSize);
             Page<DishVo> pageVo = new Page<>();
             BeanConv.toBean(page,pageVo);
@@ -85,6 +86,7 @@ public class DishFaceImpl implements DishFace {
                 });
             }
             pageVo.setRecords(dishVoList);
+            //返回结果
             return pageVo;
         } catch (Exception e) {
             log.error("查询菜品列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -95,6 +97,7 @@ public class DishFaceImpl implements DishFace {
     @Override
     public DishVo createDish(DishVo dishVo) throws ProjectException{
         try {
+            //创建菜品
             DishVo dishVoResult = BeanConv.toBean(dishService.createDish(dishVo), DishVo.class);
             dishVoResult.setHasDishFlavor(dishVo.getHasDishFlavor());
             //构建初始化库存
@@ -133,7 +136,7 @@ public class DishFaceImpl implements DishFace {
                 TimeUnit.SECONDS)){
                 //修改菜品
                 flag = dishService.updateDish(dishVo);
-                //次欧冠菜品图片
+                //处理菜品图片
                 if (flag){
                     List<AffixVo> affixVoList = affixFace.findAffixVoByBusinessId(dishVo.getId());
                     List<Long> affixIds = affixVoList.stream()
@@ -186,6 +189,7 @@ public class DishFaceImpl implements DishFace {
     @Override
     public DishVo findDishByDishId(Long dishId)throws ProjectException {
         try {
+            //按菜品ID查找菜品
             Dish dish = dishService.getById(dishId);
             if (!EmptyUtil.isNullOrEmpty(dish)){
                 return BeanConv.toBean(dish,DishVo.class);

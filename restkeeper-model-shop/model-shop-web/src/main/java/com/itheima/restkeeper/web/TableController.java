@@ -100,6 +100,7 @@ public class TableController {
     @ApiOperation(value = "删除桌台",notes = "删除桌台")
     @ApiImplicitParam(name = "tableVo",value = "桌台查询对象",required = true,dataType = "TableVo")
     ResponseWrap<Boolean> deleteTable(@RequestBody TableVo tableVo ) {
+        //拿到选中桌台的IDS
         String[] checkedIds = tableVo.getCheckedIds();
         Boolean flag = tableFace.deleteTable(checkedIds);
         return ResponseWrapBuild.build(TableEnum.SUCCEED,flag);

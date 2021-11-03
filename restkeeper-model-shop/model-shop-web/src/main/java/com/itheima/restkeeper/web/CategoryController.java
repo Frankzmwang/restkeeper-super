@@ -85,6 +85,7 @@ public class CategoryController {
     @ApiOperation(value = "删除分类",notes = "删除分类")
     @ApiImplicitParam(name = "categoryVo",value = "分类查询对象",required = true,dataType = "CategoryVo")
     ResponseWrap<Boolean> deleteCategory(@RequestBody CategoryVo categoryVo ) {
+        //获得所有选择分类IDS
         String[] checkedIds = categoryVo.getCheckedIds();
         Boolean flag = categoryFace.deleteCategory(checkedIds);
         return ResponseWrapBuild.build(CategoryEnum.SUCCEED,flag);

@@ -39,6 +39,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
                                                  int pageNum,
                                                  int pageSize)throws ProjectException {
         try {
+            //查询区域分页
             Page<TableArea> page = tableAreaService.findTableAreaVoPage(tableAreaVo, pageNum, pageSize);
             Page<TableAreaVo> pageVo = new Page<>();
             BeanConv.toBean(page,pageVo);
@@ -46,6 +47,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
             List<TableArea> tableAreaList = page.getRecords();
             List<TableAreaVo> tableAreaVoList = BeanConv.toBeanList(tableAreaList,TableAreaVo.class);
             pageVo.setRecords(tableAreaVoList);
+            //返回结果
             return pageVo;
         } catch (Exception e) {
             log.error("查询区域列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -57,6 +59,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     @Override
     public TableAreaVo createTableArea(TableAreaVo tableAreaVo) throws ProjectException{
         try {
+            //创建区域
             return BeanConv.toBean( tableAreaService.createTableArea(tableAreaVo), TableAreaVo.class);
         } catch (Exception e) {
             log.error("保存区域异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -67,6 +70,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     @Override
     public Boolean updateTableArea(TableAreaVo tableAreaVo) throws ProjectException{
         try {
+            //修改区域
             return tableAreaService.updateTableArea(tableAreaVo);
         } catch (Exception e) {
             log.error("保存区域异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -77,6 +81,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     @Override
     public Boolean deleteTableArea(String[] checkedIds)throws ProjectException {
         try {
+            //删除区域
             return tableAreaService.deleteTableArea(checkedIds);
         } catch (Exception e) {
             log.error("删除区域异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -87,6 +92,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     @Override
     public TableAreaVo findTableAreaByTableAreaId(Long tableAreaId)throws ProjectException {
         try {
+            //按id查询区域
             TableArea tableArea = tableAreaService.getById(tableAreaId);
             if (!EmptyUtil.isNullOrEmpty(tableArea)){
                 return BeanConv.toBean(tableArea,TableAreaVo.class);
@@ -101,6 +107,7 @@ public class TableAreaFaceImpl implements TableAreaFace {
     @Override
     public List<TableAreaVo> findTableAreaVoList()throws ProjectException {
         try {
+            //查询区域
             return BeanConv.toBeanList(tableAreaService.findTableAreaVoList(),TableAreaVo.class);
         } catch (Exception e) {
             log.error("查找区域所有区域异常：{}", ExceptionsUtil.getStackTraceAsString(e));

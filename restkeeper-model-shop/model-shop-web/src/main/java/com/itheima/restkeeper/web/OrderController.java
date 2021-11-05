@@ -76,7 +76,7 @@ public class OrderController {
     @ApiOperation(value = "订单结算",notes = "订单结算")
     @ApiImplicitParam(name = "orderVo",value = "订单信息",dataType = "OrderVo")
     public ResponseWrap<TradingVo> handleTrading(@RequestBody OrderVo orderVo){
-        //1、获得结算人信息
+        //获得结算人信息
         String userVoString = UserVoContext.getUserVoString();
         UserVo userVo = JSONObject.parseObject(userVoString, UserVo.class);
         orderVo.setCashierId(userVo.getId());
@@ -88,7 +88,7 @@ public class OrderController {
     @ApiOperation(value = "订单退款",notes = "订单退款")
     @ApiImplicitParam(name = "orderVo",value = "订单信息",dataType = "OrderVo")
     public ResponseWrap<Boolean> handleTradingRefund(@RequestBody OrderVo orderVo){
-        //1、获得当前订单结算人信息
+        //获得当前订单结算人信息
         String userVoString = UserVoContext.getUserVoString();
         UserVo userVo = JSONObject.parseObject(userVoString, UserVo.class);
         orderVo.setCashierId(userVo.getId());

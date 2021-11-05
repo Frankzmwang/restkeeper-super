@@ -130,21 +130,19 @@ public class AppletFaceImpl implements AppletFace {
             //5、查询菜品
             List<Dish> dishs = dishService.findDishVoByStoreId(table.getStoreId());
             List<DishVo> dishVos = BeanConv.toBeanList(dishs, DishVo.class);
-            //6、查询菜品口味
-            dishVos.forEach(dishVo -> {
+            //6、查询菜品口味、图片信息
+            dishVos.forEach(dishVo->{
+                //6.1、口味与数字字典中间表信息
                 List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(dishVo.getId());
                 List<DishFlavorVo> dishFlavorVos = BeanConv.toBeanList(dishFlavors, DishFlavorVo.class);
                 dishVo.setDishFlavorVos(dishFlavorVos);
-            });
-            dishVos.forEach(dishVo->{
-                List<DishFlavorVo> dishFlavorVos = dishVo.getDishFlavorVos();
-                //6.1、构建数字字典dataKeys
+                //6.2、构建数字字典dataKeys
                 List<String> dataKeys = dishFlavorVos.stream()
                         .map(DishFlavorVo::getDataKey).collect(Collectors.toList());
-                //6.2、RPC查询数字字典口味信息
+                //6.3、RPC查询数字字典口味信息
                 List<DataDictVo> valueByDataKeys = dataDictFace.findValueByDataKeys(dataKeys);
                 dishVo.setDataDictVos(valueByDataKeys);
-                //6.3、RPC查询附件信息
+                //6.4、RPC查询附件信息
                 List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(dishVo.getId());
                 dishVo.setAffixVo(affixVoListDish.get(0));
             });
@@ -219,6 +217,7 @@ public class AppletFaceImpl implements AppletFace {
         try {
             //查询订单信息
             OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
+            //处理订单：可核算订单项目、购物车订单项目
             return handlerOrderVo(orderVoResult);
         }catch (Exception e){
             log.error("查询桌台订单信息异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -284,12 +283,12 @@ public class AppletFaceImpl implements AppletFace {
     @Override
     public DishVo findDishVoById(Long dishId)throws ProjectException {
         try {
-            //1、查询菜品
+            //1、查询菜品,注意：菜品图片口味信息需要调用通用服务获得
             Dish dish = dishService.getById(dishId);
             //2、查询菜品口味
             List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(dishId);
             DishVo dishVo = BeanConv.toBean(dish, DishVo.class);
-            //3、处理菜品口味
+            //3、处理菜品口味【数字字典】
             List<DishFlavorVo> dishFlavorVos = BeanConv.toBeanList(dishFlavors,DishFlavorVo.class);
             List<String> DataKeys = dishFlavorVos.stream()
                     .map(DishFlavorVo::getDataKey).collect(Collectors.toList());
@@ -612,13 +611,13 @@ public class AppletFaceImpl implements AppletFace {
                     if (flag) {
                         //4、修改桌台状态
                         tableService.updateTable(TableVo.builder()
-                                .id(targetTableId)
-                                .tableStatus(SuperConstant.USE)
-                                .build());
+                            .id(targetTableId)
+                            .tableStatus(SuperConstant.USE)
+                            .build());
                         tableService.updateTable(TableVo.builder()
-                                .id(sourceTableId)
-                                .tableStatus(SuperConstant.FREE)
-                                .build());
+                            .id(sourceTableId)
+                            .tableStatus(SuperConstant.FREE)
+                            .build());
                     } else {
                         throw new ProjectException(RotaryTableEnum.ROTARY_TABLE_FAIL);
                     }

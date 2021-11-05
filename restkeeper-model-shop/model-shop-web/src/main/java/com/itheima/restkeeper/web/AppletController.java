@@ -41,7 +41,7 @@ public class AppletController {
     @ApiOperation(value = "查询桌台相关主体信息",notes = "查询桌台相关主体信息:品牌、门店、菜品、口味、分类等")
     @ApiImplicitParam(paramType = "path",name = "tableId",value = "桌台Id",dataType = "Long")
     public ResponseWrap<AppletInfoVo> findAppletInfoVoByTableId(@PathVariable("tableId") Long tableId){
-        //查询订单情况，注意：品牌图片信息、菜品图片口味信息需要调用通用服务获得
+        //AppletInfoVo对象包所有相关信息，注意：品牌图片信息、菜品图片口味信息需要调用通用服务获得
         AppletInfoVo appletInfoVo = appletFace.findAppletInfoVoByTableId(tableId);
         return ResponseWrapBuild.build(TableEnum.SUCCEED,appletInfoVo);
     }
@@ -106,7 +106,7 @@ public class AppletController {
     @PostMapping("placeOrder/{orderNo}")
     @ApiOperation(value = "下单操作",notes = "添加购物车订单项到可结算订单项")
     @ApiImplicitParam(paramType = "path",name = "orderNo",value = "订单编号",dataType = "Long")
-    public ResponseWrap<OrderVo> addToOrderItem(@PathVariable("orderNo") Long orderNo) {
+    public ResponseWrap<OrderVo> placeOrder(@PathVariable("orderNo") Long orderNo) {
         OrderVo orderVoResult = appletFace.placeOrder(orderNo);
         return ResponseWrapBuild.build(BrandEnum.SUCCEED,orderVoResult);
     }

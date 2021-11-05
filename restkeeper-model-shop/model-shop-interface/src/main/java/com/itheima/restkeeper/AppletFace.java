@@ -32,7 +32,7 @@ public interface AppletFace {
      * @param personNumbers 就餐人数
      * @return Boolean
      */
-    OrderVo openTable(Long tableId,Integer personNumbers)throws ProjectException;
+    OrderVo openTable(Long tableId, Integer personNumbers)throws ProjectException;
 
     /***
      * @description 已开桌：查询当前桌台订单信息【包括可核算订单项和购物车订单项】
@@ -56,7 +56,7 @@ public interface AppletFace {
      * @return
      * @return: java.math.BigDecimal
      */
-    BigDecimal reducePriceHandler(List<OrderItemVo> orderItemVos )throws ProjectException;
+    BigDecimal reducePriceHandler(List<OrderItemVo> orderItemVos)throws ProjectException;
 
 
     /***
@@ -64,7 +64,7 @@ public interface AppletFace {
      * @return
      * @return: com.itheima.restkeeper.req.DishVo
      */
-    DishVo findDishVoById(Long dishId);
+    DishVo findDishVoById(Long dishId) throws ProjectException;
 
     /***
      * @description 每次点击添加或减少，则添加或减少购物车订单项，同时增减库存
@@ -81,14 +81,14 @@ public interface AppletFace {
     OrderVo opertionShoppingCart(Long dishId,
                                  Long orderNo,
                                  String dishFlavor,
-                                 String opertionType) ;
+                                 String opertionType) throws ProjectException;
 
     /***
      * @description 下单操作：添加购物车订单项到可结算订单项
      * @param orderNo 订单编号
      * @return
      */
-    OrderVo placeOrder(Long orderNo) ;
+    OrderVo placeOrder(Long orderNo) throws ProjectException ;
 
     /***
      * @description 转台业务，满足下列条件才可以转台：
@@ -100,12 +100,12 @@ public interface AppletFace {
      * @param orderNo 订单号
      * @return
      */
-    Boolean rotaryTable(Long sourceTableId,Long targetTableId,Long orderNo) ;
+    Boolean rotaryTable(Long sourceTableId, Long targetTableId, Long orderNo)throws ProjectException ;
 
     /***
      * @description 清理购物车
      * @param orderNo 订单号
      * @return 是否清理成功
      */
-    Boolean clearShoppingCart(Long orderNo);
+    Boolean clearShoppingCart(Long orderNo) throws ProjectException;
 }

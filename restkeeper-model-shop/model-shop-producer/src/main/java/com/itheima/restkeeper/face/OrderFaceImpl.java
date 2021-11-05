@@ -129,7 +129,7 @@ public class OrderFaceImpl implements OrderFace {
                 TimeUnit.SECONDS)){
                 String key = AppletCacheConstant.REPERTORY_DISH+dishId;
                 RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
-                //4.1添加可核算订单项
+                //4.1、添加可核算订单项
                 if (opertionType.equals(SuperConstant.OPERTION_TYPE_ADD)){
                     this.addToOrderItem(dishId,orderNo,atomicLong);
                 }
@@ -324,14 +324,14 @@ public class OrderFaceImpl implements OrderFace {
     @Override
     @GlobalTransactional
     public TradingVo handleTrading(OrderVo orderVo) throws ProjectException{
-        //2、根据订单生成交易单
+        //1、根据订单生成交易单
         TradingVo tradingVo = tradingConvertor(orderVo);
         if (EmptyUtil.isNullOrEmpty(tradingVo)){
             throw new ProjectException(OrderEnum.FAIL);
         }
-        //3、调用支付RPC接口，进行支付
+        //2、调用支付RPC接口，进行支付
         TradingVo tradingVoResult = tradingFace.doPay(tradingVo);
-        //4、结算后桌台状态修改：开桌-->空闲
+        //3、结算后桌台状态修改：开桌-->空闲
         Boolean flag = true;
         if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
             throw new ProjectException(OrderEnum.FAIL);
@@ -339,6 +339,7 @@ public class OrderFaceImpl implements OrderFace {
             TableVo tableVo = TableVo.builder()
                 .id(orderVo.getTableId())
                 .tableStatus(SuperConstant.FREE).build();
+            //4、修改桌台状态
             flag = tableFace.updateTable(tableVo);
             if (!flag){
                 throw new ProjectException(OrderEnum.FAIL);
@@ -350,23 +351,23 @@ public class OrderFaceImpl implements OrderFace {
     @Override
     @GlobalTransactional
     public Boolean handleTradingRefund(OrderVo orderVo)throws ProjectException {
-        //2、获取当前交易单信息
+        //1、获取当前交易单信息
         OrderVo orderVoBefore = findOrderVoPaid(orderVo.getOrderNo());
-        //3、退款收款人不为同一人，退款操作拒绝
+        //2、退款收款人不为同一人，退款操作拒绝
         if (orderVo.getTradingChannel().equals(SuperConstant.TRADING_CHANNEL_REFUND)
             &&orderVo.getCashierId().longValue()!=orderVoBefore.getCashierId().longValue()){
             throw new ProjectException(OrderEnum.REFUND_FAIL);
         }
-        //4、当前交易单信息，退款操作拒绝
+        //3、当前交易单信息，退款操作拒绝
         if (!SuperConstant.YJS.equals(orderVoBefore.getOrderState())){
             throw new ProjectException(OrderEnum.REFUND_FAIL);
         }
-        //5、根据订单生成交易单
+        //4、根据订单生成交易单
         TradingVo tradingVo = tradingConvertor(orderVo);
         if (EmptyUtil.isNullOrEmpty(tradingVo)){
             throw new ProjectException(OrderEnum.FAIL);
         }
-        //6、执行退款交易
+        //5、执行退款交易
         TradingVo tradingVoResult = tradingFace.doPay(tradingVo);
         boolean flag = true;
         if (EmptyUtil.isNullOrEmpty(tradingVoResult)){

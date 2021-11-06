@@ -38,7 +38,7 @@ public interface AffixFace {
 
     /**
      * @Description 批量上传绑定对应的业务Id
-     * @param  affixVo 附件对象
+     * @param  affixVos 附件对象
      * @return
      */
     List<AffixVo> bindBatchBusinessId(List<AffixVo> affixVos) throws ProjectException;

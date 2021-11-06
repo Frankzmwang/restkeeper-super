@@ -3,10 +3,8 @@ package com.itheima.restkeeper.face;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.restkeeper.OrderFace;
 import com.itheima.restkeeper.TableFace;
-import com.itheima.restkeeper.TradingFace;
 import com.itheima.restkeeper.constant.AppletCacheConstant;
 import com.itheima.restkeeper.constant.SuperConstant;
-import com.itheima.restkeeper.enums.OpenTableEnum;
 import com.itheima.restkeeper.enums.OrderEnum;
 import com.itheima.restkeeper.enums.OrderItemEnum;
 import com.itheima.restkeeper.enums.ShoppingCartEnum;
@@ -24,18 +22,15 @@ import com.itheima.restkeeper.service.IOrderService;
 import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
-import com.itheima.restkeeper.utils.ResponseWrapBuild;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.config.annotation.Method;
-import org.redisson.RedissonMultiLock;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -58,8 +53,6 @@ import java.util.concurrent.TimeUnit;
     })
 public class OrderFaceImpl implements OrderFace {
 
-    @DubboReference(version = "${dubbo.application.version}", check = false)
-    TradingFace tradingFace;
 
     @DubboReference(version = "${dubbo.application.version}", check = false)
     TableFace tableFace;
@@ -330,7 +323,7 @@ public class OrderFaceImpl implements OrderFace {
             throw new ProjectException(OrderEnum.FAIL);
         }
         //2、调用支付RPC接口，进行支付
-        TradingVo tradingVoResult = tradingFace.doPay(tradingVo);
+        TradingVo tradingVoResult = null;
         //3、结算后桌台状态修改：开桌-->空闲
         Boolean flag = true;
         if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
@@ -368,7 +361,7 @@ public class OrderFaceImpl implements OrderFace {
             throw new ProjectException(OrderEnum.FAIL);
         }
         //5、执行退款交易
-        TradingVo tradingVoResult = tradingFace.doPay(tradingVo);
+        TradingVo tradingVoResult = null;
         boolean flag = true;
         if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
             throw new ProjectException(OrderEnum.FAIL);

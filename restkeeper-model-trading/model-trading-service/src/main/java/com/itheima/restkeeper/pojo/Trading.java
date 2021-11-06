@@ -99,7 +99,7 @@ public class Trading extends BasicPojo {
     @ApiModelProperty(value = "统一下单返回信息json【用于生产二维码、Android ios唤醒支付等】")
     private String placeOrderJson;
 
-    @ApiModelProperty(value = "订单状态【DFK待付款, FKZ付款中,QXDD取消订单,YJS已结算,MD免单】")
+    @ApiModelProperty(value = "订单状态【DFK:待付款 FKZ:付款中 QXDD:取消订单 YJS:已结算 GZ:挂账 MD免单】")
     private String tradingState;
 
     @ApiModelProperty(value = "商户号")

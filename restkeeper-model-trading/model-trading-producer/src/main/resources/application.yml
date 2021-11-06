@@ -48,6 +48,7 @@ mybatis-plus:
   #忽略门店号表
   ignore-store-tables:
     - tab_trading_setting
+    - tab_pay_channel
     - undo_log
 logging:
   config: classpath:logback.xml

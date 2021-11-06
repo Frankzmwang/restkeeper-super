@@ -11,6 +11,7 @@ import com.itheima.restkeeper.req.UserVo;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
 import com.itheima.restkeeper.utils.ResponseWrapBuild;
+import com.itheima.restkeeper.validation.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -19,8 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,7 +59,8 @@ public class UserController {
     public ResponseWrap<Page<UserVo>> findUserVoPage(
         @RequestBody UserVo userVo,
         @PathVariable("pageNum") int pageNum,
-        @PathVariable("pageSize") int pageSize) throws ProjectException {
+        @PathVariable("pageSize") int pageSize)
+        throws ProjectException {
         try {
             Page<UserVo> userVoPage = userFace.findUserVoPage(userVo, pageNum, pageSize);
             return ResponseWrapBuild.build(UserEnum.SUCCEED,userVoPage);
@@ -73,7 +78,8 @@ public class UserController {
     @PostMapping
     @ApiOperation(value = "注册用户",notes = "注册用户")
     @ApiImplicitParam(name = "userVo",value = "用户对象",required = true,dataType = "UserVo")
-    ResponseWrap<UserVo> registerUser(@RequestBody UserVo userVo) throws ProjectException {
+    ResponseWrap<UserVo> registerUser(@Validated(Create.class) @RequestBody UserVo userVo) throws ProjectException {
+
         String plainPassword = userVo.getPassword();
         //必须要加{bcrypt}要不认证不通过
         String password = "{bcrypt}"+bCryptPasswordEncoder.encode(plainPassword);
@@ -89,7 +95,7 @@ public class UserController {
     @PatchMapping
     @ApiOperation(value = "修改用户",notes = "修改用户")
     @ApiImplicitParam(name = "userVo",value = "用户对象",required = true,dataType = "UserVo")
-    ResponseWrap<Boolean> updateUser(@RequestBody UserVo userVo) throws ProjectException {
+    ResponseWrap<Boolean> updateUser(@Validated(Update.class) @RequestBody UserVo userVo) throws ProjectException {
         Boolean flag = userFace.updateUser(userVo);
         return ResponseWrapBuild.build(UserEnum.SUCCEED,flag);
     }
@@ -102,7 +108,7 @@ public class UserController {
     @DeleteMapping
     @ApiOperation(value = "删除用户",notes = "删除用户")
     @ApiImplicitParam(name = "userVo",value = "用户查询对象",required = true,dataType = "UserVo")
-    ResponseWrap<Boolean> deleteUser(@RequestBody UserVo userVo ) throws ProjectException {
+    ResponseWrap<Boolean> deleteUser(@Validated(Delete.class) @RequestBody UserVo userVo ) throws ProjectException {
         String[] checkedIds = userVo.getCheckedIds();
         Boolean flag = userFace.deleteUser(checkedIds);
         return ResponseWrapBuild.build(UserEnum.SUCCEED,flag);
@@ -135,7 +141,7 @@ public class UserController {
     @PostMapping("update-user-enableFlag")
     @ApiOperation(value = "修改用户状态",notes = "修改用户状态")
     @ApiImplicitParam(name = "userVo",value = "用户查询对象",required = true,dataType = "UserVo")
-    ResponseWrap<Boolean> updateUserEnableFlag(@RequestBody UserVo userVo) throws ProjectException {
+    ResponseWrap<Boolean> updateUserEnableFlag(@Validated(UpdateEnableFlag.class) @RequestBody UserVo userVo) throws ProjectException {
         Boolean flag = userFace.updateUser(userVo);
         return ResponseWrapBuild.build(UserEnum.SUCCEED,flag);
     }
@@ -143,7 +149,7 @@ public class UserController {
     @PostMapping("rest-password")
     @ApiOperation(value = "重置用户密码",notes = "重置用户密码")
     @ApiImplicitParam(name = "userVo",value = "用户对象",required = true,dataType = "UserVo")
-    ResponseWrap<Boolean> restPssword(@RequestBody UserVo userVo) throws ProjectException {
+    ResponseWrap<Boolean> restPssword(@Validated(RestPssword.class) @RequestBody UserVo userVo) throws ProjectException {
         //必须要加{bcrypt}要不认证不通过
         String password = "{bcrypt}"+bCryptPasswordEncoder.encode("88488");
         userVo.setPassword(password);

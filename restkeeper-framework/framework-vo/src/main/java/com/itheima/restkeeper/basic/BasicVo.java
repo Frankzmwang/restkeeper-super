@@ -1,10 +1,16 @@
 package com.itheima.restkeeper.basic;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.itheima.restkeeper.validation.Create;
+import com.itheima.restkeeper.validation.Delete;
+import com.itheima.restkeeper.validation.Update;
+import com.itheima.restkeeper.validation.UpdateEnableFlag;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -33,6 +39,7 @@ public class BasicVo implements Serializable {
     protected Date updatedTime;
 
     @ApiModelProperty(value = "是否有效")
+    @NotBlank(groups = {UpdateEnableFlag.class},message = "角色为空")
     protected String enableFlag;
 
     public BasicVo(Long id) {

@@ -41,27 +41,27 @@ public class PayChannelFaceImpl implements PayChannelFace {
 
 
     @Override
-    public Page<PayChannelVo> findPayChannelVoPage(PayChannelVo sayChannelVo,
+    public Page<PayChannelVo> findPayChannelVoPage(PayChannelVo payChannelVo,
                                                    int pageNum,
                                                    int pageSize) throws ProjectException{
         try {
-            Page<PayChannel> page = sayChannelService.findPayChannelVoPage(sayChannelVo, pageNum, pageSize);
+            Page<PayChannel> page = sayChannelService.findPayChannelVoPage(payChannelVo, pageNum, pageSize);
             Page<PayChannelVo> pageVo = new Page<>();
             BeanConv.toBean(page,pageVo);
             //结果集转换
             List<PayChannel> sayChannelList = page.getRecords();
-            List<PayChannelVo> sayChannelVoList = new ArrayList<>();
+            List<PayChannelVo> payChannelVoList = new ArrayList<>();
             if (!EmptyUtil.isNullOrEmpty(sayChannelList)){
                 sayChannelList.forEach(n->{
-                    PayChannelVo sayChannelVoHandler = BeanConv.toBean(n, PayChannelVo.class);
+                    PayChannelVo payChannelVoHandler = BeanConv.toBean(n, PayChannelVo.class);
                     if (!EmptyUtil.isNullOrEmpty(n.getOtherConfig())){
                         List <OtherConfigVo> list = JSONArray.parseArray(n.getOtherConfig(),OtherConfigVo.class);
-                        sayChannelVoHandler.setOtherConfigs(list);
+                        payChannelVoHandler.setOtherConfigs(list);
                     }
-                    sayChannelVoList.add(sayChannelVoHandler);
+                    payChannelVoList.add(payChannelVoHandler);
                 });
             }
-            pageVo.setRecords(sayChannelVoList);
+            pageVo.setRecords(payChannelVoList);
             return pageVo;
         } catch (Exception e) {
             log.error("查询支付通道列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -72,9 +72,9 @@ public class PayChannelFaceImpl implements PayChannelFace {
 
     @Override
     @Transactional
-    public PayChannelVo createPayChannel(PayChannelVo sayChannelVo) throws ProjectException{
+    public PayChannelVo createPayChannel(PayChannelVo payChannelVo) throws ProjectException{
         try {
-            return BeanConv.toBean( sayChannelService.createPayChannel(sayChannelVo), PayChannelVo.class);
+            return BeanConv.toBean( sayChannelService.createPayChannel(payChannelVo), PayChannelVo.class);
         } catch (Exception e) {
             log.error("保存支付通道异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(PayChannelEnum.CREATE_FAIL);
@@ -83,9 +83,9 @@ public class PayChannelFaceImpl implements PayChannelFace {
 
     @Override
     @Transactional
-    public Boolean updatePayChannel(PayChannelVo sayChannelVo) throws ProjectException{
+    public Boolean updatePayChannel(PayChannelVo payChannelVo) throws ProjectException{
         try {
-            return sayChannelService.updatePayChannel(sayChannelVo);
+            return sayChannelService.updatePayChannel(payChannelVo);
         } catch (Exception e) {
             log.error("保存支付通道异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(PayChannelEnum.UPDATE_FAIL);

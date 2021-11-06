@@ -1,17 +1,17 @@
 package com.itheima.restkeeper.web;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.itheima.restkeeper.AffixFace;
 import com.itheima.restkeeper.UserFace;
 import com.itheima.restkeeper.basic.ResponseWrap;
 import com.itheima.restkeeper.enums.UserEnum;
 import com.itheima.restkeeper.exception.ProjectException;
-import com.itheima.restkeeper.req.AffixVo;
 import com.itheima.restkeeper.req.UserVo;
-import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
 import com.itheima.restkeeper.utils.ResponseWrapBuild;
-import com.itheima.restkeeper.validation.*;
+import com.itheima.restkeeper.validation.Create;
+import com.itheima.restkeeper.validation.Delete;
+import com.itheima.restkeeper.validation.Update;
+import com.itheima.restkeeper.validation.UpdateEnableFlag;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -23,10 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @ClassName UserController.java
@@ -149,7 +146,7 @@ public class UserController {
     @PostMapping("rest-password")
     @ApiOperation(value = "重置用户密码",notes = "重置用户密码")
     @ApiImplicitParam(name = "userVo",value = "用户对象",required = true,dataType = "UserVo")
-    ResponseWrap<Boolean> restPssword(@Validated(RestPssword.class) @RequestBody UserVo userVo) throws ProjectException {
+    ResponseWrap<Boolean> restPssword(@RequestBody UserVo userVo) throws ProjectException {
         //必须要加{bcrypt}要不认证不通过
         String password = "{bcrypt}"+bCryptPasswordEncoder.encode("88488");
         userVo.setPassword(password);

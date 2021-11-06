@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.itheima.restkeeper.basic.BasicVo;
 import com.itheima.restkeeper.validation.Create;
 import com.itheima.restkeeper.validation.Delete;
-import com.itheima.restkeeper.validation.RestPssword;
 import com.itheima.restkeeper.validation.Update;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
@@ -67,7 +66,7 @@ public class UserVo extends BasicVo  {
     private String realName;
 
     @ApiModelProperty(value = "密码")
-    @NotBlank(groups = {Create.class, RestPssword.class},message = "密码为空")
+    @NotBlank(groups = {Create.class},message = "密码为空")
     private String password;
 
     @ApiModelProperty(value = "性别")

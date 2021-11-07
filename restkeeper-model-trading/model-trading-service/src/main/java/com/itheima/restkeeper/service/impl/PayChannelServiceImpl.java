@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,6 +9,7 @@ import com.itheima.restkeeper.enums.PayChannelEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.PayChannel;
 import com.itheima.restkeeper.mapper.PayChannelMapper;
+import com.itheima.restkeeper.req.OtherConfigVo;
 import com.itheima.restkeeper.req.PayChannelVo;
 import com.itheima.restkeeper.req.PayChannelVo;
 import com.itheima.restkeeper.service.IPayChannelService;
@@ -66,5 +68,13 @@ public class PayChannelServiceImpl extends ServiceImpl<PayChannelMapper, PayChan
     public Boolean deletePayChannel(String[] checkedIds) {
         List<String> ids = Arrays.asList(checkedIds);
         return removeByIds(ids);
+    }
+
+    @Override
+    public List<PayChannel> findPayChannelList(String channelLabel) {
+        QueryWrapper<PayChannel> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(PayChannel::getChannelLabel,channelLabel)
+                .eq(PayChannel::getEnableFlag,SuperConstant.YES);
+        return list(queryWrapper);
     }
 }

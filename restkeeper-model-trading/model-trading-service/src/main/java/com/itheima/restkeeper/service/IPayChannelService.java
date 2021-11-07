@@ -5,6 +5,8 @@ import com.itheima.restkeeper.pojo.PayChannel;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.restkeeper.req.PayChannelVo;
 
+import java.util.List;
+
 /**
  * @Description： 支付通道服务类
  */
@@ -40,4 +42,10 @@ public interface IPayChannelService extends IService<PayChannel> {
      */
     Boolean deletePayChannel(String[] checkedIds);
 
+    /**
+     * @Description 删除支付通道
+     * @param channelLabel 支付通道标识
+     * @return Boolean
+     */
+    List<PayChannel> findPayChannelList(String channelLabel);
 }

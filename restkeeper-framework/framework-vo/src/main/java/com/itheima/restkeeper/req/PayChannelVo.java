@@ -16,21 +16,19 @@ import java.util.List;
 @NoArgsConstructor
 public class PayChannelVo extends BasicVo {
 
-    private static final long serialVersionUID = 1L;
-
     @Builder
-    public PayChannelVo(Long id,String channelName,String channelLabel,String domain,String otherConfig,
-                        String publicKey,String merchantPrivateKey,String encryptKey,String remark,Long enterpriseId){
+    public PayChannelVo(Long id,String channelName,String channelLabel,String domain,String appId,String publicKey,String merchantPrivateKey,String otherConfig,String encryptKey,String remark,Long enterpriseId){
         super(id);
         this.channelName=channelName;
         this.channelLabel=channelLabel;
         this.domain=domain;
-        this.otherConfig=otherConfig;
+        this.appId=appId;
         this.publicKey=publicKey;
         this.merchantPrivateKey=merchantPrivateKey;
+        this.otherConfig=otherConfig;
         this.encryptKey=encryptKey;
         this.remark=remark;
-        this.enterpriseId = enterpriseId;
+        this.enterpriseId=enterpriseId;
     }
 
     @ApiModelProperty(value = "通道名称")
@@ -42,14 +40,17 @@ public class PayChannelVo extends BasicVo {
     @ApiModelProperty(value = "域名")
     private String domain;
 
-    @ApiModelProperty(value = "其他配置")
-    private String otherConfig;
+    @ApiModelProperty(value = "商户appid")
+    private String appId;
 
     @ApiModelProperty(value = "公钥")
     private String publicKey;
 
     @ApiModelProperty(value = "商户私钥")
     private String merchantPrivateKey;
+
+    @ApiModelProperty(value = "其他配置")
+    private String otherConfig;
 
     @ApiModelProperty(value = "AES混淆密钥")
     private String encryptKey;

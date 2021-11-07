@@ -14,9 +14,9 @@ public enum TradingEnum implements IBasicEnum {
     PAYING_TRADING_FAIL("43003", "交易单支付失败"),
     TRADING_STATE_SUCCEED("43004", "交易单已完成"),
     TRADING_STATE_PAYING("43005", "交易单交易中"),
-    ENTERPRISEID_EMPT("43006", "企业号为空"),
-    FACE_TO_FACE_FAIL("43007", "统一下单失败"),
-    QUERY_FACE_TO_FACE_FAIL("43008", "查询统一下单失败"),
+    CONFIG_EMPT("43006", "支付配置为空"),
+    FACE_TO_FACE_FAIL("43007", "统一下单交易失败"),
+    REFUND_FAIL("43008", "查询统一下单交易退款失败"),
     SAVE_OR_UPDATE_FAIL("43009", "交易单保存或修改失败"),
     TRADING_SUCCEED("43010", "SUCCEED")
     ;

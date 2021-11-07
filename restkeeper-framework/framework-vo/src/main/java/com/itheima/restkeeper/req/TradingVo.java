@@ -107,6 +107,6 @@ public class TradingVo extends BasicVo {
     @ApiModelProperty(value = "备注【订单门店，桌台信息】")
     private String memo;
 
-    @ApiModelProperty(value = "三方二维码图片路径")
-    private String imgUrl;
+    @ApiModelProperty(value = "二维码路径")
+    private String qrCodeUrl;
 }

@@ -23,7 +23,7 @@ public class Trading extends BasicPojo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public Trading(Long id,Long productOrderNo,Long tradingOrderNo,String tradingChannel,String tradingType,String payeeName,Long payeeId,String payerName,Long payerId,BigDecimal tradingAmount,BigDecimal refund,String isRefund,String resultCode,String resultMsg,String resultJson,String placeOrderCode,String placeOrderMsg,String placeOrderJson,String tradingState,Long enterpriseId,Long storeId,String memo){
+    public Trading(Long id,Long productOrderNo,Long tradingOrderNo,String tradingChannel,String tradingType,String payeeName,Long payeeId,String payerName,Long payerId,BigDecimal tradingAmount,BigDecimal refund,String isRefund,String resultCode,String resultMsg,String resultJson,String placeOrderCode,String placeOrderMsg,String placeOrderJson,String tradingState,Long enterpriseId,Long storeId,String memo,String qrCodeUrl){
         super(id);
         this.productOrderNo=productOrderNo;
         this.tradingOrderNo=tradingOrderNo;
@@ -46,6 +46,7 @@ public class Trading extends BasicPojo {
         this.enterpriseId=enterpriseId;
         this.storeId=storeId;
         this.memo=memo;
+        this.qrCodeUrl=qrCodeUrl;
     }
 
     @ApiModelProperty(value = "业务系统订单号")
@@ -110,6 +111,9 @@ public class Trading extends BasicPojo {
 
     @ApiModelProperty(value = "备注【订单门店，桌台信息】")
     private String memo;
+
+    @ApiModelProperty(value = "二维码路径")
+    private String qrCodeUrl;
 
 
 }

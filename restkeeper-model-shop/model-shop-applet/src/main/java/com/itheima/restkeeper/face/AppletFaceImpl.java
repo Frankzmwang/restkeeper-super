@@ -209,7 +209,7 @@ public class AppletFaceImpl implements AppletFace {
             throw new ProjectException(TableEnum.OPEN_TABLE_FAIL);
         }finally {
             lock.unlock();
-        }
+    }
     }
 
     @Override

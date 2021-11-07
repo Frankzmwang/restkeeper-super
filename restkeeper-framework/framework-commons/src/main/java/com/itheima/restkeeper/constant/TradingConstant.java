@@ -6,6 +6,28 @@ package com.itheima.restkeeper.constant;
  */
 public class TradingConstant {
 
+
+
+    /***
+     * 退款状态:成功
+     */
+    public static final String REFUND_STATUS_YES = "YES";
+
+    /***
+     * 退款状态:失败
+     */
+    public static final String REFUND_STATUS_NO = "NO";
+
+    /***
+     * 退款状态:请求中
+     */
+    public static final String REFUND_STATUS_SENDING= "SENDING";
+
+    /***
+     * 阿里云退款状态:成功
+     */
+    public static final String REFUND_SUCCESS= "REFUND_SUCCESS";
+
     /***
      * 交易渠道:阿里支付
      */

@@ -46,7 +46,7 @@
         <!--kryo-->
         <kryo.version>4.0.2</kryo.version>
         <!--阿里支付-->
-        <alipay.easysdk.version>2.1.2</alipay.easysdk.version>
+        <alipay.easysdk.version>2.2.0</alipay.easysdk.version>
         <!--guava版本 -->
         <guava.version>20.0</guava.version>
         <!--jwt版本-->

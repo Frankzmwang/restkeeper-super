@@ -1,6 +1,7 @@
 package com.itheima.restkeeper.handler;
 
 import com.itheima.restkeeper.exception.ProjectException;
+import com.itheima.restkeeper.pojo.RefundRecord;
 import com.itheima.restkeeper.req.TradingVo;
 
 /**
@@ -38,8 +39,8 @@ public interface NativePayHandler {
      * @description 统一收单交易退款查询接口
      * 当交易发生之后一段时间内，由于买家或者卖家的原因需要退款时，卖家可以通过退款接口将支付款退还给买家，
      * 将在收到退款请求并且验证成功之后，按照退款规则将支付款按原路退到买家帐号上。
-     * @param tradingVo 交易单
+     * @param refundRecord 退款交易单
      * @return
      */
-    TradingVo QueryRefundDownLineTrading(TradingVo tradingVo) throws ProjectException;
+    void QueryRefundDownLineTrading(RefundRecord refundRecord) throws ProjectException;
 }

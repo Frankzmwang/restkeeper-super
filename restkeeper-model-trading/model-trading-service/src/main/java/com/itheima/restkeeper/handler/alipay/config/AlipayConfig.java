@@ -91,7 +91,6 @@ public class AlipayConfig {
      */
     public Config queryConfig(String channelLabel, Long enterpriseId){
         String key = channelLabel+enterpriseId;
-
         return configHashMap.get(key);
     }
 }

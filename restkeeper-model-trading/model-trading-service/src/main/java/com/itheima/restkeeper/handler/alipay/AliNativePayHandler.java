@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.Config;
 import com.alipay.easysdk.kernel.util.ResponseChecker;
+import com.alipay.easysdk.payment.common.models.AlipayTradeFastpayRefundQueryResponse;
 import com.alipay.easysdk.payment.common.models.AlipayTradeQueryResponse;
 import com.alipay.easysdk.payment.common.models.AlipayTradeRefundResponse;
 import com.alipay.easysdk.payment.facetoface.models.AlipayTradePrecreateResponse;
+import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.constant.TradingCacheConstant;
 import com.itheima.restkeeper.constant.TradingConstant;
@@ -14,8 +16,10 @@ import com.itheima.restkeeper.enums.TradingEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.NativePayHandler;
 import com.itheima.restkeeper.handler.alipay.config.AlipayConfig;
+import com.itheima.restkeeper.pojo.RefundRecord;
 import com.itheima.restkeeper.pojo.Trading;
 import com.itheima.restkeeper.req.TradingVo;
+import com.itheima.restkeeper.service.IRefundRecordService;
 import com.itheima.restkeeper.service.ITradingService;
 import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.EmptyUtil;
@@ -39,6 +43,12 @@ public class AliNativePayHandler implements NativePayHandler {
 
     @Autowired
     ITradingService tradingService;
+
+    @Autowired
+    IRefundRecordService refundRecordService;
+
+    @Autowired
+    IdentifierGenerator identifierGenerator;
 
     @Override
     public TradingVo createDownLineTrading(TradingVo tradingVo) throws ProjectException {
@@ -148,11 +158,14 @@ public class AliNativePayHandler implements NativePayHandler {
         if (EmptyUtil.isNullOrEmpty(config)){
             throw  new ProjectException(TradingEnum.CONFIG_EMPT);
         }
-        //3、使用配置
+        //3.1、使用配置
         Factory.setOptions(config);
+        //3.2、部分退款必传
+        String outRequestNo = String.valueOf(identifierGenerator.nextId(config));
         try {
             AlipayTradeRefundResponse refundResponse = Factory.Payment
                 .Common()
+                .optional("out_request_no", outRequestNo)
                 .refund(String.valueOf(tradingVo.getTradingOrderNo()),
                         String.valueOf(tradingVo.getRefund()));
             boolean success = ResponseChecker.success(refundResponse);
@@ -163,6 +176,12 @@ public class AliNativePayHandler implements NativePayHandler {
                 Trading trading = BeanConv.toBean(tradingVo, Trading.class);
                 boolean flag = tradingService.saveOrUpdate(trading);
                 //6、保存退款单信息
+                RefundRecord refundRecord = BeanConv.toBean(trading, RefundRecord.class);
+                refundRecord.setRefundNo(outRequestNo);//本次退款订单号
+                refundRecord.setRefundStatus(TradingConstant.REFUND_STATUS_SENDING);
+                refundRecord.setRefundCode(refundResponse.getSubCode());
+                refundRecord.setRefundCode(refundResponse.getSubMsg());
+                refundRecordService.save(refundRecord);
             }else {
                 throw new ProjectException(TradingEnum.REFUND_FAIL);
             }
@@ -174,7 +193,35 @@ public class AliNativePayHandler implements NativePayHandler {
     }
 
     @Override
-    public TradingVo QueryRefundDownLineTrading(TradingVo tradingVo) throws ProjectException {
-        return null;
+    public void QueryRefundDownLineTrading(RefundRecord refundRecord) throws ProjectException {
+        //1、获得支付宝配置文件
+        Config config = alipayConfig.queryConfig(refundRecord.getTradingChannel(),
+                refundRecord.getEnterpriseId());
+        //2、容器如果为空，抛出异常
+        if (EmptyUtil.isNullOrEmpty(config)){
+            throw  new ProjectException(TradingEnum.CONFIG_EMPT);
+        }
+        //3、使用配置
+        Factory.setOptions(config);
+        try {
+            AlipayTradeFastpayRefundQueryResponse refundQueryResponse =
+                Factory.Payment.Common().queryRefund(
+                String.valueOf(refundRecord.getTradingOrderNo()),
+                refundRecord.getRefundNo());
+            boolean success = ResponseChecker.success(refundQueryResponse);
+            if (success){
+                //4、查询状态
+                String refundStatus = refundRecord.getRefundStatus();
+                //5、退款成功修改退款记录
+                if (TradingConstant.REFUND_SUCCESS.equals(refundStatus)){
+                    refundRecord.setRefundStatus(TradingConstant.REFUND_STATUS_YES);
+                    refundRecord.setRefundCode(refundQueryResponse.getSubCode());
+                    refundRecord.setRefundCode(refundQueryResponse.getSubMsg());
+                    refundRecordService.updateById(refundRecord);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("查询支付宝统一下单退款失败：{}", ExceptionsUtil.getStackTraceAsString(e));
+        }
     }
 }

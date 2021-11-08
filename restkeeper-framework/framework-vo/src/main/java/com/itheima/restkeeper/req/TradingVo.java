@@ -50,7 +50,7 @@ public class TradingVo extends BasicVo {
     @ApiModelProperty(value = "交易单号【对于三方来说：商户订单】")
     private Long tradingOrderNo;
 
-    @ApiModelProperty(value = "支付渠道【支付宝、微信、余额、现金】")
+    @ApiModelProperty(value = "支付渠道【支付宝、微信、现金、免单、挂账】")
     private String tradingChannel;
 
     @ApiModelProperty(value = "交易类型【付款、退款、免单、挂账】")
@@ -109,4 +109,7 @@ public class TradingVo extends BasicVo {
 
     @ApiModelProperty(value = "二维码路径")
     private String qrCodeUrl;
+
+    @ApiModelProperty(value = "退款请求号")
+    private String outRequestNo;
 }

@@ -15,9 +15,10 @@ public class TradingCacheConstant {
     //安全组前缀
     public static final String REDIS_GROUP = "trading:";
 
-    //运营组
-    public static final String DO_PAY = REDIS_GROUP+ "doPay:";
+    //创建交易加锁
+    public static final String CREATE_PAY = REDIS_GROUP+ "create_pay:";
 
-    //交易配置文件key
-    public static final String ALI_PAY = REDIS_GROUP+ "aliPay:";
+    //创建退款加锁
+    public static final String REFUND_PAY = REDIS_GROUP+ "refund_pay:";
+
 }

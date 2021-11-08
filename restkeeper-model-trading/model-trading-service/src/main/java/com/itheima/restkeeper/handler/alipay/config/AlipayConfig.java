@@ -10,6 +10,7 @@ import com.itheima.restkeeper.service.IPayChannelService;
 import com.itheima.restkeeper.utils.BeanConv;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,6 @@ public class AlipayConfig {
     @Autowired
     RedissonClient redissonClient;
 
-    private static Map<String,Config> configHashMap =new ConcurrentHashMap<>();
 
     /***
      * @description 支付配置文件初始化
@@ -47,7 +47,8 @@ public class AlipayConfig {
             payChannelVos.forEach(n->{
                 List <OtherConfigVo> otherConfigVos = JSONArray.parseArray(n.getOtherConfig(),OtherConfigVo.class);
                 n.setOtherConfigs(otherConfigVos);
-                createOrUpdateConfig(n);
+                RBucket<PayChannelVo> alipayChannel = redissonClient.getBucket("pay:alipay:channel:"+n.getEnterpriseId());
+                alipayChannel.set(n);
             });
         }
     }
@@ -57,7 +58,12 @@ public class AlipayConfig {
      * @param payChannelVo 配置信息
      * @return
      */
-    public void createOrUpdateConfig(PayChannelVo payChannelVo){
+    public Config createOrUpdateConfig(PayChannelVo payChannelVo){
+        //1、缓存配置
+        RBucket<PayChannelVo> alipayChannel = redissonClient
+                .getBucket("pay:alipay:channel:"+payChannelVo.getEnterpriseId());
+        alipayChannel.set(payChannelVo);
+        //2、创建配置
         Config config = new Config();
         config.protocol = "https";
         config.gatewayHost =payChannelVo.getDomain();
@@ -72,25 +78,26 @@ public class AlipayConfig {
         //2.4、设置AES密钥，调用AES加解密相关接口时需要（可选）
         config.encryptKey = payChannelVo.getEncryptKey();
         //2.5、配置信息放入configHashMap中
-        String key = payChannelVo.getChannelLabel()+payChannelVo.getEnterpriseId();
-        configHashMap.put(key,config);
+        return config;
     }
 
     /***
      * @description 移除配置
      * @return
      */
-    public void removeConfig(String channelLabel, Long enterpriseId){
-        String key = channelLabel+enterpriseId;
-        configHashMap.remove(key);
+    public void removeConfig(Long enterpriseId){
+        RBucket<PayChannelVo> alipayChannel = redissonClient
+                .getBucket("pay:alipay:channel:"+enterpriseId);
+        alipayChannel.delete();
     }
 
     /***
      * @description 获得配置
      * @return
      */
-    public Config queryConfig(String channelLabel, Long enterpriseId){
-        String key = channelLabel+enterpriseId;
-        return configHashMap.get(key);
+    public Config queryConfig( Long enterpriseId){
+        RBucket<PayChannelVo> alipayChannel = redissonClient
+                .getBucket("pay:alipay:channel:"+enterpriseId);
+        return this.createOrUpdateConfig(alipayChannel.get());
     }
 }

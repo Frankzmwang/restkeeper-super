@@ -1,10 +1,12 @@
-package com.itheima.restkeeper.face;
+ package com.itheima.restkeeper.face;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.restkeeper.NativePayFace;
 import com.itheima.restkeeper.OrderFace;
 import com.itheima.restkeeper.TableFace;
 import com.itheima.restkeeper.constant.AppletCacheConstant;
 import com.itheima.restkeeper.constant.SuperConstant;
+import com.itheima.restkeeper.constant.TradingConstant;
 import com.itheima.restkeeper.enums.OrderEnum;
 import com.itheima.restkeeper.enums.OrderItemEnum;
 import com.itheima.restkeeper.enums.ShoppingCartEnum;
@@ -46,6 +48,8 @@ import java.util.concurrent.TimeUnit;
         @Method(name = "findOrderVoPage",retries = 2),
         @Method(name = "opertionToOrderItem",retries = 0),
         @Method(name = "handleTrading",retries = 0),
+        @Method(name = "handleTradingRefund",retries = 0),
+        @Method(name = "queryQrCode",retries = 2),
         @Method(name = "findOrderVoPaid",retries = 2),
         @Method(name = "findOrderVoPaying",retries = 2),
         @Method(name = "synchTradingState",retries = 2)
@@ -68,6 +72,9 @@ public class OrderFaceImpl implements OrderFace {
 
     @Autowired
     IDishService dishService;
+
+    @Autowired
+    NativePayFace nativePayFace;
 
     @Override
     public Page<OrderVo> findOrderVoPage(OrderVo orderVo,
@@ -322,8 +329,8 @@ public class OrderFaceImpl implements OrderFace {
         if (EmptyUtil.isNullOrEmpty(tradingVo)){
             throw new ProjectException(OrderEnum.FAIL);
         }
-        //2、调用支付RPC接口，进行支付
-        TradingVo tradingVoResult = null;
+        //2、调用统一收单线下交易预创建
+        TradingVo tradingVoResult = nativePayFace.createDownLineTrading(tradingVo);
         //3、结算后桌台状态修改：开桌-->空闲
         Boolean flag = true;
         if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
@@ -339,6 +346,11 @@ public class OrderFaceImpl implements OrderFace {
             }
         }
         return tradingVoResult;
+    }
+
+    @Override
+    public String queryQrCode(OrderVo orderVo) {
+        return null;
     }
 
     @Override
@@ -360,8 +372,8 @@ public class OrderFaceImpl implements OrderFace {
         if (EmptyUtil.isNullOrEmpty(tradingVo)){
             throw new ProjectException(OrderEnum.FAIL);
         }
-        //5、执行退款交易
-        TradingVo tradingVoResult = null;
+        //5、执行统一收单交易退款接口
+        TradingVo tradingVoResult = nativePayFace.refundDownLineTrading(tradingVo);
         boolean flag = true;
         if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
             throw new ProjectException(OrderEnum.FAIL);
@@ -375,15 +387,15 @@ public class OrderFaceImpl implements OrderFace {
      * @return: com.itheima.restkeeper.req.TradingVo
      */
     private TradingVo tradingConvertor(OrderVo orderVo)throws ProjectException {
-        //免单渠道，交易单生成
-        if (orderVo.getTradingChannel().equals(SuperConstant.TRADING_CHANNEL_FREE_CHARGE)){
-            return freeChargeTradingVo(orderVo);
-        //退款渠道，交易单生成
+        //【支付】
+        if (orderVo.getTradingChannel().equals(TradingConstant.TRADING_CHANNEL_ALI_PAY)){
+            return payTradingVo(orderVo);
+        //【退款】
         }else if (orderVo.getTradingChannel().equals(SuperConstant.TRADING_CHANNEL_REFUND)){
             return refundTradingVo(orderVo);
-        //支付渠道，交易单生成
+        //【免单】
         }else {
-            return payTradingVo(orderVo);
+            return freeChargeTradingVo(orderVo);
         }
     }
 

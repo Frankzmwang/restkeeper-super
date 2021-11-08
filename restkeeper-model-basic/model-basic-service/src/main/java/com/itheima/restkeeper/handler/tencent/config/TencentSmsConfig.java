@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.handler.tencent.config;
 
+import com.alibaba.fastjson.JSONObject;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.pojo.SmsChannel;
 import com.itheima.restkeeper.service.ISmsChannelService;
@@ -9,12 +10,12 @@ import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.sms.v20210111.SmsClient;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @ClassName AlipayConfig.java
@@ -27,7 +28,8 @@ public class TencentSmsConfig {
     @Autowired
     ISmsChannelService smsChannelService;
 
-    private static Map<String,SmsClient> clientHashMap =new ConcurrentHashMap<>();
+    @Autowired
+    RedissonClient redissonClient;
 
     /***
      * @description 初始化短信配置
@@ -37,13 +39,16 @@ public class TencentSmsConfig {
         //查询阿里云SMS的配置信息
         SmsChannel smsChannel = smsChannelService.findChannelByChannelLabel(SuperConstant.TENCENT_SMS);
         if (EmptyUtil.isNullOrEmpty(smsChannel)){
-            log.warn("阿里云SMS的未配置");
+            log.warn("腾讯云SMS的未配置");
             return;
         }
-        this.createOrUpdateClient(smsChannel);
+        RBucket<SmsChannel> tencentSmsChannel = redissonClient.getBucket("sms:tencentSmsChannel");
+        tencentSmsChannel.set(smsChannel);
     }
 
-    public void createOrUpdateClient(SmsChannel smsChannel){
+    public SmsClient createOrUpdateClient(SmsChannel smsChannel){
+        RBucket<SmsChannel> tencentSmsChannel = redissonClient.getBucket("sms:tencentSmsChannel");
+        tencentSmsChannel.set(smsChannel);
         /* 必要步骤：
          * 实例化一个认证对象，入参需要传入腾讯云账户密钥对secretId，secretKey。
          * 这里采用的是从环境变量读取的方式，需要在环境变量中先设置这两个值。
@@ -74,12 +79,7 @@ public class TencentSmsConfig {
         clientProfile.setHttpProfile(httpProfile);
         /* 实例化要请求产品(以sms为例)的client对象
          * 第二个参数是地域信息，可以直接填写字符串ap-guangzhou，或者引用预设的常量 */
-        SmsClient client = new SmsClient(cred, "ap-guangzhou", clientProfile);
-        if (clientHashMap.containsKey("tenCentSmsClient")){
-            clientHashMap.replace("tenCentSmsClient",client);
-        }else {
-            clientHashMap.put("tenCentSmsClient",client);
-        }
+        return new SmsClient(cred, "ap-guangzhou", clientProfile);
     }
 
     /***
@@ -87,7 +87,8 @@ public class TencentSmsConfig {
      * @return
      */
     public void removeClient(){
-        clientHashMap.clear();
+        RBucket<SmsChannel> tencentSmsChannel = redissonClient.getBucket("sms:tencentSmsChannel");
+        tencentSmsChannel.delete();
     }
 
     /***
@@ -95,6 +96,7 @@ public class TencentSmsConfig {
      * @return
      */
     public SmsClient queryClient(){
-        return clientHashMap.get("tenCentSmsClient");
+        RBucket<SmsChannel> tencentSmsChannel = redissonClient.getBucket("sms:tencentSmsChannel");
+        return this.createOrUpdateClient(tencentSmsChannel.get());
     }
 }

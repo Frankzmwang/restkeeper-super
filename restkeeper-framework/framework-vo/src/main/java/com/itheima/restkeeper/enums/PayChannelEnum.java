@@ -13,7 +13,9 @@ public enum PayChannelEnum implements IBasicEnum {
     CREATE_FAIL("51002", "保存支付通道失败"),
     UPDATE_FAIL("51003", "修改支付通道失败"),
     DELETE_FAIL("51004", "修改支付通道失败"),
-    SELECT_FAIL("51005", "查询支付通道失败");
+    SELECT_FAIL("51005", "查询支付通道失败"),
+    CHANNEL_FAIL("51006", "交易渠道不存在"),
+    ;
 
     private String code;
     private String msg;

@@ -80,6 +80,18 @@ public class OrderController {
         return ResponseWrapBuild.build(BrandEnum.SUCCEED,orderFace.handleTrading(orderVo));
     }
 
+    @PostMapping("queryQrCode")
+    @ApiOperation(value = "查看二维码",notes = "查看二维码")
+    @ApiImplicitParam(name = "orderVo",value = "查看二维码",dataType = "OrderVo")
+    public ResponseWrap<String> queryQrCode(@RequestBody OrderVo orderVo){
+        //获得结算人信息
+        String userVoString = UserVoContext.getUserVoString();
+        UserVo userVo = JSONObject.parseObject(userVoString, UserVo.class);
+        orderVo.setCashierId(userVo.getId());
+        orderVo.setCashierName(userVo.getUsername());
+        return ResponseWrapBuild.build(BrandEnum.SUCCEED,orderFace.queryQrCode(orderVo));
+    }
+
     @PostMapping("handle-trading-refund")
     @ApiOperation(value = "订单退款",notes = "订单退款")
     @ApiImplicitParam(name = "orderVo",value = "订单信息",dataType = "OrderVo")

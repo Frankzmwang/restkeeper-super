@@ -6,8 +6,6 @@ package com.itheima.restkeeper.constant;
  */
 public class TradingConstant {
 
-
-
     /***
      * 退款状态:成功
      */
@@ -56,7 +54,27 @@ public class TradingConstant {
     /***
      * 交易渠道:微信支付
      */
-    public static final String TRADING_CHANNEL_WE_CHAT_PAY = "WE_CHAT_PAY";
+    public static final String TRADING_CHANNEL_WECHAT_PAY = "WECHAT_PAY";
+
+    /***
+     * 交易渠道:现金支付
+     */
+    public static final String TRADING_CHANNEL_CASHPAY = "CASHPAY";
+
+    /**
+     * 交易渠道:免单
+     */
+    public static final String TRADING_CHANNEL_FREE_CHARGE = "FREE_CHARGE";
+
+    /***
+     * 交易类型:退款
+     */
+    public static final String TRADING_TYPE_TK= "TK";
+
+    /***
+     * 交易类型:付款
+     */
+    public static final String TRADING_TYPE_FK = "FK";
 
 
 }

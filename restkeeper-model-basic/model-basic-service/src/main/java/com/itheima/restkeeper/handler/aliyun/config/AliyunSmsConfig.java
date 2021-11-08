@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.handler.aliyun.config;
 
+import com.alibaba.fastjson.JSONObject;
 import com.aliyun.dysmsapi20170525.Client;
 import com.aliyun.teaopenapi.models.Config;
 import com.itheima.restkeeper.constant.SuperConstant;
@@ -9,6 +10,8 @@ import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
 import com.itheima.restkeeper.utils.RegisterBeanHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +32,8 @@ public class AliyunSmsConfig {
     @Autowired
     ISmsChannelService smsChannelService;
 
-    private static Map<String,Client> clientHashMap =new ConcurrentHashMap<>();
+    @Autowired
+    RedissonClient redissonClient;
 
     /***
      * @description 初始化短信配置
@@ -42,10 +46,13 @@ public class AliyunSmsConfig {
             log.warn("阿里云SMS的未配置");
             return;
         }
-        this.createOrUpdateClient(smsChannel);
+        RBucket<SmsChannel> aliyunSmsClient = redissonClient.getBucket("sms:aliyunSmsChannel");
+        aliyunSmsClient.set(smsChannel);
     }
 
-    public void createOrUpdateClient(SmsChannel smsChannel){
+    public Client createOrUpdateClient(SmsChannel smsChannel){
+        RBucket<SmsChannel> aliyunSmsClient = redissonClient.getBucket("sms:aliyunSmsChannel");
+        aliyunSmsClient.set(smsChannel);
         Config config = new Config()
             // 阿里云AccessKey ID
             .setAccessKeyId(smsChannel.getAccessKeyId())
@@ -54,15 +61,12 @@ public class AliyunSmsConfig {
         // 访问的域名
         config.endpoint = smsChannel.getDomain();
         try {
-            Client client = new Client(config);
-            if (clientHashMap.containsKey("aliyunSmsClient")){
-                clientHashMap.replace("aliyunSmsClient",client);
-            }else {
-                clientHashMap.put("aliyunSmsClient",client);
-            }
+            return new Client(config);
         } catch (Exception e) {
             log.error("阿里云SMS的配置信息出错：{}", ExceptionsUtil.getStackTraceAsString(e));
+            return null;
         }
+
     }
 
     /***
@@ -70,7 +74,8 @@ public class AliyunSmsConfig {
      * @return
      */
     public void removeClient(){
-        clientHashMap.clear();
+        RBucket<SmsChannel> aliyunSmsClient = redissonClient.getBucket("sms:aliyunSmsChannel");
+        aliyunSmsClient.delete();
     }
 
     /***
@@ -78,6 +83,7 @@ public class AliyunSmsConfig {
      * @return
      */
     public Client queryClient(){
-        return clientHashMap.get("aliyunSmsClient");
+        RBucket<SmsChannel> aliyunSmsClient = redissonClient.getBucket("sms:aliyunSmsChannel");
+        return this.createOrUpdateClient(aliyunSmsClient.get());
     }
 }

@@ -36,14 +36,22 @@ public interface OrderFace {
                                 String opertionType) throws ProjectException;
 
     /***
-     * @description 订单结算
+     * @description 发起订单结算
      * @param orderVo 订单信息
      * @return: com.itheima.restkeeper.req.TradingVo
      */
     TradingVo handleTrading(OrderVo orderVo)throws ProjectException;
 
+
     /***
-     * @description 订单退款
+     * @description 查看二维码
+     * @param orderVo 订单信息
+     * @return: com.itheima.restkeeper.req.TradingVo
+     */
+    String queryQrCode(OrderVo orderVo);
+
+    /***
+     * @description 发起订单退款
      * @param orderVo 订单信息
      * @return: com.itheima.restkeeper.req.TradingVo
      */
@@ -70,4 +78,5 @@ public interface OrderFace {
      * @return
      */
     Boolean synchTradingState(Long orderNo,String tradingState)throws ProjectException;
+
 }

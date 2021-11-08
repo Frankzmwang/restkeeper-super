@@ -1,5 +1,7 @@
 package com.itheima.restkeeper.handler.baidu.config;
 
+import com.alibaba.fastjson.JSONObject;
+import com.aliyun.dysmsapi20170525.Client;
 import com.baidubce.auth.DefaultBceCredentials;
 import com.baidubce.http.DefaultRetryPolicy;
 import com.baidubce.services.sms.SmsClient;
@@ -9,6 +11,8 @@ import com.itheima.restkeeper.pojo.SmsChannel;
 import com.itheima.restkeeper.service.ISmsChannelService;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,7 +31,8 @@ public class BaiduSmsConfig {
     @Autowired
     ISmsChannelService smsChannelService;
 
-    private static Map<String, SmsClient> clientHashMap =new ConcurrentHashMap<>();
+    @Autowired
+    RedissonClient redissonClient;
 
     /***
      * @description 初始化短信配置
@@ -40,10 +45,13 @@ public class BaiduSmsConfig {
             log.warn("百度云SMS的未配置");
             return;
         }
-        this.createOrUpdateClient(smsChannel);
+        RBucket<SmsChannel> baiduSmsChannel = redissonClient.getBucket("sms:baiduSmsChannel");
+        baiduSmsChannel.set(smsChannel);
     }
 
-    public void createOrUpdateClient( SmsChannel smsChannel){
+    public SmsClient createOrUpdateClient( SmsChannel smsChannel){
+        RBucket<SmsChannel> baiduSmsChannel = redissonClient.getBucket("sms:baiduSmsChannel");
+        baiduSmsChannel.set(smsChannel);
         //百度云配置
         SmsClientConfiguration config = new SmsClientConfiguration()
             //站点
@@ -58,12 +66,7 @@ public class BaiduSmsConfig {
             .withRetryPolicy(new DefaultRetryPolicy())
             //设置Socket传输数据超时的时间为2000毫秒
             .withSocketTimeoutInMillis(2000);
-        SmsClient client = new SmsClient(config);
-        if (clientHashMap.containsKey("baiduSmsClient")){
-            clientHashMap.replace("baiduSmsClient",client);
-        }else {
-            clientHashMap.put("baiduSmsClient",client);
-        }
+        return new SmsClient(config);
     }
 
     /***
@@ -71,7 +74,8 @@ public class BaiduSmsConfig {
      * @return
      */
     public void removeClient(){
-        clientHashMap.clear();
+        RBucket<SmsChannel> baiduSmsChannel = redissonClient.getBucket("sms:baiduSmsChannel");
+        baiduSmsChannel.delete();
     }
 
     /***
@@ -79,7 +83,8 @@ public class BaiduSmsConfig {
      * @return
      */
     public SmsClient queryClient(){
-        return clientHashMap.get("baiduSmsClient");
+        RBucket<SmsChannel> baiduSmsChannel = redissonClient.getBucket("sms:baiduSmsChannel");
+        return this.createOrUpdateClient(baiduSmsChannel.get());
     }
 
 

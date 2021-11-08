@@ -1,15 +1,22 @@
-package com.itheima.restkeeper.handler;
+package com.itheima.restkeeper;
 
 import com.itheima.restkeeper.exception.ProjectException;
-import com.itheima.restkeeper.pojo.RefundRecord;
 import com.itheima.restkeeper.req.RefundRecordVo;
 import com.itheima.restkeeper.req.TradingVo;
 
 /**
- * @ClassName NativePayHandler.java
- * @Description Native支付方式：商户生成二维码，用户扫描支付
+ * @ClassName NativePayFace.java
+ * @Description Native支付方式dubbo接口：商户生成二维码，用户扫描支付
  */
-public interface NativePayHandler {
+public interface NativePayFace {
+
+    /***
+     * @description 查看二维码信息
+     * 收银员通过收银台或商户后台调用此接口，生成二维码后，展示给用户，商户可以多次展示二维码
+     * @param tradingVo 交易单
+     * @return  交易单
+     */
+    String queryQrCodeUrl(TradingVo tradingVo) throws ProjectException;
 
     /***
      * @description 统一收单线下交易预创建
@@ -44,4 +51,5 @@ public interface NativePayHandler {
      * @return
      */
     void queryRefundDownLineTrading(RefundRecordVo refundRecordVo) throws ProjectException;
+
 }

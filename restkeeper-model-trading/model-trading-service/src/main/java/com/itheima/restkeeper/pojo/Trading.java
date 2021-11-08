@@ -55,7 +55,7 @@ public class Trading extends BasicPojo {
     @ApiModelProperty(value = "交易系统订单号【对于三方来说：商户订单】")
     private Long tradingOrderNo;
 
-    @ApiModelProperty(value = "支付渠道【支付宝、微信、余额、现金】")
+    @ApiModelProperty(value = "支付渠道【支付宝、微信、现金、免单、挂账】")
     private String tradingChannel;
 
     @ApiModelProperty(value = "交易类型【付款、退款、免单、挂账】")

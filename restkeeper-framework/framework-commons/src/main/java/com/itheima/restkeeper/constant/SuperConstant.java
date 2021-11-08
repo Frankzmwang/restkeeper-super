@@ -97,9 +97,14 @@ public class SuperConstant {
 	public static final String QXDD ="QXDD";
 
 	/***
-	 * 取消订单【平台交易单及订单状态】
+	 * 免单【平台交易单及订单状态】
 	 */
 	public static final String MD ="MD";
+
+	/***
+	 * 免单【平台交易单及订单状态】
+	 */
+	public static final String GZ ="GZ";
 
 	/***
 	 * 桌台空闲
@@ -121,40 +126,7 @@ public class SuperConstant {
 	 */
 	public static final  String OPERTION_TYPE_ADD = "ADD";
 
-	/***
-	 * 交易渠道:阿里支付
-	 */
-	public static final String TRADING_CHANNEL_ALIPAY = "ALIPAY";
 
-	/***
-	 * 交易渠道:现金支付
-	 */
-	public static final String TRADING_CHANNEL_CASHPAY = "CASHPAY";
-
-	/**
-	 * 交易渠道:免单
-	 */
-	public static final String TRADING_CHANNEL_FREE_CHARGE = "FREE_CHARGE";
-
-	/***
-	 * 交易渠道:退款
-	 */
-	public static final String TRADING_CHANNEL_REFUND= "REFUND";
-
-	/***
-	 * 交易类型:付款
-	 */
-    public static final String TRADING_TYPE_FK = "FK";
-
-	/***
-	 * 交易类型:退款
-	 */
-	public static final String TRADING_TYPE_TK = "TK";
-
-	/***
-	 * 交易类型:付款
-	 */
-	public static final String TRADING_TYPE_MD = "MD";
 	/***
 	 * 企业状态:试用
 	 */

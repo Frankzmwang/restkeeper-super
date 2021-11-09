@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.restkeeper.constant.SuperConstant;
+import com.itheima.restkeeper.constant.TradingConstant;
 import com.itheima.restkeeper.mapper.OrderMapper;
 import com.itheima.restkeeper.pojo.Order;
 import com.itheima.restkeeper.pojo.Table;
@@ -33,9 +34,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.lambda().eq(Order::getTableId,tableId);
         queryWrapper.lambda().eq(Order::getEnableFlag,SuperConstant.YES);
         queryWrapper.lambda().and(wrapper->wrapper
-                .eq(Order::getOrderState,SuperConstant.DFK)
+                .eq(Order::getOrderState, TradingConstant.DFK)
                 .or()
-                .eq(Order::getOrderState,SuperConstant.FKZ));
+                .eq(Order::getOrderState,TradingConstant.FKZ));
         Order order = getOne(queryWrapper);
         return BeanConv.toBean(order,OrderVo.class);
     }
@@ -45,7 +46,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Order::getOrderNo,orderNo);
         queryWrapper.lambda().eq(Order::getEnableFlag,SuperConstant.YES);
-        queryWrapper.lambda().and(wrapper->wrapper.eq(Order::getOrderState,SuperConstant.DFK).or().eq(Order::getOrderState,SuperConstant.FKZ));
+        queryWrapper.lambda().and(wrapper->wrapper.eq(Order::getOrderState,TradingConstant.DFK).or().eq(Order::getOrderState,TradingConstant.FKZ));
         Order order = getOne(queryWrapper);
         return BeanConv.toBean(order,OrderVo.class);
     }
@@ -61,7 +62,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //订单修改
         LambdaQueryWrapper<Order> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Order::getTableId,sourceTableId).eq(Order::getOrderNo,orderNo);
-        lambdaQueryWrapper.eq(Order::getOrderState,SuperConstant.DFK);
+        lambdaQueryWrapper.eq(Order::getOrderState,TradingConstant.DFK);
         return update(order,lambdaQueryWrapper);
     }
 
@@ -90,7 +91,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Order::getOrderNo,orderNo);
         queryWrapper.lambda().eq(Order::getEnableFlag,SuperConstant.YES);
-        queryWrapper.lambda().eq(Order::getOrderState,SuperConstant.YJS);
+        queryWrapper.lambda().eq(Order::getOrderState,TradingConstant.YJS);
         Order order = getOne(queryWrapper);
         return BeanConv.toBean(order,OrderVo.class);
     }
@@ -99,7 +100,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public List<OrderVo> findOrderVoPaying() {
         QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Order::getEnableFlag,SuperConstant.YES);
-        queryWrapper.lambda().eq(Order::getOrderState,SuperConstant.FKZ);
+        queryWrapper.lambda().eq(Order::getOrderState,TradingConstant.FKZ);
         List<Order> orderList = list(queryWrapper);
         return BeanConv.toBeanList(orderList,OrderVo.class);
     }

@@ -10,6 +10,7 @@ import com.itheima.restkeeper.constant.TradingConstant;
 import com.itheima.restkeeper.enums.OrderEnum;
 import com.itheima.restkeeper.enums.OrderItemEnum;
 import com.itheima.restkeeper.enums.ShoppingCartEnum;
+import com.itheima.restkeeper.enums.TradingEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.Dish;
 import com.itheima.restkeeper.pojo.Order;
@@ -73,7 +74,7 @@ public class OrderFaceImpl implements OrderFace {
     @Autowired
     IDishService dishService;
 
-    @Autowired
+    @DubboReference(version = "${dubbo.application.version}", check = false)
     NativePayFace nativePayFace;
 
     @Override
@@ -110,7 +111,7 @@ public class OrderFaceImpl implements OrderFace {
                                        String opertionType)throws ProjectException {
         //1、判定订单待支付状态才可操作
         OrderVo orderVoResult = orderService.findOrderByOrderNo(orderNo);
-        if (!SuperConstant.DFK.equals(orderVoResult.getOrderState())){
+        if (!TradingConstant.DFK.equals(orderVoResult.getOrderState())){
             throw new ProjectException(OrderEnum.STATUS_FAIL);
         }
         //2、判定菜品处于起售状态才可操作
@@ -223,103 +224,6 @@ public class OrderFaceImpl implements OrderFace {
         }
     }
 
-    /***
-     * @description 免单渠道，交易单生成
-     * @param orderVo
-     * @return TradingVo 交易单
-     */
-    private TradingVo freeChargeTradingVo(OrderVo orderVo){
-        //结算保存订单信息
-        Order order = Order.builder().id(orderVo.getId())
-            .refund(new BigDecimal(0))
-            .discount(new BigDecimal(10))
-            .reduce(new BigDecimal(0))
-            .orderState(SuperConstant.MD)
-            .isRefund(SuperConstant.NO)
-            .tradingChannel(orderVo.getTradingChannel())
-            .build();
-        boolean flag = orderService.updateById(order);
-        TradingVo tradingVo = TradingVo.builder()
-            .tradingAmount(orderVo.getPayableAmountSum())
-            .tradingChannel(orderVo.getTradingChannel())
-            .enterpriseId(orderVo.getEnterpriseId())
-            .storeId(orderVo.getTableId())
-            .payeeId(orderVo.getCashierId())
-            .payeeName(orderVo.getCashierName())
-            .productOrderNo(orderVo.getOrderNo())
-            .tradingType(SuperConstant.TRADING_TYPE_MD)
-            .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
-            .build();
-        return tradingVo;
-    }
-
-    /***
-     * @description 退款渠道，交易单生成
-     * @param orderVo
-     * @return TradingVo 交易单
-     */
-    private TradingVo refundTradingVo(OrderVo orderVo){
-        Order order = Order.builder().id(orderVo.getId())
-            .refund(orderVo.getRefunded().add(orderVo.getOperTionRefund()))
-            .isRefund(SuperConstant.YES).build();
-        boolean flag = orderService.updateById(order);
-        TradingVo tradingVo = TradingVo.builder()
-            .tradingAmount(orderVo.getRealAmountSum())
-            .tradingChannel(orderVo.getTradingChannel())
-            .enterpriseId(orderVo.getEnterpriseId())
-            .storeId(orderVo.getTableId())
-            .payeeId(orderVo.getCashierId())
-            .payeeName(orderVo.getCashierName())
-            .productOrderNo(orderVo.getOrderNo())
-            .tradingType(SuperConstant.TRADING_TYPE_TK)
-            .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
-            .build();
-        tradingVo.setProductOrderNo(orderVo.getOrderNo());
-        tradingVo.setRefund(orderVo.getRefund());
-        tradingVo.setIsRefund(SuperConstant.YES);
-        return tradingVo;
-    }
-
-    /***
-     * @description 支付渠道，交易单生成
-     * @param orderVo
-     * @return TradingVo 交易单
-     */
-    private TradingVo payTradingVo(OrderVo orderVo){
-        //应付总金额
-        BigDecimal payableAmountSum = orderVo.getPayableAmountSum();
-        //打折
-        BigDecimal discount = orderVo.getDiscount();
-        //优惠
-        BigDecimal reduce = orderVo.getReduce();
-        //计算实付总金额
-        BigDecimal realAmountSum = payableAmountSum.multiply(discount.divide(new BigDecimal(10))).subtract(reduce);
-        //更新订单状态
-        Order order = Order.builder().id(orderVo.getId())
-            .realAmountSum(realAmountSum)
-            .cashierId(orderVo.getCashierId())
-            .cashierName(orderVo.getCashierName())
-            .tradingChannel(orderVo.getTradingChannel())
-            .orderState(SuperConstant.FKZ)
-            .isRefund(SuperConstant.NO).build();
-        boolean flag = orderService.updateById(order);
-        TradingVo tradingVo = null;
-        //构建交易单
-        if (flag){
-            tradingVo = TradingVo.builder()
-                .tradingAmount(realAmountSum)
-                .tradingChannel(orderVo.getTradingChannel())
-                .enterpriseId(orderVo.getEnterpriseId())
-                .storeId(orderVo.getTableId())
-                .payeeId(orderVo.getCashierId())
-                .payeeName(orderVo.getCashierName())
-                .productOrderNo(orderVo.getOrderNo())
-                .tradingType(SuperConstant.TRADING_TYPE_FK)
-                .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
-                .build();
-        }
-        return tradingVo;
-    }
 
     @Override
     @GlobalTransactional
@@ -350,7 +254,7 @@ public class OrderFaceImpl implements OrderFace {
 
     @Override
     public String queryQrCode(OrderVo orderVo) {
-        return null;
+        return nativePayFace.queryQrCodeUrl(orderVo);
     }
 
     @Override
@@ -359,12 +263,11 @@ public class OrderFaceImpl implements OrderFace {
         //1、获取当前交易单信息
         OrderVo orderVoBefore = findOrderVoPaid(orderVo.getOrderNo());
         //2、退款收款人不为同一人，退款操作拒绝
-        if (orderVo.getTradingChannel().equals(SuperConstant.TRADING_CHANNEL_REFUND)
-            &&orderVo.getCashierId().longValue()!=orderVoBefore.getCashierId().longValue()){
+        if (orderVo.getCashierId().longValue()!=orderVoBefore.getCashierId().longValue()){
             throw new ProjectException(OrderEnum.REFUND_FAIL);
         }
         //3、当前交易单信息，退款操作拒绝
-        if (!SuperConstant.YJS.equals(orderVoBefore.getOrderState())){
+        if (!TradingConstant.YJS.equals(orderVoBefore.getOrderState())){
             throw new ProjectException(OrderEnum.REFUND_FAIL);
         }
         //4、根据订单生成交易单
@@ -374,11 +277,10 @@ public class OrderFaceImpl implements OrderFace {
         }
         //5、执行统一收单交易退款接口
         TradingVo tradingVoResult = nativePayFace.refundDownLineTrading(tradingVo);
-        boolean flag = true;
         if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
             throw new ProjectException(OrderEnum.FAIL);
         }
-        return flag;
+        return true;
     }
 
     /***
@@ -387,15 +289,170 @@ public class OrderFaceImpl implements OrderFace {
      * @return: com.itheima.restkeeper.req.TradingVo
      */
     private TradingVo tradingConvertor(OrderVo orderVo)throws ProjectException {
-        //【支付】
-        if (orderVo.getTradingChannel().equals(TradingConstant.TRADING_CHANNEL_ALI_PAY)){
+        //付款动作
+        if (orderVo.getTradingType().equals(TradingConstant.TRADING_TYPE_FK)){
             return payTradingVo(orderVo);
-        //【退款】
-        }else if (orderVo.getTradingChannel().equals(SuperConstant.TRADING_CHANNEL_REFUND)){
+        //退款动作
+        }else if (orderVo.getTradingType().equals(TradingConstant.TRADING_TYPE_TK)){
             return refundTradingVo(orderVo);
-        //【免单】
-        }else {
+        //免单动作
+        }else if (orderVo.getTradingType().equals(TradingConstant.TRADING_TYPE_MD)) {
             return freeChargeTradingVo(orderVo);
+        //挂账动作
+        }else if (orderVo.getTradingType().equals(TradingConstant.TRADING_TYPE_GZ)) {
+            return creditTradingVo(orderVo);
+        }else {
+            throw new ProjectException(TradingEnum.TRADING_TYPE_FAIL);
+        }
+    }
+
+    /***
+     * @description 付款动作
+     * @param orderVo
+     * @return TradingVo 交易单
+     */
+    private TradingVo payTradingVo(OrderVo orderVo){
+        Order order = orderService.getById(orderVo.getId());
+        //应付总金额
+        BigDecimal payableAmountSum = order.getPayableAmountSum();
+        //打折
+        BigDecimal discount = orderVo.getDiscount();
+        //优惠
+        BigDecimal reduce = orderVo.getReduce();
+        //计算实付总金额
+        BigDecimal realAmountSum = payableAmountSum
+                .multiply(discount.divide(new BigDecimal(10)))
+                .subtract(reduce);
+        //实付金额
+        order.setRealAmountSum(realAmountSum);
+        //支付人id
+        order.setCashierId(orderVo.getCashierId());
+        //支付人名称
+        order.setCashierName(orderVo.getCashierName());
+        //支付渠道
+        order.setTradingChannel(orderVo.getTradingChannel());
+        //支付类型
+        order.setTradingType(orderVo.getTradingType());
+        //订单状态：FKZ
+        order.setOrderState(TradingConstant.FKZ);
+        boolean flag = orderService.updateById(order);
+        //构建交易单
+        if (flag){
+            TradingVo tradingVo = TradingVo.builder()
+                .tradingAmount(realAmountSum)
+                .tradingChannel(orderVo.getTradingChannel())
+                .tradingType(orderVo.getTradingType())
+                .tradingState(order.getOrderState())
+                .enterpriseId(order.getEnterpriseId())
+                .storeId(order.getTableId())
+                .payeeId(orderVo.getCashierId())
+                .payeeName(orderVo.getCashierName())
+                .productOrderNo(order.getOrderNo())
+                .memo(order.getTableName()+":"+order.getOrderNo())
+                .build();
+            return tradingVo;
+        }else {
+            throw new ProjectException(OrderEnum.UPDATE_FAIL);
+        }
+    }
+
+    /***
+     * @description 退款动作
+     * @param orderVo
+     * @return TradingVo 交易单
+     */
+    private TradingVo refundTradingVo(OrderVo orderVo){
+        Order order = orderService.getById(orderVo.getId());
+        //修改退款金额
+        order.setRefund(order.getRefund().add(orderVo.getOperTionRefund()));
+        //有退款行为
+        order.setIsRefund(SuperConstant.YES);;
+        boolean flag = orderService.updateById(order);
+        //构建交易单
+        if (flag){
+            TradingVo tradingVo = TradingVo.builder()
+                .tradingAmount(orderVo.getOperTionRefund())//前台传递过来退款金额
+                .refund(orderVo.getRefund())
+                .isRefund(SuperConstant.YES)
+                .tradingChannel(orderVo.getTradingChannel())
+                .tradingType(orderVo.getTradingType())
+                .enterpriseId(orderVo.getEnterpriseId())
+                .productOrderNo(order.getOrderNo())
+                .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
+                .build();
+            return tradingVo;
+        }else {
+            throw new ProjectException(OrderEnum.UPDATE_FAIL);
+        }
+    }
+
+    /***
+     * @description 免单动作
+     * @param orderVo
+     * @return TradingVo 交易单
+     */
+    private TradingVo freeChargeTradingVo(OrderVo orderVo){
+        Order order = orderService.getById(orderVo.getId());
+        //支付渠道
+        order.setTradingChannel(orderVo.getTradingChannel());
+        //支付类型
+        order.setTradingType(orderVo.getTradingType());
+        //订单状态：MD
+        order.setOrderState(TradingConstant.MD);
+        //结算保存订单信息
+        boolean flag = orderService.updateById(order);
+        //构建交易单
+        if (flag){
+            TradingVo tradingVo = TradingVo.builder()
+                    .tradingAmount(orderVo.getPayableAmountSum())
+                    .tradingChannel(orderVo.getTradingChannel())
+                    .tradingType(orderVo.getTradingType())
+                    .tradingState(order.getOrderState())
+                    .enterpriseId(orderVo.getEnterpriseId())
+                    .storeId(orderVo.getTableId())
+                    .payeeId(orderVo.getCashierId())
+                    .payeeName(orderVo.getCashierName())
+                    .productOrderNo(orderVo.getOrderNo())
+                    .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
+                    .build();
+            return tradingVo;
+        }else {
+            throw new ProjectException(OrderEnum.UPDATE_FAIL);
+        }
+    }
+
+    /***
+     * @description 挂账动作
+     * @param orderVo
+     * @return TradingVo 交易单
+     */
+    private TradingVo creditTradingVo(OrderVo orderVo){
+        Order order = orderService.getById(orderVo.getId());
+        //支付渠道
+        order.setTradingChannel(orderVo.getTradingChannel());
+        //支付类型
+        order.setTradingType(orderVo.getTradingType());
+        //订单状态：MD
+        order.setOrderState(TradingConstant.GZ);
+        //结算保存订单信息
+        boolean flag = orderService.updateById(order);
+        //构建交易单
+        if (flag){
+            TradingVo tradingVo = TradingVo.builder()
+                    .tradingAmount(orderVo.getPayableAmountSum())
+                    .tradingChannel(orderVo.getTradingChannel())
+                    .tradingType(orderVo.getTradingType())
+                    .tradingState(order.getOrderState())
+                    .enterpriseId(orderVo.getEnterpriseId())
+                    .storeId(orderVo.getTableId())
+                    .payeeId(orderVo.getCashierId())
+                    .payeeName(orderVo.getCashierName())
+                    .productOrderNo(orderVo.getOrderNo())
+                    .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
+                    .build();
+            return tradingVo;
+        }else {
+            throw new ProjectException(OrderEnum.UPDATE_FAIL);
         }
     }
 

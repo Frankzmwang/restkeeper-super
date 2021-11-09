@@ -23,19 +23,10 @@ public class Order extends BasicPojo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public Order(Long id,Long orderNo,Integer personNumbers,String orderState,
-                 BigDecimal payableAmountSum,BigDecimal realAmountSum,
-                 BigDecimal reduce,BigDecimal discount,
-                 BigDecimal refund,String isRefund,
-                 Integer useScore,Long acquireScore,
-                 Long buyerId,String buyerMemo,
-                 Long cashierId,String cashierName,
-                 Long storeId,Long enterpriseId,Long areaId,
-                 Long tableId,String tableName,String tradingChannel){
+    public Order(Long id,Long orderNo,Integer personNumbers,BigDecimal payableAmountSum,BigDecimal realAmountSum,BigDecimal reduce,BigDecimal discount,BigDecimal refund,String isRefund,Integer useScore,Long acquireScore,Long buyerId,String buyerMemo,Long cashierId,String cashierName,Long storeId,Long enterpriseId,Long areaId,Long tableId,String tableName,String tradingChannel,String tradingType,String orderState){
         super(id);
         this.orderNo=orderNo;
         this.personNumbers=personNumbers;
-        this.orderState=orderState;
         this.payableAmountSum=payableAmountSum;
         this.realAmountSum=realAmountSum;
         this.reduce=reduce;
@@ -53,7 +44,9 @@ public class Order extends BasicPojo {
         this.areaId=areaId;
         this.tableId=tableId;
         this.tableName=tableName;
-        this.tradingChannel = tradingChannel;
+        this.tradingChannel=tradingChannel;
+        this.tradingType=tradingType;
+        this.orderState=orderState;
     }
 
     @ApiModelProperty(value = "业务系统订单号【分表字段】")
@@ -61,12 +54,6 @@ public class Order extends BasicPojo {
 
     @ApiModelProperty(value = "就餐人数")
     private Integer personNumbers;
-
-    @ApiModelProperty(value = "支付渠道")
-    private String tradingChannel;
-
-    @ApiModelProperty(value = "订单状态【DFK待付款, FKZ(付款中,QXDD取消订单,YJS已结算,MD免单】")
-    private String orderState;
 
     @ApiModelProperty(value = "应付总金额")
     private BigDecimal payableAmountSum;
@@ -80,7 +67,7 @@ public class Order extends BasicPojo {
     @ApiModelProperty(value = "折扣")
     private BigDecimal discount;
 
-    @ApiModelProperty(value = "退款金额【付款后】")
+    @ApiModelProperty(value = "退款总金额【付款后】")
     private BigDecimal refund;
 
     @ApiModelProperty(value = "是否有退款：YES，NO")
@@ -101,6 +88,7 @@ public class Order extends BasicPojo {
     @ApiModelProperty(value = "收银员ID")
     private Long cashierId;
 
+    @ApiModelProperty(value = "收银员名称")
     private String cashierName;
 
     @ApiModelProperty(value = "门店主键id")
@@ -117,6 +105,15 @@ public class Order extends BasicPojo {
 
     @ApiModelProperty(value = "桌台名称")
     private String tableName;
+
+    @ApiModelProperty(value = "支付渠道【支付宝、微信、现金、免单挂账】")
+    private String tradingChannel;
+
+    @ApiModelProperty(value = "交易类型【付款、退款、免单、挂账】")
+    private String tradingType;
+
+    @ApiModelProperty(value = "订单状态【DFK待付款,FKZ付款中,QXDD取消订单,YJS已结算,MD免单,GZ挂账】")
+    private String orderState;
 
 
 }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.ParameterizedType;
 
 /**
- * @Description： 服务实现类
+ * @Description： 退款记录服务实现类
  */
 @Service
 public class RefundRecordServiceImpl extends ServiceImpl<RefundRecordMapper, RefundRecord> implements IRefundRecordService {

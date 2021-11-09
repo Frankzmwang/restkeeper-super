@@ -54,7 +54,7 @@ public class RefundRecord extends BasicPojo {
     @ApiModelProperty(value = "退款渠道【支付宝、微信、现金】")
     private String tradingChannel;
 
-    @ApiModelProperty(value = "退款状态【成功：YES,失败：NO，进行中：SENDING")
+    @ApiModelProperty(value = "退款状态【成功：SUCCESS,进行中：SENDING】")
     private String refundStatus;
 
     @ApiModelProperty(value = "返回编码")

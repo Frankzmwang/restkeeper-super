@@ -90,7 +90,7 @@ public class AliNativePayHandler implements NativePayHandler {
                 //7.4、指定统一下单json字符串
                 tradingVo.setPlaceOrderJson(JSONObject.toJSONString(precreateResponse));
                 //7.5、指定交易状态
-                tradingVo.setTradingState(SuperConstant.FKZ);
+                tradingVo.setTradingState(TradingConstant.FKZ);
                 //7.7、重新保存信息
                 Trading trading = BeanConv.toBean(tradingVo, Trading.class);
                 flag = tradingService.saveOrUpdate(trading);
@@ -135,11 +135,11 @@ public class AliNativePayHandler implements NativePayHandler {
                 String tradeStatus = queryResponse.getTradeStatus();
                 //6.1、TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
                 if (TradingConstant.ALI_TRADE_CLOSED.equals(tradeStatus)){
-                    tradingVo.setTradingState(SuperConstant.QXDD);
+                    tradingVo.setTradingState(TradingConstant.QXDD);
                 //6.2、TRADE_SUCCESS（交易支付成功）TRADE_FINISHED（交易结束，不可退款）
                 }else if (TradingConstant.ALI_TRADE_SUCCESS.equals(tradeStatus)||
                     TradingConstant.ALI_TRADE_FINISHED.equals(tradeStatus)){
-                    tradingVo.setTradingState(SuperConstant.YJS);
+                    tradingVo.setTradingState(TradingConstant.YJS);
                 //6.3、当前交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）不处理
                 }else {
                     flag = false;
@@ -184,29 +184,25 @@ public class AliNativePayHandler implements NativePayHandler {
                 .Common()
                 .optional("out_request_no", outRequestNo)
                 .refund(String.valueOf(tradingVo.getTradingOrderNo()),
-                        String.valueOf(tradingVo.getRefund()));
+                        String.valueOf(tradingVo.getTradingAmount()));
             boolean success = ResponseChecker.success(refundResponse);
-            if (success){
-                //6、指定此订单为退款交易单
-                tradingVo.setIsRefund(SuperConstant.YES);
-                //7、保存交易单信息
-                Trading trading = BeanConv.toBean(tradingVo, Trading.class);
-                flag = tradingService.saveOrUpdate(trading);
-                //8、保存退款单信息
-                RefundRecord refundRecord = BeanConv.toBean(trading, RefundRecord.class);
-                refundRecord.setRefundNo(outRequestNo);//本次退款订单号
-                refundRecord.setRefundStatus(TradingConstant.REFUND_STATUS_SENDING);
-                refundRecord.setRefundCode(refundResponse.getSubCode());
-                refundRecord.setRefundCode(refundResponse.getSubMsg());
-                refundRecordService.save(refundRecord);
-            }else {
-                throw new ProjectException(TradingEnum.REFUND_FAIL);
-            }
+            //6、指定此订单为退款交易单
+            tradingVo.setIsRefund(SuperConstant.YES);
+            //7、保存交易单信息
+            Trading trading = BeanConv.toBean(tradingVo, Trading.class);
+            flag = tradingService.updateById(trading);
+            //8、保存退款单信息
+            RefundRecord refundRecord = BeanConv.toBean(trading, RefundRecord.class);
+            refundRecord.setRefundNo(outRequestNo);//本次退款订单号
+            refundRecord.setRefundStatus(TradingConstant.REFUND_STATUS_SENDING);
+            refundRecord.setRefundCode(refundResponse.getSubCode());
+            refundRecord.setRefundCode(refundResponse.getSubMsg());
+            refundRecordService.save(refundRecord);
+            return tradingVo;
         } catch (Exception e) {
             log.error("支付宝统一下单退款失败：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(TradingEnum.REFUND_FAIL);
         }
-        return null;
     }
 
     @Override
@@ -235,7 +231,7 @@ public class AliNativePayHandler implements NativePayHandler {
                 String refundStatus = refundRecordVo.getRefundStatus();
                 //5、退款成功修改退款记录
                 if (TradingConstant.REFUND_SUCCESS.equals(refundStatus)){
-                    refundRecordVo.setRefundStatus(TradingConstant.REFUND_STATUS_YES);
+                    refundRecordVo.setRefundStatus(TradingConstant.REFUND_STATUS_SUCCESS);
                     refundRecordVo.setRefundCode(refundQueryResponse.getSubCode());
                     refundRecordVo.setRefundCode(refundQueryResponse.getSubMsg());
                     refundRecordService.updateById(BeanConv.toBean(refundRecordVo,RefundRecord.class));

@@ -6,6 +6,7 @@ import com.itheima.restkeeper.AppletFace;
 import com.itheima.restkeeper.DataDictFace;
 import com.itheima.restkeeper.constant.AppletCacheConstant;
 import com.itheima.restkeeper.constant.SuperConstant;
+import com.itheima.restkeeper.constant.TradingConstant;
 import com.itheima.restkeeper.enums.*;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.*;
@@ -187,12 +188,14 @@ public class AppletFaceImpl implements AppletFace {
                             .areaId(table.getAreaId())
                             .enterpriseId(table.getEnterpriseId())
                             .orderNo((Long) identifierGenerator.nextId(tableId))
-                            .orderState(SuperConstant.DFK)
+                            .orderState(TradingConstant.DFK)
                             .isRefund(SuperConstant.NO)
                             .refund(new BigDecimal(0))
-                            .discount(new BigDecimal(0))
+                            .discount(new BigDecimal(10))
                             .personNumbers(personNumbers)
                             .reduce(new BigDecimal(0))
+                            .useScore(0)
+                            .acquireScore(0l)
                             .build();
                     orderService.save(order);
                     //5、修改桌台状态为使用中

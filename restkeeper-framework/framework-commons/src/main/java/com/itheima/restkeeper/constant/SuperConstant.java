@@ -77,36 +77,6 @@ public class SuperConstant {
 	public static final String STORE_ID ="store_id";
 
 	/***
-	 * 待付款【平台交易单及订单状态】
-	 */
-	public static final String DFK ="DFK";
-
-	/***
-	 * 付款中【平台交易单及订单状态】
-	 */
-	public static final String FKZ ="FKZ";
-
-	/***
-	 * 已结算【平台交易单及订单状态】
-	 */
-	public static final String YJS ="YJS";
-
-	/***
-	 * 取消订单【平台交易单及订单状态】
-	 */
-	public static final String QXDD ="QXDD";
-
-	/***
-	 * 免单【平台交易单及订单状态】
-	 */
-	public static final String MD ="MD";
-
-	/***
-	 * 免单【平台交易单及订单状态】
-	 */
-	public static final String GZ ="GZ";
-
-	/***
 	 * 桌台空闲
 	 */
 	public static final String FREE = "FREE";

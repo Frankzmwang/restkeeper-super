@@ -8,6 +8,7 @@ import com.itheima.restkeeper.enums.TradingEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.NativePayHandler;
 import com.itheima.restkeeper.pojo.Trading;
+import com.itheima.restkeeper.req.OrderVo;
 import com.itheima.restkeeper.req.RefundRecordVo;
 import com.itheima.restkeeper.req.TradingVo;
 import com.itheima.restkeeper.service.ITradingService;
@@ -56,14 +57,14 @@ public class NativePayAdapterImpl implements NativePayAdapter {
     }
 
     @Override
-    public String queryQrCodeUrl(TradingVo tradingVo) throws ProjectException {
-        Trading trading = tradingService.findTradByTradingOrderNo(tradingVo.getTradingOrderNo());
+    public String queryQrCodeUrl(OrderVo orderVo) throws ProjectException {
+        Trading trading = tradingService.findTradByProductOrderNo(orderVo.getOrderNo());
         //之前生成过则直接返回
-        if (!EmptyUtil.isNullOrEmpty(trading.getQrCodeUrl())){
+        if (!EmptyUtil.isNullOrEmpty(trading)&&!EmptyUtil.isNullOrEmpty(trading.getQrCodeUrl())){
             return trading.getQrCodeUrl();
         }
         //之前未生成直接调用万维易源生成二维码图片，并保存
-        String qrCodeUrl = showApiService.handlerQRcode(trading.getQrCodeUrl());
+        String qrCodeUrl = showApiService.handlerQRcode(trading.getPlaceOrderMsg());
         trading.setQrCodeUrl(qrCodeUrl);
         tradingService.updateById(trading);
         return qrCodeUrl;
@@ -84,7 +85,7 @@ public class NativePayAdapterImpl implements NativePayAdapter {
                         .getBean(nativePayHandlerString, NativePayHandler.class);
                 TradingVo downLineTrading = nativePayHandler.createDownLineTrading(tradingVo);
                 //3、构建支付二维码
-                String qrCodeUrl = this.queryQrCodeUrl(downLineTrading);
+                String qrCodeUrl = showApiService.handlerQRcode(downLineTrading.getPlaceOrderMsg());
                 downLineTrading.setQrCodeUrl(qrCodeUrl);
                 return downLineTrading;
             }else {
@@ -93,6 +94,8 @@ public class NativePayAdapterImpl implements NativePayAdapter {
         } catch (Exception e) {
             log.error("统一收单线下交易预创建异常:{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(TradingEnum.NATIVE_PAY_FAIL);
+        }finally {
+            lock.unlock();
         }
     }
 
@@ -124,6 +127,8 @@ public class NativePayAdapterImpl implements NativePayAdapter {
         } catch (Exception e) {
             log.error("统一收单交易退款接口异常:{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(TradingEnum.NATIVE_REFUND_FAIL);
+        }finally {
+            lock.unlock();
         }
     }
 

@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.req;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.itheima.restkeeper.basic.BasicVo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
@@ -59,6 +60,7 @@ public class PayChannelVo extends BasicVo {
     private String remark;
 
     @ApiModelProperty(value = "商户ID【系统内部识别使用】")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long enterpriseId;
 
     @ApiModelProperty(value = "选中节点")

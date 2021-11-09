@@ -1,6 +1,7 @@
 package com.itheima.restkeeper;
 
 import com.itheima.restkeeper.exception.ProjectException;
+import com.itheima.restkeeper.req.OrderVo;
 import com.itheima.restkeeper.req.RefundRecordVo;
 import com.itheima.restkeeper.req.TradingVo;
 
@@ -13,16 +14,16 @@ public interface NativePayFace {
     /***
      * @description 查看二维码信息
      * 收银员通过收银台或商户后台调用此接口，生成二维码后，展示给用户，商户可以多次展示二维码
-     * @param tradingVo 交易单
+     * @param orderVo 订单单
      * @return  交易单
      */
-    String queryQrCodeUrl(TradingVo tradingVo) throws ProjectException;
+    String queryQrCodeUrl(OrderVo orderVo) throws ProjectException;
 
     /***
      * @description 统一收单线下交易预创建
      * 收银员通过收银台或商户后台调用此接口，生成二维码后，展示给用户，由用户扫描二维码完成订单支付。
-     * @param tradingVo 交易单
-     * @return  交易单
+     * @param tradingVo 订单单
+     * @return  二维码路径
      */
     TradingVo createDownLineTrading(TradingVo tradingVo) throws ProjectException;
 

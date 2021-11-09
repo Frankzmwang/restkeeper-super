@@ -18,7 +18,7 @@ public enum TradingEnum implements IBasicEnum {
     NATIVE_PAY_FAIL("43007", "统一下单交易失败"),
     REFUND_FAIL("43008", "查询统一下单交易退款失败"),
     SAVE_OR_UPDATE_FAIL("43009", "交易单保存或修改失败"),
-    TRADING_SUCCEED("43010", "SUCCEED"),
+    TRADING_TYPE_FAIL("43010", "未定义的交易类型"),
     NATIVE_QUERY_FAIL("43011", "查询统一下单交易失败"),
     NATIVE_REFUND_FAIL("43012", "统一下单退款交易失败"),
     ;

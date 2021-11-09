@@ -44,9 +44,11 @@ mybatis-plus:
     default-fetch-size: 100
   #忽略商户号表
   ignore-enterprise-tables:
+    - tab_trading
     - undo_log
   #忽略门店号表
   ignore-store-tables:
+    - tab_trading
     - tab_trading_setting
     - tab_pay_channel
     - undo_log

@@ -89,7 +89,7 @@ public class WechatPayHttpClient {
      * @return  返回字符串
      */
     public String doPost(ObjectNode params) throws IOException {
-        HttpPost httpPost = new HttpPost("https://api.mch.weixin.qq.com"+domain);
+        HttpPost httpPost = new HttpPost("https://"+domain);
         httpPost.addHeader("Accept", "application/json");
         httpPost.addHeader("Content-type","application/json; charset=utf-8");
 
@@ -109,7 +109,7 @@ public class WechatPayHttpClient {
      * @return: 返回字符串
      */
     public String doGet(String param) throws IOException, URISyntaxException {
-        URIBuilder uriBuilder = new URIBuilder("https://api.mch.weixin.qq.com"+domain+param);
+        URIBuilder uriBuilder = new URIBuilder("https://"+domain+param);
         HttpGet httpGet = new HttpGet(uriBuilder.build());
         httpGet.addHeader("Accept", "application/json");
         CloseableHttpResponse response = this.createHttpClient().execute(httpGet);

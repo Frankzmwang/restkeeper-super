@@ -10,6 +10,7 @@ import com.itheima.restkeeper.enums.PayChannelEnum;
 import com.itheima.restkeeper.enums.TradingEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.alipay.config.AlipayConfig;
+import com.itheima.restkeeper.handler.wechat.config.WechatPayConfig;
 import com.itheima.restkeeper.pojo.PayChannel;
 import com.itheima.restkeeper.mapper.PayChannelMapper;
 import com.itheima.restkeeper.req.OtherConfigVo;
@@ -33,6 +34,9 @@ public class PayChannelServiceImpl extends ServiceImpl<PayChannelMapper, PayChan
 
     @Autowired
     AlipayConfig alipayConfig;
+
+    @Autowired
+    WechatPayConfig wechatPayConfig;
 
     @Override
     public Page<PayChannel> findPayChannelVoPage(PayChannelVo payChannelVo, int pageNum, int pageSize) {
@@ -59,7 +63,9 @@ public class PayChannelServiceImpl extends ServiceImpl<PayChannelMapper, PayChan
         boolean flag = save(payChannel);
         if (TradingConstant.TRADING_CHANNEL_ALI_PAY.equals(payChannel.getChannelLabel())){
             alipayConfig.createOrUpdateConfig(payChannelVo);
-        }else {
+        }else if (TradingConstant.TRADING_CHANNEL_WECHAT_PAY.equals(payChannel.getChannelLabel())){
+            wechatPayConfig.createOrUpdateConfig(payChannelVo);
+        } else {
             throw new ProjectException(PayChannelEnum.CHANNEL_FAIL);
         }
         if (flag){
@@ -76,6 +82,8 @@ public class PayChannelServiceImpl extends ServiceImpl<PayChannelMapper, PayChan
         if (flag){
             if (TradingConstant.TRADING_CHANNEL_ALI_PAY.equals(payChannel.getChannelLabel())){
                 alipayConfig.createOrUpdateConfig(payChannelVo);
+            }else if (TradingConstant.TRADING_CHANNEL_WECHAT_PAY.equals(payChannel.getChannelLabel())){
+                wechatPayConfig.createOrUpdateConfig(payChannelVo);
             }else {
                 throw new ProjectException(PayChannelEnum.CHANNEL_FAIL);
             }
@@ -92,6 +100,8 @@ public class PayChannelServiceImpl extends ServiceImpl<PayChannelMapper, PayChan
         for (PayChannel payChannel : payChannels) {
             if (TradingConstant.TRADING_CHANNEL_ALI_PAY.equals(payChannel.getChannelLabel())){
                 alipayConfig.removeConfig(payChannel.getEnterpriseId());
+            }else if (TradingConstant.TRADING_CHANNEL_WECHAT_PAY.equals(payChannel.getChannelLabel())){
+                wechatPayConfig.removeConfig(payChannel.getEnterpriseId());
             }else {
                 throw new ProjectException(PayChannelEnum.CHANNEL_FAIL);
             }

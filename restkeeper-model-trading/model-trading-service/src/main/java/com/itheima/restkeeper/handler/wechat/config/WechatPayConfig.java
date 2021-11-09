@@ -12,9 +12,10 @@ import com.itheima.restkeeper.utils.EmptyUtil;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import java.util.Map;
  * @ClassName WeChatPayConfig.java
  * @Description 微信配置类
  */
+@Configuration
 public class WechatPayConfig {
 
     @Autowired
@@ -44,8 +46,8 @@ public class WechatPayConfig {
             payChannelVos.forEach(n->{
                 List <OtherConfigVo> otherConfigVos = JSONArray.parseArray(n.getOtherConfig(),OtherConfigVo.class);
                 n.setOtherConfigs(otherConfigVos);
-                RBucket<PayChannelVo> alipayChannel = redissonClient.getBucket("pay:alipay:channel:"+n.getEnterpriseId());
-                alipayChannel.set(n);
+                RBucket<PayChannelVo> wechatPayChannel = redissonClient.getBucket("pay:wechat:channel:"+n.getEnterpriseId());
+                wechatPayChannel.set(n);
             });
         }
     }
@@ -55,11 +57,11 @@ public class WechatPayConfig {
      * @param payChannelVo 配置信息
      * @return
      */
-    public WechatPayClient createOrUpdateClient(PayChannelVo payChannelVo) throws UnsupportedEncodingException {
+    public WechatPayClient createOrUpdateConfig(PayChannelVo payChannelVo) {
         //1、缓存配置
-        RBucket<PayChannelVo> alipayChannel = redissonClient
-                .getBucket("pay:alipay:channel:"+payChannelVo.getEnterpriseId());
-        alipayChannel.set(payChannelVo);
+        RBucket<PayChannelVo> wechatPayChannel = redissonClient
+                .getBucket("pay:wechat:channel:"+payChannelVo.getEnterpriseId());
+        wechatPayChannel.set(payChannelVo);
         List<OtherConfigVo> otherConfigs = payChannelVo.getOtherConfigs();
         //2、转换其他属性为map结构
         Map<String,String> otherConfigMap = new HashMap<>();
@@ -68,12 +70,33 @@ public class WechatPayConfig {
         });
         return WechatPayClient.builder()
             .appid(payChannelVo.getAppId())
+            .domain(payChannelVo.getDomain())
             .mchId(otherConfigMap.get("mchId"))
             .mchSerialNo(otherConfigMap.get("mchSerialNo"))
             .apiV3Key(otherConfigMap.get("apiV3Key"))
-            .privateKey(otherConfigMap.get("privateKey"))
+            .privateKey(payChannelVo.getMerchantPrivateKey())
             .build();
     }
 
+    /***
+     * @description 移除配置
+     * @return
+     */
+    public void removeConfig(Long enterpriseId){
+        //1、缓存配置
+        RBucket<PayChannelVo> wechatPayChannel = redissonClient
+                .getBucket("pay:wechat:channel:"+enterpriseId);
+        wechatPayChannel.delete();
+    }
 
+    /***
+     * @description 获得配置
+     * @return
+     */
+    public WechatPayClient queryConfig(Long enterpriseId){
+        //1、缓存配置
+        RBucket<PayChannelVo> wechatPayChannel = redissonClient
+                .getBucket("pay:wechat:channel:"+enterpriseId);
+        return this.createOrUpdateConfig(wechatPayChannel.get());
+    }
 }

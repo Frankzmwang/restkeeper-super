@@ -53,7 +53,7 @@ public class NativePayAdapterImpl implements NativePayAdapter {
 
     static {
         nativePayHandlers.put(TradingConstant.TRADING_CHANNEL_ALI_PAY,"aliNativePayHandler");
-        nativePayHandlers.put(TradingConstant.TRADING_CHANNEL_WECHAT_PAY,"weChatNativePayHandler");
+        nativePayHandlers.put(TradingConstant.TRADING_CHANNEL_WECHAT_PAY,"wechatNativePayHandler");
     }
 
     @Override

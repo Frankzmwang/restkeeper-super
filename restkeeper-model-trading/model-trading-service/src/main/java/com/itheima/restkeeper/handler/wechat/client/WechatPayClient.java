@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URISyntaxException;
 
 /**
@@ -31,6 +32,9 @@ public class WechatPayClient {
     //V3密钥
     String apiV3Key;
 
+    //请求地址
+    String domain;
+
     /***
      * @description 构建客户端
      *
@@ -45,40 +49,44 @@ public class WechatPayClient {
                            String mchId,
                            String privateKey,
                            String mchSerialNo,
-                           String apiV3Key) {
+                           String apiV3Key,
+                           String domain) {
         this.appid = appid;
         this.mchId = mchId;
         this.privateKey = privateKey;
         this.mchSerialNo = mchSerialNo;
         this.apiV3Key = apiV3Key;
+        this.domain=domain;
     }
 
     /***
      * @description 统一收单线下交易预创建
      * @param outTradeNo 发起支付传递的交易单号
-     * @param amount 交易金额
+     * @param amount 交易金额【元】
      * @param description 商品描述
      * @return
      */
     public String preCreate(String outTradeNo,String amount,String description){
         //请求地址
-        String domain ="/v3/pay/transactions/native";
+        String uri ="/v3/pay/transactions/native";
         WechatPayHttpClient httpClient = WechatPayHttpClient.builder()
                 .mchId(mchId)
                 .mchSerialNo(mchSerialNo)
                 .apiV3Key(apiV3Key)
                 .privateKey(privateKey)
-                .domain(domain)
+                .domain(domain+uri)
                 .build();
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode bodyParams = objectMapper.createObjectNode();
+        BigDecimal bigDecimal = new BigDecimal(amount);
+        BigDecimal multiply = bigDecimal.multiply(new BigDecimal(100));
         bodyParams.put("mchid",mchId)
                   .put("appid",appid )
                   .put("description", description)
                   .put("notify_url", "https://www.weixin.qq.com/wxpay/pay.php")
                   .put("out_trade_no", outTradeNo);
         bodyParams.putObject("amount")
-                  .put("total", Integer.valueOf(amount));
+                  .put("total", multiply.intValue());
         try {
             return httpClient.doPost(bodyParams);
         } catch (IOException e) {
@@ -94,13 +102,13 @@ public class WechatPayClient {
      */
     public String query(String outTradeNo){
         //请求地址
-        String domain ="/v3/pay/transactions";
+        String uri ="/v3/pay/transactions";
         WechatPayHttpClient httpClient = WechatPayHttpClient.builder()
                 .mchId(mchId)
                 .mchSerialNo(mchSerialNo)
                 .apiV3Key(apiV3Key)
                 .privateKey(privateKey)
-                .domain(domain)
+                .domain(domain+uri)
                 .build();
         try {
             //uri参数对象
@@ -121,13 +129,13 @@ public class WechatPayClient {
      */
     public String refund(String outTradeNo,String amount,String outRefundNo){
         //请求地址
-        String domain ="/v3/refund/domestic/refunds";
+        String uri ="/v3/refund/domestic/refunds";
         WechatPayHttpClient httpClient = WechatPayHttpClient.builder()
                 .mchId(mchId)
                 .mchSerialNo(mchSerialNo)
                 .apiV3Key(apiV3Key)
                 .privateKey(privateKey)
-                .domain(domain)
+                .domain(domain+uri)
                 .build();
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode bodyParams = objectMapper.createObjectNode();
@@ -150,13 +158,13 @@ public class WechatPayClient {
      */
     public String queryRefund(String outRefundNo){
         //请求地址
-        String domain ="/v3/refund/domestic/refunds";
+        String uri ="/v3/refund/domestic/refunds";
         WechatPayHttpClient httpClient = WechatPayHttpClient.builder()
                 .mchId(mchId)
                 .mchSerialNo(mchSerialNo)
                 .apiV3Key(apiV3Key)
                 .privateKey(privateKey)
-                .domain(domain)
+                .domain(domain+uri)
                 .build();
         try {
             String uriParams ="/"+outRefundNo;

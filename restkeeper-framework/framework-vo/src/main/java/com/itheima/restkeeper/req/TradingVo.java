@@ -22,7 +22,11 @@ public class TradingVo extends BasicVo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public TradingVo(Long id,Long productOrderNo,Long tradingOrderNo,String tradingChannel,String tradingType,String tradingState,String payeeName,Long payeeId,String payerName,Long payerId,BigDecimal tradingAmount,BigDecimal refund,String isRefund,String resultCode,String resultMsg,String resultJson,String placeOrderCode,String placeOrderMsg,String placeOrderJson,Long enterpriseId,Long storeId,String memo,String qrCodeUrl){
+    public TradingVo(Long id,Long productOrderNo,Long tradingOrderNo,String tradingChannel,
+                     String tradingType,String tradingState,String payeeName,Long payeeId,String payerName,
+                     Long payerId,BigDecimal tradingAmount,BigDecimal refund,String isRefund,String resultCode,String resultMsg,
+                     String resultJson,String placeOrderCode,String placeOrderMsg,String placeOrderJson,Long enterpriseId,
+                     Long storeId,String memo,String qrCodeUrl,BigDecimal operTionRefund){
         super(id);
         this.productOrderNo=productOrderNo;
         this.tradingOrderNo=tradingOrderNo;
@@ -46,6 +50,7 @@ public class TradingVo extends BasicVo {
         this.storeId=storeId;
         this.memo=memo;
         this.qrCodeUrl=qrCodeUrl;
+        this.operTionRefund = operTionRefund;
     }
 
     @ApiModelProperty(value = "业务系统订单号")
@@ -122,4 +127,7 @@ public class TradingVo extends BasicVo {
 
     @ApiModelProperty(value = "退款请求号")
     private String outRequestNo;
+
+    @ApiModelProperty(value = "操作退款金额")
+    private BigDecimal operTionRefund;
 }

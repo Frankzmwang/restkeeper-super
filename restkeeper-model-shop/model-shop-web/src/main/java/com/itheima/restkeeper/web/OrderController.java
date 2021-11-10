@@ -77,7 +77,8 @@ public class OrderController {
         UserVo userVo = JSONObject.parseObject(userVoString, UserVo.class);
         orderVo.setCashierId(userVo.getId());
         orderVo.setCashierName(userVo.getUsername());
-        return ResponseWrapBuild.build(BrandEnum.SUCCEED,orderFace.handleTrading(orderVo));
+        TradingVo tradingVo = orderFace.handleTrading(orderVo);
+        return ResponseWrapBuild.build(BrandEnum.SUCCEED,tradingVo);
     }
 
     @PostMapping("queryQrCode")

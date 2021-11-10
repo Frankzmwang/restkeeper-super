@@ -16,6 +16,8 @@ import com.itheima.restkeeper.utils.EmptyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 /**
  * @ClassName BeforePayHandlerImpl.java
  * @Description 阿里交易前置处理接口实现
@@ -108,6 +110,7 @@ public class AliBeforePayHandlerImpl implements BeforePayHandler {
             throw new ProjectException(TradingEnum.NATIVE_REFUND_FAIL);
         }else {
             tradingVo.setTradingOrderNo(trading.getTradingOrderNo());
+            tradingVo.setId(trading.getId());
         }
         //查询是否有退款中的退款记录
         RefundRecord refundRecord = refundRecordService
@@ -119,6 +122,7 @@ public class AliBeforePayHandlerImpl implements BeforePayHandler {
 
     @Override
     public Boolean checkeRefundDownLineTrading(TradingVo tradingVo) {
+
         Boolean flag =null;
         //订单为空
         if (EmptyUtil.isNullOrEmpty(tradingVo)) {
@@ -129,12 +133,16 @@ public class AliBeforePayHandlerImpl implements BeforePayHandler {
          //退款请求号为空
         }else if (EmptyUtil.isNullOrEmpty(tradingVo.getOutRequestNo())){
             flag = false;
-         //退款金额为空
-        }else if (EmptyUtil.isNullOrEmpty(tradingVo.getTradingAmount())){
+        //当前退款金额为空
+        }else if (EmptyUtil.isNullOrEmpty(tradingVo.getOperTionRefund())){
+            flag = false;
+        //退款总金额不可超实付总金额
+        }else if (tradingVo.getRefund().compareTo(tradingVo.getTradingAmount()) > 0){
             flag = false;
         }else {
             flag = true;
         }
+
         return flag;
     }
 

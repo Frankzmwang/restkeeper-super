@@ -27,10 +27,10 @@ public class TradingConstant {
     public static final String TRADING_CHANNEL_WECHAT_PAY = "WECHAT_PAY";
     //现金
     public static final String TRADING_CHANNEL_CASHPAY = "CASHPAY";
-    //免单挂账
+    //免单挂账【信用渠道】
     public static final String TRADING_CHANNEL_CREDIT_CARD = "CREDIT_CARD";
 
-    //【平台:交易类型】
+    //【平台:交易动作】
     //付款
     public static final String TRADING_TYPE_FK = "FK";
     //退款
@@ -55,6 +55,8 @@ public class TradingConstant {
     public static final String GZ ="GZ";
 
     //【平台：退款状态】
+    //失败
+    public static final String REFUND_STATUS_FAIL= "FAIL";
     //成功
     public static final String REFUND_STATUS_SUCCESS = "SUCCESS";
     //请求中

@@ -325,9 +325,9 @@ public class OrderFaceImpl implements OrderFace {
                 .subtract(reduce);
         //实付金额
         order.setRealAmountSum(realAmountSum);
-        //支付人id
+        //收银人id
         order.setCashierId(orderVo.getCashierId());
-        //支付人名称
+        //收银人名称
         order.setCashierName(orderVo.getCashierName());
         //支付渠道
         order.setTradingChannel(orderVo.getTradingChannel());
@@ -344,6 +344,7 @@ public class OrderFaceImpl implements OrderFace {
                 .tradingType(orderVo.getTradingType())
                 .tradingState(order.getOrderState())
                 .enterpriseId(order.getEnterpriseId())
+                .isRefund(order.getIsRefund())
                 .storeId(order.getTableId())
                 .payeeId(orderVo.getCashierId())
                 .payeeName(orderVo.getCashierName())
@@ -371,8 +372,9 @@ public class OrderFaceImpl implements OrderFace {
         //构建交易单
         if (flag){
             TradingVo tradingVo = TradingVo.builder()
-                .tradingAmount(orderVo.getOperTionRefund())//前台传递过来退款金额
-                .refund(orderVo.getRefund())
+                .operTionRefund(orderVo.getOperTionRefund())//前台传递过来退款金额
+                .tradingAmount(order.getRealAmountSum())//订单实付金额
+                .refund(order.getRefund())//订单退款金额
                 .isRefund(SuperConstant.YES)
                 .tradingChannel(orderVo.getTradingChannel())
                 .tradingType(orderVo.getTradingType())
@@ -404,17 +406,17 @@ public class OrderFaceImpl implements OrderFace {
         //构建交易单
         if (flag){
             TradingVo tradingVo = TradingVo.builder()
-                    .tradingAmount(orderVo.getPayableAmountSum())
-                    .tradingChannel(orderVo.getTradingChannel())
-                    .tradingType(orderVo.getTradingType())
-                    .tradingState(order.getOrderState())
-                    .enterpriseId(orderVo.getEnterpriseId())
-                    .storeId(orderVo.getTableId())
-                    .payeeId(orderVo.getCashierId())
-                    .payeeName(orderVo.getCashierName())
-                    .productOrderNo(orderVo.getOrderNo())
-                    .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
-                    .build();
+                .tradingAmount(order.getPayableAmountSum())
+                .tradingChannel(orderVo.getTradingChannel())
+                .tradingType(orderVo.getTradingType())
+                .tradingState(order.getOrderState())
+                .enterpriseId(orderVo.getEnterpriseId())
+                .storeId(orderVo.getTableId())
+                .payeeId(orderVo.getCashierId())
+                .payeeName(orderVo.getCashierName())
+                .productOrderNo(orderVo.getOrderNo())
+                .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
+                .build();
             return tradingVo;
         }else {
             throw new ProjectException(OrderEnum.UPDATE_FAIL);
@@ -439,17 +441,17 @@ public class OrderFaceImpl implements OrderFace {
         //构建交易单
         if (flag){
             TradingVo tradingVo = TradingVo.builder()
-                    .tradingAmount(orderVo.getPayableAmountSum())
-                    .tradingChannel(orderVo.getTradingChannel())
-                    .tradingType(orderVo.getTradingType())
-                    .tradingState(order.getOrderState())
-                    .enterpriseId(orderVo.getEnterpriseId())
-                    .storeId(orderVo.getTableId())
-                    .payeeId(orderVo.getCashierId())
-                    .payeeName(orderVo.getCashierName())
-                    .productOrderNo(orderVo.getOrderNo())
-                    .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
-                    .build();
+                .tradingAmount(order.getPayableAmountSum())
+                .tradingChannel(orderVo.getTradingChannel())
+                .tradingType(orderVo.getTradingType())
+                .tradingState(order.getOrderState())
+                .enterpriseId(orderVo.getEnterpriseId())
+                .storeId(orderVo.getTableId())
+                .payeeId(orderVo.getCashierId())
+                .payeeName(orderVo.getCashierName())
+                .productOrderNo(orderVo.getOrderNo())
+                .memo(orderVo.getTableName()+":"+orderVo.getOrderNo())
+                .build();
             return tradingVo;
         }else {
             throw new ProjectException(OrderEnum.UPDATE_FAIL);

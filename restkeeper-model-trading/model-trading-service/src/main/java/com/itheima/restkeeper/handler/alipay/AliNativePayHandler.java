@@ -184,19 +184,25 @@ public class AliNativePayHandler implements NativePayHandler {
                 .Common()
                 .optional("out_request_no", outRequestNo)
                 .refund(String.valueOf(tradingVo.getTradingOrderNo()),
-                        String.valueOf(tradingVo.getTradingAmount()));
+                        String.valueOf(tradingVo.getOperTionRefund()));
             boolean success = ResponseChecker.success(refundResponse);
             //6、指定此订单为退款交易单
             tradingVo.setIsRefund(SuperConstant.YES);
             //7、保存交易单信息
             Trading trading = BeanConv.toBean(tradingVo, Trading.class);
-            flag = tradingService.updateById(trading);
-            //8、保存退款单信息
+            tradingService.updateById(trading);
             RefundRecord refundRecord = BeanConv.toBean(trading, RefundRecord.class);
+            //8、保存退款单信息
+            refundRecord.setId(null);
             refundRecord.setRefundNo(outRequestNo);//本次退款订单号
-            refundRecord.setRefundStatus(TradingConstant.REFUND_STATUS_SENDING);
+            refundRecord.setRefundAmount(tradingVo.getOperTionRefund());//本次退款金额
             refundRecord.setRefundCode(refundResponse.getSubCode());
             refundRecord.setRefundCode(refundResponse.getSubMsg());
+            if (success){
+                refundRecord.setRefundStatus(TradingConstant.REFUND_STATUS_SENDING);
+            }else {
+                refundRecord.setRefundStatus(TradingConstant.REFUND_STATUS_FAIL);;
+            }
             refundRecordService.save(refundRecord);
             return tradingVo;
         } catch (Exception e) {

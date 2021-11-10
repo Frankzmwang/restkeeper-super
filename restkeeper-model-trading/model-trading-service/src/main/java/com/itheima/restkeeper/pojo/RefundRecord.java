@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.pojo;
 
+import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.itheima.restkeeper.basic.BasicPojo;
 import io.swagger.annotations.ApiModel;
@@ -22,7 +23,7 @@ public class RefundRecord extends BasicPojo {
     private static final long serialVersionUID = 1L;
 
     @Builder
-    public RefundRecord(Long id,Long tradingOrderNo,Long productOrderNo,String refundNo,Long enterpriseId,Long storeId,String tradingChannel,String refundStatus,String refundCode,String refundMsg,String memo){
+    public RefundRecord(Long id,Long tradingOrderNo,Long productOrderNo,String refundNo,Long enterpriseId,Long storeId,String tradingChannel,String refundStatus,String refundCode,String refundMsg,String memo,BigDecimal refundAmount){
         super(id);
         this.tradingOrderNo=tradingOrderNo;
         this.productOrderNo=productOrderNo;
@@ -34,6 +35,7 @@ public class RefundRecord extends BasicPojo {
         this.refundCode=refundCode;
         this.refundMsg=refundMsg;
         this.memo=memo;
+        this.refundAmount=refundAmount;
     }
 
     @ApiModelProperty(value = "交易系统订单号【对于三方来说：商户订单】")
@@ -65,6 +67,9 @@ public class RefundRecord extends BasicPojo {
 
     @ApiModelProperty(value = "备注【订单门店，桌台信息】")
     private String memo;
+
+    @ApiModelProperty(value = "本次退款金额")
+    private BigDecimal refundAmount;
 
 
 }

@@ -1,4 +1,4 @@
-package com.itheima.restkeeper.handler.alipay;
+package com.itheima.restkeeper.handler.impl;
 
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.itheima.restkeeper.constant.TradingConstant;
@@ -23,7 +23,7 @@ import java.math.BigDecimal;
  * @Description 阿里交易前置处理接口实现
  */
 @Component("aliBeforePayHandler")
-public class AliBeforePayHandlerImpl implements BeforePayHandler {
+public class BeforePayHandlerImpl implements BeforePayHandler {
 
     @Autowired
     ITradingService tradingService;
@@ -111,6 +111,7 @@ public class AliBeforePayHandlerImpl implements BeforePayHandler {
         }else {
             tradingVo.setTradingOrderNo(trading.getTradingOrderNo());
             tradingVo.setId(trading.getId());
+            tradingVo.setTradingAmount(trading.getTradingAmount());
         }
         //查询是否有退款中的退款记录
         RefundRecord refundRecord = refundRecordService

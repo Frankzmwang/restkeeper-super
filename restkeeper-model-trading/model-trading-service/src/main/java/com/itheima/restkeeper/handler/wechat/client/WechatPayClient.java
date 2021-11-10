@@ -1,11 +1,18 @@
 package com.itheima.restkeeper.handler.wechat.client;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.itheima.restkeeper.enums.TradingEnum;
+import com.itheima.restkeeper.exception.ProjectException;
+import com.itheima.restkeeper.handler.wechat.response.PreCreateResponse;
+import com.itheima.restkeeper.handler.wechat.response.RefundResponse;
+import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.constraints.Email;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
@@ -66,7 +73,7 @@ public class WechatPayClient {
      * @param description 商品描述
      * @return
      */
-    public String preCreate(String outTradeNo,String amount,String description){
+    public PreCreateResponse preCreate(String outTradeNo,String amount,String description) throws ProjectException{
         //请求地址
         String uri ="/v3/pay/transactions/native";
         WechatPayHttpClient httpClient = WechatPayHttpClient.builder()
@@ -87,12 +94,18 @@ public class WechatPayClient {
                   .put("out_trade_no", outTradeNo);
         bodyParams.putObject("amount")
                   .put("total", multiply.intValue());
+        String body = null;
         try {
-            return httpClient.doPost(bodyParams);
+            body =  httpClient.doPost(bodyParams);
         } catch (IOException e) {
             log.error("微信支付：preCreate，发生异常：{}", ExceptionsUtil.getStackTraceAsString(e));
         }
-        return null;
+        if (EmptyUtil.isNullOrEmpty(body)){
+            throw new ProjectException(TradingEnum.NATIVE_PAY_FAIL);
+        }
+        PreCreateResponse preCreateResponse = JSONObject.parseObject(body, PreCreateResponse.class);
+        preCreateResponse.setCode("200");
+        return preCreateResponse;
     }
 
     /***
@@ -125,9 +138,10 @@ public class WechatPayClient {
      * @param outTradeNo 发起支付传递的交易单号
      * @param amount 退款金额
      * @param outRefundNo 商户系统内部的退款单号，商户系统内部唯一，只能是数字、大小写字母_-|*@ ，同一退款单号多次请求只退一笔
+     * @param total 原订单金额
      * @return
      */
-    public String refund(String outTradeNo,String amount,String outRefundNo){
+    public RefundResponse refund(String outTradeNo,String amount,String outRefundNo,String total) throws ProjectException{
         //请求地址
         String uri ="/v3/refund/domestic/refunds";
         WechatPayHttpClient httpClient = WechatPayHttpClient.builder()
@@ -139,16 +153,28 @@ public class WechatPayClient {
                 .build();
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode bodyParams = objectMapper.createObjectNode();
+        BigDecimal bigDecimal = new BigDecimal(amount);
+        BigDecimal multiply = bigDecimal.multiply(new BigDecimal(100));
+        BigDecimal bigDecimalTotal = new BigDecimal(total);
+        BigDecimal multiplyTotal = bigDecimalTotal.multiply(new BigDecimal(100));
         bodyParams.put("out_refund_no", outRefundNo)
                   .put("out_trade_no", outTradeNo);
         bodyParams.putObject("amount")
-                  .put("refund", Integer.valueOf(amount));
+                  .put("refund", multiply.intValue())
+                  .put("total", multiplyTotal.intValue())
+                  .put("currency", "CNY");
+        String body = null;
         try {
-            return httpClient.doPost(bodyParams);
+            body =  httpClient.doPost(bodyParams);
         } catch (IOException e) {
             log.error("微信支付：refund，发生异常：{}", ExceptionsUtil.getStackTraceAsString(e));
         }
-        return null;
+        if (EmptyUtil.isNullOrEmpty(body)){
+            throw new ProjectException(TradingEnum.NATIVE_REFUND_FAIL);
+        }
+        RefundResponse refundResponse = JSONObject.parseObject(body, RefundResponse.class);
+        refundResponse.setCode("200");
+        return refundResponse;
     }
 
     /***

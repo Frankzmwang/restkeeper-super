@@ -20,6 +20,17 @@ public class TradingConstant {
     //TRADE_FINISHED:交易结束不可退款
     public static final String ALI_TRADE_FINISHED ="TRADE_FINISHED";
 
+
+    //微信：退款状态
+    //SUCCESS：退款成功
+    public static final String WECHAT_REFUND_SUCCESS ="SUCCESS";
+    //CLOSED：退款关闭
+    public static final String WECHAT_REFUND_CLOSED="CLOSED";
+    //PROCESSING：退款处理中
+    public static final String WECHAT_REFUND_PROCESSING ="PROCESSING";
+    //ABNORMAL：退款异常
+    public static final String WECHAT_REFUND_ABNORMAL ="TRADE_CLOSED";
+
     //【平台:交易渠道】
     //阿里支付
     public static final String TRADING_CHANNEL_ALI_PAY = "ALI_PAY";

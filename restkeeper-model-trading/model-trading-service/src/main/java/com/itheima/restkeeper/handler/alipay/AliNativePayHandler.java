@@ -50,17 +50,17 @@ public class AliNativePayHandler implements NativePayHandler {
     IdentifierGenerator identifierGenerator;
 
     @Autowired
-    BeforePayHandler aliBeforePayHandler;
+    BeforePayHandler beforePayHandler;
 
     @Override
     public TradingVo createDownLineTrading(TradingVo tradingVo) throws ProjectException {
         //1.1、交易前置处理：检测交易单参数
-        Boolean flag = aliBeforePayHandler.checkeCreateDownLineTrading(tradingVo);
+        Boolean flag = beforePayHandler.checkeCreateDownLineTrading(tradingVo);
         if (!flag){
             throw new ProjectException(TradingEnum.NATIVE_PAY_FAIL);
         }
         //1.2、交易前置处理：幂等性处理
-        TradingVo tradingVoResult = aliBeforePayHandler.idempotentCreateDownLineTrading(tradingVo);
+        TradingVo tradingVoResult = beforePayHandler.idempotentCreateDownLineTrading(tradingVo);
         //2、获得支付宝配置文件
         Config config = alipayConfig.queryConfig(tradingVo.getEnterpriseId());
         //3、容器如果为空，抛出异常
@@ -111,7 +111,7 @@ public class AliNativePayHandler implements NativePayHandler {
     @Override
     public void queryDownLineTrading(TradingVo tradingVo) throws ProjectException {
         //1、查询前置处理：检测交易单参数
-        Boolean flag = aliBeforePayHandler.checkeQueryDownLineTrading(tradingVo);
+        Boolean flag = beforePayHandler.checkeQueryDownLineTrading(tradingVo);
         if (!flag){
             throw new ProjectException(TradingEnum.NATIVE_QUERY_FAIL);
         }
@@ -164,12 +164,12 @@ public class AliNativePayHandler implements NativePayHandler {
         String outRequestNo = String.valueOf(identifierGenerator.nextId(tradingVo));
         tradingVo.setOutRequestNo(outRequestNo);
         //2.1、退款前置处理：检测交易单参数
-        Boolean flag = aliBeforePayHandler.checkeRefundDownLineTrading(tradingVo);
+        Boolean flag = beforePayHandler.checkeRefundDownLineTrading(tradingVo);
         if (!flag){
             throw new ProjectException(TradingEnum.NATIVE_QUERY_FAIL);
         }
         //2.2、退款前置处理：退款幂等性校验
-        aliBeforePayHandler.idempotentRefundDownLineTrading(tradingVo);
+        beforePayHandler.idempotentRefundDownLineTrading(tradingVo);
         //3、获得支付宝配置文件
         Config config = alipayConfig.queryConfig(tradingVo.getEnterpriseId());
         //4、容器如果为空，抛出异常
@@ -214,7 +214,7 @@ public class AliNativePayHandler implements NativePayHandler {
     @Override
     public void queryRefundDownLineTrading(RefundRecordVo refundRecordVo) throws ProjectException {
         //2.1、退款前置处理：检测退款单参数
-        Boolean flag = aliBeforePayHandler.checkeQueryRefundDownLineTrading(refundRecordVo);
+        Boolean flag = beforePayHandler.checkeQueryRefundDownLineTrading(refundRecordVo);
         if (!flag){
             throw new ProjectException(TradingEnum.NATIVE_QUERY_FAIL);
         }

@@ -21,7 +21,7 @@ public class TradingConstant {
     public static final String ALI_TRADE_FINISHED ="TRADE_FINISHED";
 
 
-    //微信：退款状态
+    //【微信退款返回状态】
     //SUCCESS：退款成功
     public static final String WECHAT_REFUND_SUCCESS ="SUCCESS";
     //CLOSED：退款关闭
@@ -30,6 +30,22 @@ public class TradingConstant {
     public static final String WECHAT_REFUND_PROCESSING ="PROCESSING";
     //ABNORMAL：退款异常
     public static final String WECHAT_REFUND_ABNORMAL ="TRADE_CLOSED";
+
+    //【微信返回付款状态】
+    //SUCCESS：支付成功
+    public static final String WECHAT_TRADE_SUCCESS ="TRADE_SUCCESS";
+    //REFUND：转入退款
+    public static final String WECHAT_TRADE_REFUND ="TRADE_REFUND";
+    //NOTPAY：未支付
+    public static final String WECHAT_TRADE_NOTPAY ="TRADE_NOTPAY";
+    //CLOSED：已关闭
+    public static final String WECHAT_TRADE_CLOSED ="TRADE_CLOSED";
+    //REVOKED：已撤销（仅付款码支付会返回）
+    public static final String WECHAT_TRADE_REVOKED ="TRADE_REVOKED";
+    //USERPAYING：用户支付中（仅付款码支付会返回）
+    public static final String WECHAT_TRADE_USERPAYING ="TRADE_USERPAYING";
+    //PAYERROR：支付失败（仅付款码支付会返回）
+    public static final String WECHAT_TRADE_PAYERROR ="TRADE_PAYERROR";
 
     //【平台:交易渠道】
     //阿里支付

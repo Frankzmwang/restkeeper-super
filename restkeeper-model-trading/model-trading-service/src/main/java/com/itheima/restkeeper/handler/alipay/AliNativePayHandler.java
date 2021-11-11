@@ -133,14 +133,14 @@ public class AliNativePayHandler implements NativePayHandler {
             //6、响应成功，分析交易状态
             if (success){
                 String tradeStatus = queryResponse.getTradeStatus();
-                //6.1、TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
+                //6.1、支付取消：TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
                 if (TradingConstant.ALI_TRADE_CLOSED.equals(tradeStatus)){
                     tradingVo.setTradingState(TradingConstant.QXDD);
-                //6.2、TRADE_SUCCESS（交易支付成功）TRADE_FINISHED（交易结束，不可退款）
+                //6.2、支付成功：TRADE_SUCCESS（交易支付成功）TRADE_FINISHED（交易结束，不可退款）
                 }else if (TradingConstant.ALI_TRADE_SUCCESS.equals(tradeStatus)||
                     TradingConstant.ALI_TRADE_FINISHED.equals(tradeStatus)){
                     tradingVo.setTradingState(TradingConstant.YJS);
-                //6.3、当前交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）不处理
+                //6.3、非最终状态不处理，当前交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）不处理
                 }else {
                     flag = false;
                 }
@@ -213,14 +213,14 @@ public class AliNativePayHandler implements NativePayHandler {
 
     @Override
     public void queryRefundDownLineTrading(RefundRecordVo refundRecordVo) throws ProjectException {
-        //2.1、退款前置处理：检测退款单参数
+        //1、退款前置处理：检测退款单参数
         Boolean flag = beforePayHandler.checkeQueryRefundDownLineTrading(refundRecordVo);
         if (!flag){
             throw new ProjectException(TradingEnum.NATIVE_QUERY_FAIL);
         }
-        //1、获得支付宝配置文件
+        //2.1、获得支付宝配置文件
         Config config = alipayConfig.queryConfig(refundRecordVo.getEnterpriseId());
-        //2、容器如果为空，抛出异常
+        //2.2、容器如果为空，抛出异常
         if (EmptyUtil.isNullOrEmpty(config)){
             throw  new ProjectException(TradingEnum.CONFIG_EMPT);
         }
@@ -234,12 +234,12 @@ public class AliNativePayHandler implements NativePayHandler {
             boolean success = ResponseChecker.success(refundQueryResponse);
             if (success){
                 //4、查询状态
-                String refundStatus = refundRecordVo.getRefundStatus();
+                String refundStatus = refundQueryResponse.getRefundStatus();
                 //5、退款成功修改退款记录
                 if (TradingConstant.REFUND_SUCCESS.equals(refundStatus)){
                     refundRecordVo.setRefundStatus(TradingConstant.REFUND_STATUS_SUCCESS);
                     refundRecordVo.setRefundCode(refundQueryResponse.getSubCode());
-                    refundRecordVo.setRefundCode(refundQueryResponse.getSubMsg());
+                    refundRecordVo.setRefundMsg(refundQueryResponse.getSubMsg());
                     refundRecordService.updateById(BeanConv.toBean(refundRecordVo,RefundRecord.class));
                 }
             }

@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.handler.wechat.response;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,9 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PreCreateResponse {
 
-    //二维码请求地址
-    private String code_url;
-
-    //编码定义
+    //请求返回编码
     private String code;
+
+    //二维码请求地址
+    @JSONField(name="code_url")
+    private String codeUrl;
+
 }

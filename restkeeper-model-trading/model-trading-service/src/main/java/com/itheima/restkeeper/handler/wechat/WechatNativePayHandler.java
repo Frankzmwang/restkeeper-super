@@ -12,6 +12,7 @@ import com.itheima.restkeeper.handler.alipay.config.AlipayConfig;
 import com.itheima.restkeeper.handler.wechat.client.WechatPayClient;
 import com.itheima.restkeeper.handler.wechat.config.WechatPayConfig;
 import com.itheima.restkeeper.handler.wechat.response.PreCreateResponse;
+import com.itheima.restkeeper.handler.wechat.response.QueryResponse;
 import com.itheima.restkeeper.handler.wechat.response.RefundResponse;
 import com.itheima.restkeeper.pojo.RefundRecord;
 import com.itheima.restkeeper.pojo.Trading;
@@ -63,9 +64,9 @@ public class WechatNativePayHandler implements NativePayHandler {
                 String.valueOf(tradingVo.getTradingAmount()),
                 tradingVo.getMemo());
         if (!EmptyUtil.isNullOrEmpty(preCreateResponse)&&
-            !EmptyUtil.isNullOrEmpty(preCreateResponse.getCode_url())){
+            !EmptyUtil.isNullOrEmpty(preCreateResponse.getCodeUrl())){
             String subCode = preCreateResponse.getCode();
-            String subMsg = preCreateResponse.getCode_url();
+            String subMsg = preCreateResponse.getCodeUrl();
             //4.1、指定统一下单code
             tradingVo.setPlaceOrderCode(subCode);
             //4.2、指定统一下单返回信息
@@ -89,7 +90,47 @@ public class WechatNativePayHandler implements NativePayHandler {
 
     @Override
     public void queryDownLineTrading(TradingVo tradingVo) throws ProjectException {
+        //1、查询前置处理：检测交易单参数
+        Boolean flag = beforePayHandler.checkeQueryDownLineTrading(tradingVo);
+        if (!flag){
+            throw new ProjectException(TradingEnum.NATIVE_QUERY_FAIL);
+        }
+        //4、获得微信客户端
+        WechatPayClient wechatPayClient = wechatPayConfig.queryConfig(tradingVo.getEnterpriseId());
+        //5、调用微信API：preCreateResponse
+        QueryResponse queryResponse = wechatPayClient.query(String.valueOf(tradingVo.getTradingOrderNo()));
 
+        //6、响应成功，分析交易状态
+        if (!EmptyUtil.isNullOrEmpty(queryResponse)){
+            //SUCCESS：支付成功
+            //REFUND：转入退款
+            //NOTPAY：未支付
+            //CLOSED：已关闭
+            //REVOKED：已撤销（仅付款码支付会返回）
+            //USERPAYING：用户支付中（仅付款码支付会返回）
+            //PAYERROR：支付失败（仅付款码支付会返回）
+            String tradeStatus = queryResponse.getTradeState();
+            //6.1、支付取消
+            if (TradingConstant.WECHAT_TRADE_CLOSED.equals(tradeStatus)||
+                TradingConstant.WECHAT_TRADE_REVOKED.equals(tradeStatus)){
+                tradingVo.setTradingState(TradingConstant.QXDD);
+            //6.2、支付成功
+            }else if (TradingConstant.WECHAT_REFUND_SUCCESS.equals(tradeStatus)||
+                    TradingConstant.WECHAT_TRADE_REFUND.equals(tradeStatus)){
+                tradingVo.setTradingState(TradingConstant.YJS);
+                //6.3、其他状态未非最终状态不处理
+            }else {
+                flag = false;
+            }
+            //7、修改交易单状态
+            if (flag){
+                tradingVo.setResultCode(queryResponse.getTradeState());
+                tradingVo.setResultMsg(queryResponse.getTradeStateDesc());
+                tradingVo.setResultJson(JSONObject.toJSONString(queryResponse));
+                Trading trading = BeanConv.toBean(tradingVo, Trading.class);
+                tradingService.saveOrUpdate(trading);
+            }
+        }
     }
 
     @Override
@@ -137,6 +178,21 @@ public class WechatNativePayHandler implements NativePayHandler {
 
     @Override
     public void queryRefundDownLineTrading(RefundRecordVo refundRecordVo) throws ProjectException {
-
+        //1、退款前置处理：检测退款单参数
+        Boolean flag = beforePayHandler.checkeQueryRefundDownLineTrading(refundRecordVo);
+        if (!flag){
+            throw new ProjectException(TradingEnum.NATIVE_QUERY_FAIL);
+        }
+        //2、获得微信客户端
+        WechatPayClient wechatPayClient = wechatPayConfig.queryConfig(refundRecordVo.getEnterpriseId());
+        //5、调用微信API：queryRefund
+        RefundResponse refundResponse = wechatPayClient.queryRefund(refundRecordVo.getRefundNo());
+        //4、查询状态
+        String refundStatus = refundResponse.getStatus();
+        //5、退款成功修改退款记录
+        if (TradingConstant.WECHAT_REFUND_SUCCESS.equals(refundStatus)){
+            refundRecordVo.setRefundStatus(TradingConstant.REFUND_STATUS_SUCCESS);
+            refundRecordService.updateById(BeanConv.toBean(refundRecordVo,RefundRecord.class));
+        }
     }
 }

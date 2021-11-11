@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.itheima.restkeeper.enums.TradingEnum;
 import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.handler.wechat.response.PreCreateResponse;
+import com.itheima.restkeeper.handler.wechat.response.QueryResponse;
 import com.itheima.restkeeper.handler.wechat.response.RefundResponse;
 import com.itheima.restkeeper.utils.EmptyUtil;
 import com.itheima.restkeeper.utils.ExceptionsUtil;
@@ -99,8 +100,6 @@ public class WechatPayClient {
             body =  httpClient.doPost(bodyParams);
         } catch (IOException e) {
             log.error("微信支付：preCreate，发生异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-        }
-        if (EmptyUtil.isNullOrEmpty(body)){
             throw new ProjectException(TradingEnum.NATIVE_PAY_FAIL);
         }
         PreCreateResponse preCreateResponse = JSONObject.parseObject(body, PreCreateResponse.class);
@@ -113,7 +112,7 @@ public class WechatPayClient {
      * @param outTradeNo 发起支付传递的交易单号
      * @return
      */
-    public String query(String outTradeNo){
+    public QueryResponse query(String outTradeNo){
         //请求地址
         String uri ="/v3/pay/transactions";
         WechatPayHttpClient httpClient = WechatPayHttpClient.builder()
@@ -123,14 +122,17 @@ public class WechatPayClient {
                 .privateKey(privateKey)
                 .domain(domain+uri)
                 .build();
+        String body = null;
         try {
             //uri参数对象
             String uriParams ="/"+mchId+"/"+outTradeNo;
-            return httpClient.doGet(uriParams);
+            body =  httpClient.doGet(uriParams);
         } catch (IOException | URISyntaxException e) {
             log.error("微信支付：preCreate，发生异常：{}", ExceptionsUtil.getStackTraceAsString(e));
         }
-        return null;
+        QueryResponse queryResponse = JSONObject.parseObject(body, QueryResponse.class);
+        queryResponse.setCode("200");
+        return queryResponse;
     }
 
     /***
@@ -168,8 +170,6 @@ public class WechatPayClient {
             body =  httpClient.doPost(bodyParams);
         } catch (IOException e) {
             log.error("微信支付：refund，发生异常：{}", ExceptionsUtil.getStackTraceAsString(e));
-        }
-        if (EmptyUtil.isNullOrEmpty(body)){
             throw new ProjectException(TradingEnum.NATIVE_REFUND_FAIL);
         }
         RefundResponse refundResponse = JSONObject.parseObject(body, RefundResponse.class);
@@ -182,7 +182,7 @@ public class WechatPayClient {
      * @param outRefundNo 商户系统内部的退款单号
      * @return
      */
-    public String queryRefund(String outRefundNo){
+    public RefundResponse queryRefund(String outRefundNo){
         //请求地址
         String uri ="/v3/refund/domestic/refunds";
         WechatPayHttpClient httpClient = WechatPayHttpClient.builder()
@@ -192,13 +192,16 @@ public class WechatPayClient {
                 .privateKey(privateKey)
                 .domain(domain+uri)
                 .build();
+        String body = null;
         try {
             String uriParams ="/"+outRefundNo;
-            return httpClient.doGet(uriParams);
+            body =  httpClient.doGet(uriParams);
         } catch (IOException | URISyntaxException e) {
             log.error("微信支付：queryRefund，发生异常：{}", ExceptionsUtil.getStackTraceAsString(e));
         }
-        return null;
+        RefundResponse refundResponse = JSONObject.parseObject(body, RefundResponse.class);
+        refundResponse.setCode("200");
+        return refundResponse;
     }
 
 

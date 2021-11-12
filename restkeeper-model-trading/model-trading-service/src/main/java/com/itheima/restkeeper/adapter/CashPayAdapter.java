@@ -16,4 +16,10 @@ public interface CashPayAdapter {
      */
     TradingVo createCachTrading(TradingVo tradingVo) throws ProjectException;
 
+    /***
+     * @description 现金退款
+     * @param tradingVo 交易单
+     * @return  交易单
+     */
+    TradingVo refundCachTrading(TradingVo tradingVo);
 }

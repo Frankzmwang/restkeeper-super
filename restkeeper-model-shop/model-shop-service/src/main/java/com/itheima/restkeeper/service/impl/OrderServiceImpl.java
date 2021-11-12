@@ -2,6 +2,7 @@ package com.itheima.restkeeper.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.restkeeper.constant.SuperConstant;
@@ -106,6 +107,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.lambda().eq(Order::getOrderState,TradingConstant.FKZ);
         List<Order> orderList = list(queryWrapper);
         return BeanConv.toBeanList(orderList,OrderVo.class);
+    }
+
+    @Override
+    public Boolean updateOrderStateByOrderNo(Long orderNo, String orderState) {
+        UpdateWrapper<Order> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.lambda().eq(Order::getOrderNo,orderNo);
+        Order order = Order.builder().orderState(orderState).build();
+        return update(order,updateWrapper);
     }
 
 }

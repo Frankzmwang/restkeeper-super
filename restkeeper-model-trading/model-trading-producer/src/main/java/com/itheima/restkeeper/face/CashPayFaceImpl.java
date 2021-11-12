@@ -16,7 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 @DubboService(version = "${dubbo.application.version}",timeout = 5000,
     methods ={
-        @Method(name = "createCachTrading",retries = 0)
+        @Method(name = "createCachTrading",retries = 0),
+        @Method(name = "refundCachTrading",retries = 0)
     })
 public class CashPayFaceImpl implements CashPayFace {
 
@@ -26,6 +27,11 @@ public class CashPayFaceImpl implements CashPayFace {
     @Override
     public TradingVo createCachTrading(TradingVo tradingVo) throws ProjectException {
         return cashPayAdapter.createCachTrading(tradingVo);
+    }
+
+    @Override
+    public TradingVo refundCachTrading(TradingVo tradingVo) {
+        return cashPayAdapter.refundCachTrading(tradingVo);
     }
 
 }

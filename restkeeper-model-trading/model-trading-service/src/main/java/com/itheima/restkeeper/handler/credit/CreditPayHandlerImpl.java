@@ -1,5 +1,6 @@
 package com.itheima.restkeeper.handler.credit;
 
+import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.constant.TradingConstant;
 import com.itheima.restkeeper.enums.TradingEnum;
 import com.itheima.restkeeper.exception.ProjectException;
@@ -39,6 +40,7 @@ public class CreditPayHandlerImpl implements CreditPayHandler {
         tradingVo.setResultCode(TradingConstant.MD);
         tradingVo.setResultMsg(TradingConstant.MD);
         tradingVo.setTradingState(TradingConstant.MD);
+        tradingVo.setIsRefund(SuperConstant.NO);
         Trading trading = BeanConv.toBean(tradingVo, Trading.class);
         flag = tradingService.saveOrUpdate(trading);
         if (!flag){
@@ -60,6 +62,7 @@ public class CreditPayHandlerImpl implements CreditPayHandler {
         tradingVo.setResultCode(TradingConstant.GZ);
         tradingVo.setResultMsg(TradingConstant.GZ);
         tradingVo.setTradingState(TradingConstant.GZ);
+        tradingVo.setIsRefund(SuperConstant.NO);
         Trading trading = BeanConv.toBean(tradingVo, Trading.class);
         flag = tradingService.saveOrUpdate(trading);
         if (!flag){

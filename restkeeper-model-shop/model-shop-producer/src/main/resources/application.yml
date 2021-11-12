@@ -91,7 +91,7 @@ dubbo:
     base-packages: com.itheima.restkeeper
   cloud:
     #表示要订阅服务的服务名，可以配置'*'，代表订阅所有服务，不推荐使用。若需订阅多应用，使用 "," 分割。
-    subscribed-services: model-basic-producer,model-trading-producer
+    subscribed-services: model-basic-producer,model-trading-producer,model-shop-user
   registry:
     #注册中心
     address: spring-cloud://192.168.112.77

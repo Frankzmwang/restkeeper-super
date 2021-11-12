@@ -106,4 +106,30 @@ public class OrderController {
         return ResponseWrapBuild.build(BrandEnum.SUCCEED,flag);
     }
 
+    @PostMapping("handle-trading-md")
+    @ApiOperation(value = "订单免单",notes = "订单免单")
+    @ApiImplicitParam(name = "orderVo",value = "订单信息",dataType = "OrderVo")
+    public ResponseWrap<Boolean> handleTradingMd(@RequestBody OrderVo orderVo){
+        //获得当前订单结算人信息
+        String userVoString = UserVoContext.getUserVoString();
+        UserVo userVo = JSONObject.parseObject(userVoString, UserVo.class);
+        orderVo.setCashierId(userVo.getId());
+        orderVo.setCashierName(userVo.getUsername());
+        Boolean flag = orderFace.handleTradingMd(orderVo);
+        return ResponseWrapBuild.build(BrandEnum.SUCCEED,flag);
+    }
+
+    @PostMapping("handle-trading-gz")
+    @ApiOperation(value = "订单挂账",notes = "订单挂账")
+    @ApiImplicitParam(name = "orderVo",value = "订单信息",dataType = "OrderVo")
+    public ResponseWrap<Boolean> handleTradingGz(@RequestBody OrderVo orderVo){
+        //获得当前订单结算人信息
+        String userVoString = UserVoContext.getUserVoString();
+        UserVo userVo = JSONObject.parseObject(userVoString, UserVo.class);
+        orderVo.setCashierId(userVo.getId());
+        orderVo.setCashierName(userVo.getUsername());
+        Boolean flag = orderFace.handleTradingGz(orderVo);
+        return ResponseWrapBuild.build(BrandEnum.SUCCEED,flag);
+    }
+
 }

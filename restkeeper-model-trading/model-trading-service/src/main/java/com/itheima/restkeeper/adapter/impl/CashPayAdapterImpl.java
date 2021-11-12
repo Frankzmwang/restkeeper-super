@@ -53,4 +53,26 @@ public class CashPayAdapterImpl implements CashPayAdapter {
         }
     }
 
+    @Override
+    public TradingVo refundCachTrading(TradingVo tradingVo) {
+        //1、对交易订单加锁
+        Long productOrderNo = tradingVo.getProductOrderNo();
+        String key =TradingCacheConstant.REFUND_PAY + productOrderNo;
+        RLock lock = redissonClient.getFairLock(key);
+        try {
+            boolean flag = lock.tryLock(TradingCacheConstant.REDIS_WAIT_TIME, TimeUnit.SECONDS);
+            if (flag){
+                //2、现金退款接口
+                return cashPayHandler.refundCachTrading(tradingVo);
+            }else {
+                throw new ProjectException(TradingEnum.NATIVE_REFUND_FAIL);
+            }
+        } catch (Exception e) {
+            log.error("统一收单交易退款接口异常:{}", ExceptionsUtil.getStackTraceAsString(e));
+            throw new ProjectException(TradingEnum.NATIVE_REFUND_FAIL);
+        }finally {
+            lock.unlock();
+        }
+    }
+
 }

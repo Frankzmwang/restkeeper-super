@@ -55,4 +55,14 @@ public interface IOrderService extends IService<Order> {
      * @return
      */
     List<OrderVo> findOrderVoPaying();
+
+
+    /***
+     * @description 按订单编号修改订单状态
+     *
+     * @param orderNo
+     * @param orderState
+     * @return
+     */
+    Boolean updateOrderStateByOrderNo(Long orderNo, String orderState);
 }

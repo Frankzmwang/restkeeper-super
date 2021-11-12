@@ -58,6 +58,20 @@ public interface OrderFace {
     Boolean handleTradingRefund(OrderVo orderVo)throws ProjectException;
 
     /***
+     * @description 发起免单
+     * @param orderVo 订单信息
+     * @return: com.itheima.restkeeper.req.TradingVo
+     */
+    Boolean handleTradingMd(OrderVo orderVo)throws ProjectException;
+
+    /***
+     * @description 发起挂账
+     * @param orderVo 订单信息
+     * @return: com.itheima.restkeeper.req.TradingVo
+     */
+    Boolean handleTradingGz(OrderVo orderVo);
+
+    /***
      * @description 查询已支付订单
      * @param orderNo d订单编号
      * @return
@@ -78,5 +92,7 @@ public interface OrderFace {
      * @return
      */
     Boolean synchTradingState(Long orderNo,String tradingState)throws ProjectException;
+
+
 
 }

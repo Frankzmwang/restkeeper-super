@@ -1,9 +1,7 @@
  package com.itheima.restkeeper.face;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.itheima.restkeeper.NativePayFace;
-import com.itheima.restkeeper.OrderFace;
-import com.itheima.restkeeper.TableFace;
+import com.itheima.restkeeper.*;
 import com.itheima.restkeeper.constant.AppletCacheConstant;
 import com.itheima.restkeeper.constant.SuperConstant;
 import com.itheima.restkeeper.constant.TradingConstant;
@@ -15,10 +13,7 @@ import com.itheima.restkeeper.exception.ProjectException;
 import com.itheima.restkeeper.pojo.Dish;
 import com.itheima.restkeeper.pojo.Order;
 import com.itheima.restkeeper.pojo.OrderItem;
-import com.itheima.restkeeper.req.OrderItemVo;
-import com.itheima.restkeeper.req.OrderVo;
-import com.itheima.restkeeper.req.TableVo;
-import com.itheima.restkeeper.req.TradingVo;
+import com.itheima.restkeeper.req.*;
 import com.itheima.restkeeper.service.IDishService;
 import com.itheima.restkeeper.service.IOrderItemService;
 import com.itheima.restkeeper.service.IOrderService;
@@ -62,6 +57,9 @@ public class OrderFaceImpl implements OrderFace {
     @DubboReference(version = "${dubbo.application.version}", check = false)
     TableFace tableFace;
 
+    @DubboReference(version = "${dubbo.application.version}", check = false)
+    CustomerFace customerFace;
+
     @Autowired
     IOrderService orderService;
 
@@ -73,6 +71,12 @@ public class OrderFaceImpl implements OrderFace {
 
     @Autowired
     IDishService dishService;
+
+    @DubboReference(version = "${dubbo.application.version}", check = false)
+    CreditPayFace creditPayFace;
+
+    @DubboReference(version = "${dubbo.application.version}", check = false)
+    CashPayFace cashPayFace;
 
     @DubboReference(version = "${dubbo.application.version}", check = false)
     NativePayFace nativePayFace;
@@ -234,7 +238,15 @@ public class OrderFaceImpl implements OrderFace {
             throw new ProjectException(OrderEnum.FAIL);
         }
         //2、调用统一收单线下交易预创建
-        TradingVo tradingVoResult = nativePayFace.createDownLineTrading(tradingVo);
+        TradingVo tradingVoResult = null;
+        if (TradingConstant.TRADING_CHANNEL_WECHAT_PAY.equals(orderVo.getTradingChannel())||
+            TradingConstant.TRADING_CHANNEL_ALI_PAY.equals(orderVo.getTradingChannel())){
+            tradingVoResult = nativePayFace.createDownLineTrading(tradingVo);
+        }else if (TradingConstant.TRADING_CHANNEL_CASH_PAY.equals(orderVo.getTradingChannel())){
+            tradingVoResult = cashPayFace.createCachTrading(tradingVo);
+            orderService.updateOrderStateByOrderNo(orderVo.getOrderNo(),
+                    tradingVoResult.getTradingState());
+        }
         //3、结算后桌台状态修改：开桌-->空闲
         Boolean flag = true;
         if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
@@ -276,11 +288,85 @@ public class OrderFaceImpl implements OrderFace {
             throw new ProjectException(OrderEnum.FAIL);
         }
         //5、执行统一收单交易退款接口
-        TradingVo tradingVoResult = nativePayFace.refundDownLineTrading(tradingVo);
+        TradingVo tradingVoResult = null;
+        if (TradingConstant.TRADING_CHANNEL_WECHAT_PAY.equals(orderVo.getTradingChannel())||
+            TradingConstant.TRADING_CHANNEL_ALI_PAY.equals(orderVo.getTradingChannel())){
+            tradingVoResult = nativePayFace.refundDownLineTrading(tradingVo);
+        }else if (TradingConstant.TRADING_CHANNEL_CASH_PAY.equals(orderVo.getTradingChannel())){
+            tradingVoResult = cashPayFace.refundCachTrading(tradingVo);
+        }
         if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
             throw new ProjectException(OrderEnum.FAIL);
         }
         return true;
+    }
+
+    @Override
+    @GlobalTransactional
+    public Boolean handleTradingMd(OrderVo orderVo) throws ProjectException {
+        //1、根据订单生成交易单
+        TradingVo tradingVo = tradingConvertor(orderVo);
+        if (EmptyUtil.isNullOrEmpty(tradingVo)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }
+        //2、调用免单接口
+        TradingVo tradingVoResult = creditPayFace.createCreditMdTrading(tradingVo);
+        if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }
+        Boolean flag = true;
+        //4、结算后桌台状态修改：开桌-->空闲
+        if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }else {
+            TableVo tableVo = TableVo.builder()
+                    .id(orderVo.getTableId())
+                    .tableStatus(SuperConstant.FREE).build();
+            //4、修改桌台状态
+            flag = tableFace.updateTable(tableVo);
+            if (!flag){
+                throw new ProjectException(OrderEnum.FAIL);
+            }
+        }
+        //5、结算订单
+        flag = orderService.updateOrderStateByOrderNo(
+                orderVo.getOrderNo(),
+                tradingVoResult.getTradingState());
+        return flag;
+    }
+
+    @Override
+    @GlobalTransactional
+    public Boolean handleTradingGz(OrderVo orderVo) {
+        //1、根据订单生成交易单
+        TradingVo tradingVo = tradingConvertor(orderVo);
+        if (EmptyUtil.isNullOrEmpty(tradingVo)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }
+        //2、调用挂账接口
+        TradingVo tradingVoResult = creditPayFace.createCreditGzTrading(tradingVo);
+        if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }
+        Boolean flag = true;
+        //3、结算后桌台状态修改：开桌-->空闲
+        if (EmptyUtil.isNullOrEmpty(tradingVoResult)){
+            throw new ProjectException(OrderEnum.FAIL);
+        }else {
+            TableVo tableVo = TableVo.builder()
+                    .id(orderVo.getTableId())
+                    .tableStatus(SuperConstant.FREE).build();
+            //4、修改桌台状态
+            flag = tableFace.updateTable(tableVo);
+            if (!flag){
+                throw new ProjectException(OrderEnum.FAIL);
+            }
+        }
+        //5、结算订单
+        flag = orderService.updateOrderStateByOrderNo(
+                orderVo.getOrderNo(),
+                tradingVoResult.getTradingState());
+        return flag;
     }
 
     /***
@@ -395,12 +481,17 @@ public class OrderFaceImpl implements OrderFace {
      */
     private TradingVo freeChargeTradingVo(OrderVo orderVo){
         Order order = orderService.getById(orderVo.getId());
+        CustomerVo customerVo = customerFace.findCustomerByCustomerId(orderVo.getBuyerId());
         //支付渠道
         order.setTradingChannel(orderVo.getTradingChannel());
         //支付类型
         order.setTradingType(orderVo.getTradingType());
         //订单状态：MD
         order.setOrderState(TradingConstant.MD);
+        //收银人id
+        order.setCashierId(orderVo.getCashierId());
+        //收银人名称
+        order.setCashierName(orderVo.getCashierName());
         //结算保存订单信息
         boolean flag = orderService.updateById(order);
         //构建交易单
@@ -412,6 +503,8 @@ public class OrderFaceImpl implements OrderFace {
                 .tradingState(order.getOrderState())
                 .enterpriseId(orderVo.getEnterpriseId())
                 .storeId(orderVo.getTableId())
+                .payerId(customerVo.getId())
+                .payerName(customerVo.getMobil())
                 .payeeId(orderVo.getCashierId())
                 .payeeName(orderVo.getCashierName())
                 .productOrderNo(orderVo.getOrderNo())
@@ -430,12 +523,17 @@ public class OrderFaceImpl implements OrderFace {
      */
     private TradingVo creditTradingVo(OrderVo orderVo){
         Order order = orderService.getById(orderVo.getId());
+        CustomerVo customerVo = customerFace.findCustomerByCustomerId(orderVo.getBuyerId());
         //支付渠道
         order.setTradingChannel(orderVo.getTradingChannel());
         //支付类型
         order.setTradingType(orderVo.getTradingType());
         //订单状态：MD
         order.setOrderState(TradingConstant.GZ);
+        //收银人id
+        order.setCashierId(orderVo.getCashierId());
+        //收银人名称
+        order.setCashierName(orderVo.getCashierName());
         //结算保存订单信息
         boolean flag = orderService.updateById(order);
         //构建交易单
@@ -447,6 +545,8 @@ public class OrderFaceImpl implements OrderFace {
                 .tradingState(order.getOrderState())
                 .enterpriseId(orderVo.getEnterpriseId())
                 .storeId(orderVo.getTableId())
+                .payerId(customerVo.getId())
+                .payerName(customerVo.getMobil())
                 .payeeId(orderVo.getCashierId())
                 .payeeName(orderVo.getCashierName())
                 .productOrderNo(orderVo.getOrderNo())

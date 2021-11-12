@@ -82,6 +82,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (!EmptyUtil.isNullOrEmpty(orderVo.getOrderState())) {
             queryWrapper.lambda().eq(Order::getOrderState,orderVo.getOrderState());
         }
+        if (!EmptyUtil.isNullOrEmpty(orderVo.getTradingChannel())) {
+            queryWrapper.lambda().eq(Order::getTradingChannel,orderVo.getTradingChannel());
+        }
         queryWrapper.lambda().orderByDesc(Order::getCreatedTime);
         return page(page,queryWrapper);
     }

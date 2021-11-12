@@ -46,9 +46,6 @@ public class NativePayAdapterImpl implements NativePayAdapter {
     @Autowired
     RedissonClient redissonClient;
 
-    @Autowired
-    BeforePayHandler beforePayHandler;
-
     private static Map<String,String> nativePayHandlers =new HashMap<>();
 
     static {
@@ -100,11 +97,11 @@ public class NativePayAdapterImpl implements NativePayAdapter {
     }
 
     @Override
-    public void queryDownLineTrading(TradingVo tradingVo) throws ProjectException {
+    public TradingVo queryDownLineTrading(TradingVo tradingVo) throws ProjectException {
         String nativePayHandlerString = nativePayHandlers.get(tradingVo.getTradingChannel());
         NativePayHandler nativePayHandler = registerBeanHandler
                 .getBean(nativePayHandlerString, NativePayHandler.class);
-        nativePayHandler.queryDownLineTrading(tradingVo);
+       return nativePayHandler.queryDownLineTrading(tradingVo);
     }
 
     @Override

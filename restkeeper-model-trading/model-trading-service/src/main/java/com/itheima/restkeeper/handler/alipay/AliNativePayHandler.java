@@ -60,7 +60,7 @@ public class AliNativePayHandler implements NativePayHandler {
             throw new ProjectException(TradingEnum.NATIVE_PAY_FAIL);
         }
         //1.2、交易前置处理：幂等性处理
-        TradingVo tradingVoResult = beforePayHandler.idempotentCreateDownLineTrading(tradingVo);
+        beforePayHandler.idempotentCreateDownLineTrading(tradingVo);
         //2、获得支付宝配置文件
         Config config = alipayConfig.queryConfig(tradingVo.getEnterpriseId());
         //3、容器如果为空，抛出异常
@@ -109,7 +109,7 @@ public class AliNativePayHandler implements NativePayHandler {
     }
 
     @Override
-    public void queryDownLineTrading(TradingVo tradingVo) throws ProjectException {
+    public TradingVo queryDownLineTrading(TradingVo tradingVo) throws ProjectException {
         //1、查询前置处理：检测交易单参数
         Boolean flag = beforePayHandler.checkeQueryDownLineTrading(tradingVo);
         if (!flag){
@@ -156,6 +156,9 @@ public class AliNativePayHandler implements NativePayHandler {
         } catch (Exception e) {
             log.warn("查询支付宝统一下单失败：{}", ExceptionsUtil.getStackTraceAsString(e));
         }
+        //8、返回结果
+        Trading trading = tradingService.findTradByProductOrderNo(tradingVo.getTradingOrderNo());
+        return BeanConv.toBean(trading,TradingVo.class);
     }
 
     @Override

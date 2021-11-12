@@ -25,7 +25,7 @@ public interface NativePayHandler {
      * @param tradingVo 交易单
      * @return
      */
-    void queryDownLineTrading(TradingVo tradingVo) throws ProjectException;
+    TradingVo queryDownLineTrading(TradingVo tradingVo) throws ProjectException;
 
     /***
      * @description 统一收单交易退款接口

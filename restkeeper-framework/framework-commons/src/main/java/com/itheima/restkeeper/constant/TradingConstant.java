@@ -53,9 +53,9 @@ public class TradingConstant {
     //微信支付
     public static final String TRADING_CHANNEL_WECHAT_PAY = "WECHAT_PAY";
     //现金
-    public static final String TRADING_CHANNEL_CASHPAY = "CASHPAY";
+    public static final String TRADING_CHANNEL_CASH_PAY = "CASH_PAY";
     //免单挂账【信用渠道】
-    public static final String TRADING_CHANNEL_CREDIT_CARD = "CREDIT_CARD";
+    public static final String TRADING_CHANNEL_CREDIT_PAY = "CREDIT_PAY";
 
     //【平台:交易动作】
     //付款

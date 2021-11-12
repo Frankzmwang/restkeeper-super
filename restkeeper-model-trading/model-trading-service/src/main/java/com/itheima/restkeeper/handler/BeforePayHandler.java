@@ -27,6 +27,13 @@ public interface BeforePayHandler {
     Boolean checkeCreateDownLineTrading(TradingVo tradingVo);
 
     /***
+     * @description createCreditGzTrading交易单参数校验
+     * @param tradingVo 交易订单
+     * @return
+     */
+    Boolean checkeCreateCreditGzTrading(TradingVo tradingVo);
+
+    /***
      * @description QueryDownLineTrading交易单参数校验
      * @param tradingVo 交易订单
      * @return

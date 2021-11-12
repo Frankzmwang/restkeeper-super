@@ -86,6 +86,35 @@ public class BeforePayHandlerImpl implements BeforePayHandler {
     }
 
     @Override
+    public Boolean checkeCreateCreditGzTrading(TradingVo tradingVo) {
+        Boolean flag =null;
+        //订单为空
+        if (EmptyUtil.isNullOrEmpty(tradingVo)) {
+            flag = false;
+            //订单号为空
+        }else if (EmptyUtil.isNullOrEmpty(tradingVo.getProductOrderNo())){
+            flag = false;
+            //企业号为空
+        }else if (EmptyUtil.isNullOrEmpty(tradingVo.getEnterpriseId())){
+            flag = false;
+            //交易金额为空
+        }else if (EmptyUtil.isNullOrEmpty(tradingVo.getTradingAmount())){
+            flag = false;
+            //支付渠道为空
+        }else if (EmptyUtil.isNullOrEmpty(tradingVo.getTradingChannel())){
+            flag=false;
+            //挂账人为空
+        }else if (EmptyUtil.isNullOrEmpty(tradingVo.getPayerId())||
+                EmptyUtil.isNullOrEmpty(tradingVo.getPayerName())){
+            flag=false;
+        }
+        else {
+            flag = true;
+        }
+        return flag;
+    }
+
+    @Override
     public Boolean checkeQueryDownLineTrading(TradingVo tradingVo) {
         Boolean flag =null;
         //订单为空
@@ -94,7 +123,6 @@ public class BeforePayHandlerImpl implements BeforePayHandler {
          //交易号为空
         }else if (EmptyUtil.isNullOrEmpty(tradingVo.getTradingOrderNo())){
             flag = false;
-        //企业号为空
         }else {
             flag = true;
         }

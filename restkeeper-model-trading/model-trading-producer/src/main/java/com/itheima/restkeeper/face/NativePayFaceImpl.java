@@ -44,8 +44,8 @@ public class NativePayFaceImpl implements NativePayFace {
 
     @Override
     @GlobalTransactional
-    public void queryDownLineTrading(TradingVo tradingVo) throws ProjectException {
-        nativePayAdapter.queryDownLineTrading(tradingVo);
+    public TradingVo queryDownLineTrading(TradingVo tradingVo) throws ProjectException {
+        return nativePayAdapter.queryDownLineTrading(tradingVo);
     }
 
     @Override

@@ -41,14 +41,14 @@ public interface BeforePayHandler {
     Boolean checkeQueryDownLineTrading(TradingVo tradingVo);
 
     /***
-     * @description RefundDownLineTrading交易幂等性
+     * @description RefundDownLineTrading退款交易幂等性
      * @param tradingVo 交易订单
      * @return
      */
     void idempotentRefundDownLineTrading(TradingVo tradingVo);
 
     /***
-     * @description RefundDownLineTrading交易单参数校验
+     * @description RefundDownLineTrading退款交易单参数校验
      * @param tradingVo 交易订单
      * @return
      */

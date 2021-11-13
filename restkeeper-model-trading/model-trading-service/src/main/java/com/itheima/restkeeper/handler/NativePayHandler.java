@@ -7,7 +7,7 @@ import com.itheima.restkeeper.req.TradingVo;
 
 /**
  * @ClassName NativePayHandler.java
- * @Description Native支付方式：商户生成二维码，用户扫描支付
+ * @Description Native支付方式Handler：商户生成二维码，用户扫描支付
  */
 public interface NativePayHandler {
 

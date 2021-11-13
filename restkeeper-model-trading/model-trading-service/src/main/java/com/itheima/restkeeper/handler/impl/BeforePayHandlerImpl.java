@@ -22,7 +22,7 @@ import java.math.BigDecimal;
  * @ClassName BeforePayHandlerImpl.java
  * @Description 阿里交易前置处理接口实现
  */
-@Component("aliBeforePayHandler")
+@Component("beforePayHandler")
 public class BeforePayHandlerImpl implements BeforePayHandler {
 
     @Autowired
@@ -39,7 +39,7 @@ public class BeforePayHandlerImpl implements BeforePayHandler {
         Trading trading = tradingService.findTradByProductOrderNo(tradingVo.getProductOrderNo());
         if (!EmptyUtil.isNullOrEmpty(trading)) {
             String tradingState = trading.getTradingState();
-            //已结算或免单直接抛出重复支付异常
+            //已结算、免单：直接抛出重复支付异常
             if (TradingConstant.YJS.equals(tradingState) ||
                 TradingConstant.MD.equals(tradingState)) {
                 throw new ProjectException(TradingEnum.TRADING_STATE_SUCCEED);
@@ -51,7 +51,7 @@ public class BeforePayHandlerImpl implements BeforePayHandler {
                     ||TradingConstant.GZ.equals(tradingState)) {
                 tradingVo.setId(trading.getId());
                 tradingVo.setTradingOrderNo((Long)identifierGenerator.nextId(tradingVo));
-            //挂账：直接交易失败
+            //其他情况：直接交易失败
             } else {
                 throw new ProjectException(TradingEnum.PAYING_TRADING_FAIL);
             }

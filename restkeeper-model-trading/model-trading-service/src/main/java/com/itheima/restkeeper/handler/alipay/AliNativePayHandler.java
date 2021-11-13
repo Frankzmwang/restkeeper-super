@@ -70,35 +70,30 @@ public class AliNativePayHandler implements NativePayHandler {
         //4、Factory使用配置
         Factory.setOptions(config);
         try {
-            //5、调用支付宝API面对面支付【1】：支付的备注
+            //5、调用支付宝API面对面支付
             AlipayTradePrecreateResponse precreateResponse = Factory
                 .Payment
                 .FaceToFace()
                 .preCreate(tradingVo.getMemo(),
                     String.valueOf(tradingVo.getTradingOrderNo()),
                     String.valueOf(tradingVo.getTradingAmount()));
-            //6、受理结果【只表示请求是否成功，而不是支付是否成功】
+            //受理结果【只表示请求是否成功，而不是支付是否成功】
             boolean isSuccess = ResponseChecker.success(precreateResponse);
-            //7.1、受理成功：修改交易单
+            //6.1、受理成功：修改交易单
             if (isSuccess){
                 String subCode = precreateResponse.getCode();
                 String subMsg = precreateResponse.getQrCode();
-                //7.2、指定统一下单code
                 tradingVo.setPlaceOrderCode(subCode);
-                //7.3、指定统一下单返回信息
                 tradingVo.setPlaceOrderMsg(subMsg);
-                //7.4、指定统一下单json字符串
                 tradingVo.setPlaceOrderJson(JSONObject.toJSONString(precreateResponse));
-                //7.5、指定交易状态
                 tradingVo.setTradingState(TradingConstant.FKZ);
-                //7.7、重新保存信息
                 Trading trading = BeanConv.toBean(tradingVo, Trading.class);
                 flag = tradingService.saveOrUpdate(trading);
                 if (!flag){
                     throw new ProjectException(TradingEnum.SAVE_OR_UPDATE_FAIL);
                 }
-                //8、返回结果
                 return BeanConv.toBean(trading, TradingVo.class);
+            //6.2受理失败：抛出异常
             }else {
                 throw new ProjectException(TradingEnum.NATIVE_PAY_FAIL);
             }
@@ -163,7 +158,7 @@ public class AliNativePayHandler implements NativePayHandler {
 
     @Override
     public TradingVo refundDownLineTrading(TradingVo tradingVo) throws ProjectException {
-        //1、生产退款请求编号
+        //1、生成退款请求编号
         String outRequestNo = String.valueOf(identifierGenerator.nextId(tradingVo));
         tradingVo.setOutRequestNo(outRequestNo);
         //2.1、退款前置处理：检测交易单参数
@@ -189,7 +184,7 @@ public class AliNativePayHandler implements NativePayHandler {
                 .refund(String.valueOf(tradingVo.getTradingOrderNo()),
                         String.valueOf(tradingVo.getOperTionRefund()));
             boolean success = ResponseChecker.success(refundResponse);
-            //6、指定此订单为退款交易单
+            //6、指定此交易单为退款交易单
             tradingVo.setIsRefund(SuperConstant.YES);
             //7、保存交易单信息
             Trading trading = BeanConv.toBean(tradingVo, Trading.class);

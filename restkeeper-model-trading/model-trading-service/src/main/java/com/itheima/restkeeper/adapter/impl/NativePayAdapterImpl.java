@@ -76,12 +76,13 @@ public class NativePayAdapterImpl implements NativePayAdapter {
         try {
             boolean flag = lock.tryLock(TradingCacheConstant.REDIS_WAIT_TIME, TimeUnit.SECONDS);
             if (flag){
-                //2、调用统一收单线下交易预创建
+                //2、从IOC容器中找到NativePayHandler实现
                 String nativePayHandlerString = nativePayHandlers.get(tradingVo.getTradingChannel());
                 NativePayHandler nativePayHandler = registerBeanHandler
                         .getBean(nativePayHandlerString, NativePayHandler.class);
+                //3、Native支付交易处理
                 TradingVo downLineTrading = nativePayHandler.createDownLineTrading(tradingVo);
-                //3、构建支付二维码
+                //4、构建支付二维码
                 String qrCodeUrl = showApiService.handlerQRcode(downLineTrading.getPlaceOrderMsg());
                 downLineTrading.setQrCodeUrl(qrCodeUrl);
                 return downLineTrading;
@@ -92,6 +93,7 @@ public class NativePayAdapterImpl implements NativePayAdapter {
             log.error("统一收单线下交易预创建异常:{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(TradingEnum.NATIVE_PAY_FAIL);
         }finally {
+            //释放锁
             lock.unlock();
         }
     }

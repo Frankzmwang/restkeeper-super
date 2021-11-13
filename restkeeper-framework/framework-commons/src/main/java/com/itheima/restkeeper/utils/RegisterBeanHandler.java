@@ -8,7 +8,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * @Description：
+ * @Description：IOC容器工具
  */
 @Slf4j
 @Component

@@ -69,7 +69,7 @@ public class OrderController {
     }
 
     @PostMapping("handleTrading")
-    @ApiOperation(value = "订单结算",notes = "订单结算")
+    @ApiOperation(value = "发起订单结算",notes = "发起订单结算")
     @ApiImplicitParam(name = "orderVo",value = "订单信息",dataType = "OrderVo")
     public ResponseWrap<TradingVo> handleTrading(@RequestBody OrderVo orderVo){
         //获得结算人信息

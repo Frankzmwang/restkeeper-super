@@ -43,7 +43,7 @@ public class RegisterBeanHandler {
      * 获得bean
      * @param beanName bean的id
      */
-    public <T> T getBean(String beanName, Class<T> t) {
+    public <T> T getBean(String  beanName,Class<T> t) {
         return configurableApplicationContext.getBean(beanName,t);
     }
 

@@ -244,8 +244,6 @@ public class OrderFaceImpl implements OrderFace {
             tradingVoResult = nativePayFace.createDownLineTrading(tradingVo);
         }else if (TradingConstant.TRADING_CHANNEL_CASH_PAY.equals(orderVo.getTradingChannel())){
             tradingVoResult = cashPayFace.createCachTrading(tradingVo);
-            orderService.updateOrderStateByOrderNo(orderVo.getOrderNo(),
-                    tradingVoResult.getTradingState());
         }
         //3、结算后桌台状态修改：开桌-->空闲
         Boolean flag = true;
@@ -328,10 +326,6 @@ public class OrderFaceImpl implements OrderFace {
                 throw new ProjectException(OrderEnum.FAIL);
             }
         }
-        //5、结算订单
-        flag = orderService.updateOrderStateByOrderNo(
-                orderVo.getOrderNo(),
-                tradingVoResult.getTradingState());
         return flag;
     }
 
@@ -362,10 +356,6 @@ public class OrderFaceImpl implements OrderFace {
                 throw new ProjectException(OrderEnum.FAIL);
             }
         }
-        //5、结算订单
-        flag = orderService.updateOrderStateByOrderNo(
-                orderVo.getOrderNo(),
-                tradingVoResult.getTradingState());
         return flag;
     }
 
@@ -419,8 +409,12 @@ public class OrderFaceImpl implements OrderFace {
         order.setTradingChannel(orderVo.getTradingChannel());
         //支付类型
         order.setTradingType(orderVo.getTradingType());
-        //订单状态：FKZ
-        order.setOrderState(TradingConstant.FKZ);
+        //订单状态：现金结算：YJS,支付宝，微信结算：FKZ
+        if (TradingConstant.TRADING_CHANNEL_CASH_PAY.equals(orderVo.getTradingChannel())){
+            order.setOrderState(TradingConstant.YJS);
+        }else {
+            order.setOrderState(TradingConstant.FKZ);
+        }
         boolean flag = orderService.updateById(order);
         //构建交易单
         if (flag){

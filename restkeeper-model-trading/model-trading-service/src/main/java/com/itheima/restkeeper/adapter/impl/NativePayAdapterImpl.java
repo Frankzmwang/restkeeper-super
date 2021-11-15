@@ -74,7 +74,7 @@ public class NativePayAdapterImpl implements NativePayAdapter {
         String key =TradingCacheConstant.CREATE_PAY + productOrderNo;
         RLock lock = redissonClient.getFairLock(key);
         try {
-            boolean flag = lock.tryLock(TradingCacheConstant.REDIS_WAIT_TIME, TimeUnit.SECONDS);
+            boolean flag = lock.tryLock(TradingCacheConstant.REDIS_LEASETIME, TimeUnit.SECONDS);
             if (flag){
                 //2、从IOC容器中找到NativePayHandler实现
                 String nativePayHandlerString = nativePayHandlers.get(tradingVo.getTradingChannel());

@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @ClassName AlipayConfig.java
  * @Description 支付宝配置类
  */
-@Configuration
 @Slf4j
+@Configuration
 public class AlipayConfig {
 
     @Autowired
@@ -74,7 +74,7 @@ public class AlipayConfig {
         //2.2、配置支付宝公钥
         config.alipayPublicKey = payChannelVo.getPublicKey();
         //2.3、可设置异步通知接收服务地址（可选）
-        //config.notifyUrl = "<-- 请填写您的支付类接口异步通知接收服务地址，例如：https://www.test.com/callback -->";
+        //config.notifyUrl = "<-- 请填写您的支付类接口异步通知接收服务地址，例如：https://www.eehp.com/callback -->";
         //2.4、设置AES密钥，调用AES加解密相关接口时需要（可选）
         config.encryptKey = payChannelVo.getEncryptKey();
         //2.5、配置信息放入configHashMap中

@@ -58,11 +58,16 @@ public class WechatNativePayHandler implements NativePayHandler {
         beforePayHandler.idempotentCreateDownLineTrading(tradingVo);
         //2、获得微信客户端
         WechatPayClient wechatPayClient = wechatPayConfig.queryConfig(tradingVo.getEnterpriseId());
-        //3、调用微信API：preCreateResponse
+        //3、客户端如果为空，抛出异常
+        if (EmptyUtil.isNullOrEmpty(wechatPayClient)){
+            throw  new ProjectException(TradingEnum.CONFIG_EMPT);
+        }
+        //4、调用微信API：preCreateResponse
         PreCreateResponse preCreateResponse = wechatPayClient.preCreate(
             String.valueOf(tradingVo.getTradingOrderNo()),
             String.valueOf(tradingVo.getTradingAmount()),
             tradingVo.getMemo());
+        //5.1、受理成功：修改交易单
         if (!EmptyUtil.isNullOrEmpty(preCreateResponse)&&
             !EmptyUtil.isNullOrEmpty(preCreateResponse.getCodeUrl())){
             String subCode = preCreateResponse.getCode();
@@ -81,8 +86,8 @@ public class WechatNativePayHandler implements NativePayHandler {
             if (!flag){
                 throw new ProjectException(TradingEnum.SAVE_OR_UPDATE_FAIL);
             }
-            //6、返回结果
             return BeanConv.toBean(trading, TradingVo.class);
+        //5.2受理失败：抛出异常
         }else {
             throw new ProjectException(TradingEnum.NATIVE_PAY_FAIL);
         }
@@ -95,12 +100,15 @@ public class WechatNativePayHandler implements NativePayHandler {
         if (!flag){
             throw new ProjectException(TradingEnum.NATIVE_QUERY_FAIL);
         }
-        //4、获得微信客户端
+        //2、获得微信客户端
         WechatPayClient wechatPayClient = wechatPayConfig.queryConfig(tradingVo.getEnterpriseId());
-        //5、调用微信API：preCreateResponse
+        //3、客户端如果为空，抛出异常
+        if (EmptyUtil.isNullOrEmpty(wechatPayClient)){
+            throw  new ProjectException(TradingEnum.CONFIG_EMPT);
+        }
+        //4、调用微信API：query
         QueryResponse queryResponse = wechatPayClient.query(String.valueOf(tradingVo.getTradingOrderNo()));
-
-        //6、响应成功，分析交易状态
+        //5、响应成功，分析交易状态
         if (!EmptyUtil.isNullOrEmpty(queryResponse)){
             //SUCCESS：支付成功
             //REFUND：转入退款
@@ -132,7 +140,7 @@ public class WechatNativePayHandler implements NativePayHandler {
             }
         }
         //8、返回结果
-        Trading trading = tradingService.findTradByProductOrderNo(tradingVo.getTradingOrderNo());
+        Trading trading = tradingService.findTradByProductOrderNo(tradingVo.getProductOrderNo());
         return BeanConv.toBean(trading,TradingVo.class);
     }
 
@@ -148,13 +156,17 @@ public class WechatNativePayHandler implements NativePayHandler {
         }
         //2.2、退款前置处理：退款幂等性校验
         beforePayHandler.idempotentRefundDownLineTrading(tradingVo);
-        //4、获得微信客户端
+        //3、获得微信客户端
         WechatPayClient wechatPayClient = wechatPayConfig.queryConfig(tradingVo.getEnterpriseId());
-        //5、调用微信API：preCreateResponse
+        //4、客户端如果为空，抛出异常
+        if (EmptyUtil.isNullOrEmpty(wechatPayClient)){
+            throw  new ProjectException(TradingEnum.CONFIG_EMPT);
+        }
+        //5、调用微信API：refund
         RefundResponse refundResponse = wechatPayClient.refund(
-            String.valueOf(tradingVo.getTradingOrderNo()),
-            String.valueOf(tradingVo.getOperTionRefund()),
-            outRequestNo,String.valueOf(tradingVo.getTradingAmount()));
+                String.valueOf(tradingVo.getTradingOrderNo()),
+                String.valueOf(tradingVo.getOperTionRefund()),
+                outRequestNo,String.valueOf(tradingVo.getTradingAmount()));
         //6、指定此订单为退款交易单
         tradingVo.setIsRefund(SuperConstant.YES);
         //7、保存交易单信息
@@ -167,7 +179,7 @@ public class WechatNativePayHandler implements NativePayHandler {
         refundRecord.setRefundAmount(tradingVo.getOperTionRefund());//本次退款金额
         refundRecord.setRefundCode(refundResponse.getCode());
         if (!EmptyUtil.isNullOrEmpty(refundResponse)&&
-             TradingConstant.WECHAT_REFUND_PROCESSING.equals(refundResponse.getStatus())){
+                TradingConstant.WECHAT_REFUND_PROCESSING.equals(refundResponse.getStatus())){
             refundRecord.setRefundStatus(TradingConstant.REFUND_STATUS_SENDING);
         }else if (!EmptyUtil.isNullOrEmpty(refundResponse)&&
                 TradingConstant.WECHAT_REFUND_SUCCESS.equals(refundResponse.getStatus())){
@@ -186,9 +198,13 @@ public class WechatNativePayHandler implements NativePayHandler {
         if (!flag){
             throw new ProjectException(TradingEnum.NATIVE_QUERY_FAIL);
         }
-        //2、获得微信客户端
+        //2.1、获得微信客户端
         WechatPayClient wechatPayClient = wechatPayConfig.queryConfig(refundRecordVo.getEnterpriseId());
-        //5、调用微信API：queryRefund
+        //2.2、客户端如果为空，抛出异常
+        if (EmptyUtil.isNullOrEmpty(wechatPayClient)){
+            throw  new ProjectException(TradingEnum.CONFIG_EMPT);
+        }
+        //3、调用微信API：queryRefund
         RefundResponse refundResponse = wechatPayClient.queryRefund(refundRecordVo.getRefundNo());
         //4、查询状态
         String refundStatus = refundResponse.getStatus();

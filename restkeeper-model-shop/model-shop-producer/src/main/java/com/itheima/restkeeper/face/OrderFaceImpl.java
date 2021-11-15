@@ -244,6 +244,8 @@ public class OrderFaceImpl implements OrderFace {
             tradingVoResult = nativePayFace.createDownLineTrading(tradingVo);
         }else if (TradingConstant.TRADING_CHANNEL_CASH_PAY.equals(orderVo.getTradingChannel())){
             tradingVoResult = cashPayFace.createCachTrading(tradingVo);
+        }else{
+            throw new ProjectException(OrderEnum.PLACE_ORDER_FAIL);
         }
         //3、结算后桌台状态修改：开桌-->空闲
         Boolean flag = true;

@@ -3,6 +3,8 @@ package com.itheima.restkeeper.service;
 import com.itheima.restkeeper.pojo.Trading;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * @Description：交易订单表 服务类
  */
@@ -21,4 +23,11 @@ public interface ITradingService extends IService<Trading> {
      * @return
      */
     Trading findTradByProductOrderNo(Long productOrderNo);
+
+    /***
+     * @description 按交易状态查询交易单
+     * @param tradingState
+     * @return
+     */
+    List<Trading> findTradingByTradingState(String tradingState);
 }

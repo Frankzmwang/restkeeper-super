@@ -12,6 +12,7 @@ import com.itheima.restkeeper.req.TradingVo;
 import com.itheima.restkeeper.req.UserVo;
 import com.itheima.restkeeper.utils.ResponseWrapBuild;
 import com.itheima.restkeeper.utils.UserVoContext;
+import io.seata.spring.annotation.GlobalTransactional;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

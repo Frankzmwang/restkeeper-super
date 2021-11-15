@@ -81,7 +81,7 @@ public class AliNativePayHandler implements NativePayHandler {
             boolean isSuccess = ResponseChecker.success(precreateResponse);
             //6.1、受理成功：修改交易单
             if (isSuccess){
-                String subCode = precreateResponse.getCode();
+                String subCode = precreateResponse.getSubCode();
                 String subMsg = precreateResponse.getQrCode();
                 tradingVo.setPlaceOrderCode(subCode);
                 tradingVo.setPlaceOrderMsg(subMsg);
@@ -152,7 +152,7 @@ public class AliNativePayHandler implements NativePayHandler {
             log.warn("查询支付宝统一下单失败：{}", ExceptionsUtil.getStackTraceAsString(e));
         }
         //8、返回结果
-        Trading trading = tradingService.findTradByProductOrderNo(tradingVo.getTradingOrderNo());
+        Trading trading = tradingService.findTradByProductOrderNo(tradingVo.getProductOrderNo());
         return BeanConv.toBean(trading,TradingVo.class);
     }
 

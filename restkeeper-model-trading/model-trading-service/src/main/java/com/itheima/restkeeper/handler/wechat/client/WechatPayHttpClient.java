@@ -72,9 +72,10 @@ public class WechatPayHttpClient {
                 .loadPrivateKey(new ByteArrayInputStream(privateKey.getBytes("utf-8")));
         // 加载平台证书（mchId：商户号,mchSerialNo：商户证书序列号,apiV3Key：V3密钥）
         PrivateKeySigner privateKeySigner = new PrivateKeySigner(mchSerialNo, merchantPrivateKey);
-        WechatPay2Credentials wechatPay2Credentials = new WechatPay2Credentials(mchId, privateKeySigner);
-        AutoUpdateCertificatesVerifier verifier =
-                new AutoUpdateCertificatesVerifier(wechatPay2Credentials, apiV3Key.getBytes("utf-8"));
+        WechatPay2Credentials wechatPay2Credentials = new WechatPay2Credentials(
+                mchId, privateKeySigner);
+        AutoUpdateCertificatesVerifier verifier = new AutoUpdateCertificatesVerifier(
+                wechatPay2Credentials, apiV3Key.getBytes("utf-8"));
         // 初始化httpClient
         return com.wechat.pay.contrib.apache.httpclient.WechatPayHttpClientBuilder.create()
                 .withMerchant(mchId, mchSerialNo, merchantPrivateKey)

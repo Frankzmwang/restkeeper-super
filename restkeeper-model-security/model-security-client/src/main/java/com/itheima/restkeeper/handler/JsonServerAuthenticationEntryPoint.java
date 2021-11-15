@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
  * @Description  用来解决匿名用户访问无权限资源时的异常
  */
 @Component
-public class JsonServerAuthenticationEntryPoint implements ServerAuthenticationEntryPoint {
+public class  JsonServerAuthenticationEntryPoint implements ServerAuthenticationEntryPoint {
 
 
     @Override

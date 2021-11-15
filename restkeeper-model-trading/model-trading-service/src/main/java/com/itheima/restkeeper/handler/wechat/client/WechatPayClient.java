@@ -114,7 +114,7 @@ public class WechatPayClient {
      */
     public QueryResponse query(String outTradeNo){
         //请求地址
-        String uri ="/v3/pay/transactions";
+        String uri ="/v3/pay/transactions/out-trade-no";
         WechatPayHttpClient httpClient = WechatPayHttpClient.builder()
                 .mchId(mchId)
                 .mchSerialNo(mchSerialNo)
@@ -125,10 +125,10 @@ public class WechatPayClient {
         String body = null;
         try {
             //uri参数对象
-            String uriParams ="/"+mchId+"/"+outTradeNo;
+            String uriParams ="/"+outTradeNo+"?mchid="+mchId;
             body =  httpClient.doGet(uriParams);
         } catch (IOException | URISyntaxException e) {
-            log.error("微信支付：preCreate，发生异常：{}", ExceptionsUtil.getStackTraceAsString(e));
+            log.error("微信支付：query，发生异常：{}", ExceptionsUtil.getStackTraceAsString(e));
         }
         QueryResponse queryResponse = JSONObject.parseObject(body, QueryResponse.class);
         queryResponse.setCode("200");

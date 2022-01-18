@@ -40,9 +40,9 @@ clusterServersConfig:
   masterConnectionPoolSize: 64
   readMode: "SLAVE"
   nodeAddresses:
-    - "redis://192.168.112.77:7004"
-    - "redis://192.168.112.77:7001"
-    - "redis://192.168.112.77:7000"
+    - "redis://192.168.200.129:7004"
+    - "redis://192.168.200.129:7001"
+    - "redis://192.168.200.129:7000"
   scanInterval: 1000
 threads: 0
 nettyThreads: 0

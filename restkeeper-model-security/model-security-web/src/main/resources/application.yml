@@ -19,12 +19,12 @@ dubbo:
   scan:
     base-packages: com.itheima.restkeeper.web
   registry:
-    address: spring-cloud://192.168.112.77
+    address: spring-cloud://192.168.200.129
   protocol:
     name: dubbo
     port: 27074
     threads: 200
-    accesslog: D:/logs/model-security-web-01.log
+    accesslog: logs/model-security-web-01.log
 restkeeper:
   framework:
     swagger:

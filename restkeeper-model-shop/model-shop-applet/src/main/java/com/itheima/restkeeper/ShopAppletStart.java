@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @Slf4j
 @SpringBootApplication
-public class ShopAppletStarta {
+public class ShopAppletStart {
     public static void main(String[] args) {
-        SpringApplication.run(ShopAppletStarta.class, args);
+        SpringApplication.run(ShopAppletStart.class, args);
     }
 
 }

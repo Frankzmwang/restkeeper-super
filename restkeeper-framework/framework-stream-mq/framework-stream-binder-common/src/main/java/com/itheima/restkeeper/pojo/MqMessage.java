@@ -24,7 +24,7 @@ public class MqMessage extends ToString {
     private String title;
 
     /**消息内容**/
-    private String conten;
+    private String content;
 
     /**业务类型**/
     private String messageType;

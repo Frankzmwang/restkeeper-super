@@ -24,6 +24,7 @@
             <artifactId>model-basic-interface</artifactId>
         </dependency>
 
+
         <dependency>
             <groupId>com.itheima.restkeeper</groupId>
             <artifactId>model-basic-service</artifactId>

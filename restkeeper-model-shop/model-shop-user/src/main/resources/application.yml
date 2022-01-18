@@ -16,7 +16,7 @@ spring:
   datasource:
     druid:
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://192.168.112.77:3306/restkeeper-security?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
+      url: jdbc:mysql://192.168.200.129:3306/restkeeper-security?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
       username: root
       password: pass
 #mybatis配置
@@ -57,10 +57,10 @@ dubbo:
     #表示要订阅服务的服务名，可以配置'*'，代表订阅所有服务，不推荐使用。若需订阅多应用，使用 "," 分割。
     subscribed-services: model-basic-producer
   registry:
-    address: spring-cloud://192.168.112.77
+    address: spring-cloud://192.168.200.129
   protocol:
     #指定二进制协议
     name: dubbo
     port: 27080
     threads: 200
-    accesslog: D:/logs/model-shop-user-01.log
+    accesslog: logs/model-shop-user-01.log

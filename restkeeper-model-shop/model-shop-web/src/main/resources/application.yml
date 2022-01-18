@@ -29,25 +29,27 @@ seata:
     #此配置与nacos中配置中心service.vgroupMapping.project_tx_group的key信息相同
     vgroup-mapping:
       project_tx_group: default
-    #此配置与nacos中配置中心service.default.grouplist = "192.168.112.77:9200"相同
+    #此配置与nacos中配置中心service.default.grouplist = "192.168.200.129:9200"相同
     grouplist:
-      default: 192.168.112.77:9200
+      default: 192.168.200.129:9200
   #从nacos中读取配置
   config:
     type: nacos
     nacos:
       group: SEATA_GROUP
-      server-addr: 192.168.112.77:8848
+      server-addr: 192.168.200.129:8848
       username: nacos
       password: nacos
+      namespace: a2334a2d-d74b-4bfb-ac6c-2058aa46aa8c
   #注册中心使用nacos
   registry:
     type: nacos
     nacos:
       group: SEATA_GROUP
-      server-addr: 192.168.112.77:8848
+      server-addr: 192.168.200.129:8848
       username: nacos
       password: nacos
+      namespace: a2334a2d-d74b-4bfb-ac6c-2058aa46aa8c
 dubbo:
   #dubbo应用服务定义
   application:
@@ -63,7 +65,7 @@ dubbo:
     base-packages: com.itheima.restkeeper.web
   registry:
     #注册中心
-    address: spring-cloud://192.168.112.77
+    address: spring-cloud://192.168.200.129
   #服务协议定义
   protocol:
     #服务协议名称
@@ -73,7 +75,7 @@ dubbo:
     #线程数
     threads: 200
     #dubbo调用日志
-    accesslog: D:/logs/model-shop-web-01.log
+    accesslog: logs/model-shop-web-01.log
 restkeeper:
   framework:
     swagger:
@@ -82,4 +84,4 @@ restkeeper:
       description: model-shop-web
       contact-name: 上海黑马
       contact-url: www.itheima.com
-      contact-email: 58948528@qq.com
+      contact-email: itheima@qq.com

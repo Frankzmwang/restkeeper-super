@@ -23,12 +23,12 @@ dubbo:
   scan:
     base-packages: com.itheima.restkeeper.web
   registry:
-    address: spring-cloud://192.168.112.77
+    address: spring-cloud://192.168.200.129
   protocol:
     name: dubbo
     port: 27072
     threads: 200
-    accesslog: D:/logs/model-basic-web-01.log
+    accesslog: logs/model-basic-web-01.log
 restkeeper:
   framework:
     swagger:
@@ -37,4 +37,4 @@ restkeeper:
       description: 附件、数据字典、日志
       contact-name: 上海黑马
       contact-url: www.itheima.com
-      contact-email: 58948528@qq.com
+      contact-email: itheima@qq.com

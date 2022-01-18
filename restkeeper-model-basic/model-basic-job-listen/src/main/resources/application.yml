@@ -12,7 +12,7 @@ spring:
   redis:
     redisson:
       config: classpath:singleServerConfig.yaml
-    host: 192.168.112.77
+    host: 192.168.200.129
     port: 6379
     password: pass
   cloud:
@@ -47,7 +47,7 @@ spring:
           environment:  #配置rabbimq连接环境
             spring:
               rabbitmq:
-                host: 192.168.112.77   #rabbitmq 服务器的地址
+                host: 192.168.200.129   #rabbitmq 服务器的地址
                 port: 5672           #rabbitmq 服务器端口
                 username: admin       #rabbitmq 用户名
                 password: pass       #rabbitmq 密码
@@ -74,7 +74,7 @@ spring:
   datasource:
     druid:
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://192.168.112.77:3306/restkeeper-basic?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
+      url: jdbc:mysql://192.168.200.129:3306/restkeeper-basic?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8
       username: root
       password: pass
 #mybatis配置
@@ -119,7 +119,7 @@ restkeeper:
       executor:
         # 调度中心部署跟地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。
         # 执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册；
-        admin-addresses: http://192.168.112.77:8280/xxl-job-admin/
+        admin-addresses: http://192.168.200.129:8280/xxl-job-admin/
         # 执行器AppName [选填]：执行器心跳注册分组依据；为空则关闭自动注册
         app-name: model-basic-job-listen
         # 执行器IP [选填]：默认为空表示自动获取IP，多网卡时可手动设置指定IP，
@@ -131,6 +131,6 @@ restkeeper:
         # 执行器通讯TOKEN [选填]：非空时启用；
         access-token:
         # 执行器运行日志文件存储磁盘路径 [选填] ：需要对该路径拥有读写权限；为空则使用默认路径；
-        log-path: D:/logs/model-basic-job-listen/handler
+        log-path: logs/model-basic-job-listen/handler
         # 执行器日志保存天数 [选填] ：值大于3时生效，启用执行器Log文件定期清理功能，否则不生效；
         log-retention-days: -1

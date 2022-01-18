@@ -365,6 +365,7 @@ public class OrderFaceImpl implements OrderFace {
      * @description 转换订单为交易单
      * @param orderVo 订单信息
      * @return: com.itheima.restkeeper.req.TradingVo
+     * TODO 策略模式优化
      */
     private TradingVo tradingConvertor(OrderVo orderVo)throws ProjectException {
         //付款动作

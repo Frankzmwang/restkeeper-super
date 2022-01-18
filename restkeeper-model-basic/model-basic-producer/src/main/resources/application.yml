@@ -12,7 +12,7 @@ spring:
   redis:
     redisson:
       config: classpath:singleServerConfig.yaml
-    host: 192.168.112.77
+    host: 192.168.200.129
     port: 6379
     password: pass
   cloud:
@@ -29,7 +29,7 @@ spring:
           environment:  #配置rabbimq连接环境
             spring:
               rabbitmq:
-                host: 192.168.112.77   #rabbitmq 服务器的地址
+                host: 192.168.200.129   #rabbitmq 服务器的地址
                 port: 5672           #rabbitmq 服务器端口
                 username: admin       #rabbitmq 用户名
                 password: pass       #rabbitmq 密码
@@ -49,7 +49,7 @@ spring:
   datasource:
     druid:
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://192.168.112.77:3306/restkeeper-basic?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
+      url: jdbc:mysql://192.168.200.129:3306/restkeeper-basic?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
       username: root
       password: pass
 #mybatis配置
@@ -97,10 +97,12 @@ dubbo:
   scan:
     base-packages: com.itheima.restkeeper
   registry:
-    address: spring-cloud://192.168.112.77
+    address: spring-cloud://192.168.200.129
   protocol:
     #指定二进制协议
     name: dubbo
     port: 27071
     threads: 200
-    accesslog: D:/logs/model-basic-producer-01.log
+    accesslog: logs/model-basic-producer-01.log
+  cloud:
+    subscribed-services: ''

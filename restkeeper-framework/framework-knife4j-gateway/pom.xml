@@ -9,9 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>framework-knife4j-gatewag</artifactId>
+    <artifactId>framework-knife4j-gateway</artifactId>
 
-    <name>framework-knife4j-gatewag</name>
+    <name>framework-knife4j-gateway</name>
     <dependencies>
 
         <!--  knife4j版接口文档 访问/doc.html      -->

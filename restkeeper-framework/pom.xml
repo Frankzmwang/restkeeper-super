@@ -14,7 +14,7 @@
         <module>framework-mybatis-plus</module>
         <module>framework-seata</module>
         <module>framework-knife4j-web</module>
-        <module>framework-knife4j-gatewag</module>
+        <module>framework-knife4j-gateway</module>
         <module>framework-web</module>
         <module>framework-jwt</module>
         <module>framework-xxl-job</module>

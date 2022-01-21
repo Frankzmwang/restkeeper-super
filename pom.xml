@@ -155,12 +155,6 @@
 
             <dependency>
                 <groupId>com.itheima.restkeeper</groupId>
-                <artifactId>framework-stream-rabbitmq</artifactId>
-                <version>${itheima.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.itheima.restkeeper</groupId>
                 <artifactId>framework-sharding-jdbc</artifactId>
                 <version>${itheima.version}</version>
             </dependency>

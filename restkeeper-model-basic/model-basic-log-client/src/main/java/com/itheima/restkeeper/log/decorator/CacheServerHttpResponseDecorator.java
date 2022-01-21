@@ -107,7 +107,7 @@ public class CacheServerHttpResponseDecorator extends ServerHttpResponseDecorato
         MqMessage mqMessage = MqMessage.builder()
                 .id(messageId)
                 .title("log-message")
-                .conten(logBusinessVoJsonString)
+                .content(logBusinessVoJsonString)
                 .messageType("log-request")
                 .produceTime(Timestamp.valueOf(LocalDateTime.now()))
                 .sender(sender)

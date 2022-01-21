@@ -65,6 +65,56 @@ public class ReactiveSecurityConfig {
     @Autowired
     ServerAccessDeniedHandler jsonServerAccessDeniedHandler;
 
+    /****
+     * @description 认证核心配置
+     * @return
+     */
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        SecurityWebFilterChain chain =
+            //跨域处理
+            http.cors()
+            .and()
+                    .csrf().disable()
+                    .httpBasic().disable()
+                    // 匿名访问处理
+                    .exceptionHandling().authenticationEntryPoint(jsonServerAuthenticationEntryPoint)
+            .and()
+                    // 匿名资源放行
+                    .authorizeExchange().pathMatchers(securityProperties.getIgnoreUrl().toArray(new String[securityProperties.getIgnoreUrl().size()])).permitAll()
+            .and()
+                //指定当前的以表单提交方式进行校验
+                .formLogin()
+                .loginPage(securityProperties.getLoginPage())
+                // 登陆认证
+                .authenticationManager(jwtReactiveAuthenticationManager)
+                // 登录成功handler
+                .authenticationSuccessHandler(jsonServerAuthenticationSuccessHandler)
+                // 登陆失败handler
+                .authenticationFailureHandler(jsonServerAuthenticationFailureHandler)
+            .and()
+                // 访问权限控制
+                .authorizeExchange().anyExchange().access(jwtReactiveAuthorizationManager)
+            .and()
+                // 无访问权限处理
+                .exceptionHandling().accessDeniedHandler(jsonServerAccessDeniedHandler)
+            .and()
+                .logout()
+                 // 登出成功handler
+                .logoutSuccessHandler(jsonServerLogoutSuccessHandler)
+            .and()
+                .build();
+        // 设置自定义登录参数转换器
+        chain.getWebFilters()
+                .filter(webFilter -> webFilter instanceof AuthenticationWebFilter)
+                .subscribe(webFilter -> {
+                    AuthenticationWebFilter filter = (AuthenticationWebFilter) webFilter;
+                    filter.setServerAuthenticationConverter(reactiveServerAuthenticationConverter);
+                });
+        return chain;
+    }
+
+
     /**
      * BCrypt密码编码
      * @return
@@ -93,53 +143,6 @@ public class ReactiveSecurityConfig {
             cfg.setAllowCredentials(true);
             return cfg;
         };
-    }
-
-    /****
-     * @description 认证核心配置
-     * @return
-     */
-    @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        SecurityWebFilterChain chain =
-            //跨域处理
-            http.cors()
-            .and()
-                //指定当前的以表单提交方式进行校验
-                .formLogin()
-                .loginPage(securityProperties.getLoginPage())
-                // 登陆认证
-                .authenticationManager(jwtReactiveAuthenticationManager)
-                // 登录成功handler
-                .authenticationSuccessHandler(jsonServerAuthenticationSuccessHandler)
-                // 登陆失败handler
-                .authenticationFailureHandler(jsonServerAuthenticationFailureHandler)
-                // 匿名访问处理
-                .authenticationEntryPoint(jsonServerAuthenticationEntryPoint)
-            .and()
-                .logout()
-                // 登出成功handler
-                .logoutSuccessHandler(jsonServerLogoutSuccessHandler)
-            .and()
-                .csrf().disable()
-                .httpBasic().disable()
-                // 匿名资源放行
-                .authorizeExchange().pathMatchers(securityProperties.getIgnoreUrl().toArray(new String[securityProperties.getIgnoreUrl().size()])).permitAll()
-                // 访问权限控制
-                .anyExchange().access(jwtReactiveAuthorizationManager)
-            .and()
-                // 无访问权限处理
-                .exceptionHandling().accessDeniedHandler(jsonServerAccessDeniedHandler)
-            .and()
-                .build();
-        // 设置自定义登录参数转换器
-        chain.getWebFilters()
-                .filter(webFilter -> webFilter instanceof AuthenticationWebFilter)
-                .subscribe(webFilter -> {
-                    AuthenticationWebFilter filter = (AuthenticationWebFilter) webFilter;
-                    filter.setServerAuthenticationConverter(reactiveServerAuthenticationConverter);
-                });
-        return chain;
     }
 
 }

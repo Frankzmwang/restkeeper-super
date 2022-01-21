@@ -33,7 +33,7 @@ public class LogListen {
     public void onMessage(@Payload MqMessage message,
                            @Header(AmqpHeaders.CHANNEL) Channel channel,
                            @Header(AmqpHeaders.DELIVERY_TAG) Long deliveryTag) throws IOException {
-        String jsonConten = message.getConten();
+        String jsonConten = message.getContent();
         log.info("[onMessage][线程编号:{} 消息内容：{}]", Thread.currentThread().getId(), message);
         LogBusinessVo logBusinessVo= JSONObject.parseObject(jsonConten,LogBusinessVo.class);
         boolean flag = logBusinessService.save(BeanConv.toBean(logBusinessVo, LogBusiness.class));

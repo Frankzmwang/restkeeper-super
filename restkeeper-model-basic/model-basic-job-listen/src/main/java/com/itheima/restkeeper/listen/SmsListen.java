@@ -36,7 +36,7 @@ public class SmsListen {
     public void onMessage(@Payload MqMessage message,
                           @Header(AmqpHeaders.CHANNEL) Channel channel,
                           @Header(AmqpHeaders.DELIVERY_TAG) Long deliveryTag) throws IOException {
-        String jsonConten = message.getConten();
+        String jsonConten = message.getContent();
         log.info("[onMessage][线程编号:{} 消息内容：{}]", Thread.currentThread().getId(), message);
         SendMessageVo sendMessageVo = JSONObject.parseObject(jsonConten, SendMessageVo.class);
         boolean flag = smsSendAdapter.SendSms(

@@ -26,7 +26,7 @@ import java.util.List;
 @Api(tags = "品牌controller")
 public class BrandController {
 
-    @DubboReference(version = "${dubbo.application.version}",check = false)
+    @DubboReference(version = "${dubbo.application.version}",check = false, timeout = 9000000)
     BrandFace brandFace;
 
     /**

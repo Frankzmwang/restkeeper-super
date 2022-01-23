@@ -38,7 +38,7 @@ public class BrandFaceImpl implements BrandFace {
     @Autowired
     IBrandService brandService;
 
-    @DubboReference(version = "${dubbo.application.version}",check = false)
+    @DubboReference(version = "${dubbo.application.version}",check = false, timeout = 9000000)
     AffixFace affixFace;
 
     @Override
@@ -46,7 +46,7 @@ public class BrandFaceImpl implements BrandFace {
                                          int pageNum,
                                          int pageSize) throws ProjectException{
         try {
-            //查询Page<Brand>图片分页
+            //查询Page<Brand>品牌分页
             Page<Brand> page = brandService.findBrandVoPage(brandVo, pageNum, pageSize);
             //转化Page<Brand>为Page<BrandVo>
             Page<BrandVo> pageVo = new Page<>();
@@ -63,8 +63,9 @@ public class BrandFaceImpl implements BrandFace {
                     }
                 });
             }
-            pageVo.setRecords(brandVoList);
+
             //返回结果
+            pageVo.setRecords(brandVoList);
             return pageVo;
         } catch (Exception e) {
             log.error("查询品牌列表异常：{}", ExceptionsUtil.getStackTraceAsString(e));
@@ -75,7 +76,8 @@ public class BrandFaceImpl implements BrandFace {
     @Override
     public BrandVo createBrand(BrandVo brandVo) throws ProjectException{
         try {
-            BrandVo brandVoResult = BeanConv.toBean(brandService.createBrand(brandVo), BrandVo.class);
+            Brand brand = brandService.createBrand(brandVo);
+            BrandVo brandVoResult = BeanConv.toBean(brand, BrandVo.class);
             //绑定附件
             if (!EmptyUtil.isNullOrEmpty(brandVoResult)){
                 affixFace.bindBusinessId(
@@ -84,6 +86,7 @@ public class BrandFaceImpl implements BrandFace {
                         .id(brandVo.getAffixVo().getId())
                         .build());
             }
+            //回显
             brandVoResult.setAffixVo(AffixVo.builder()
                 .pathUrl(brandVo.getAffixVo().getPathUrl())
                 .businessId(brandVoResult.getId())

@@ -478,7 +478,6 @@ public class AppletFaceImpl implements AppletFace {
     }
 
     /***
-     * @description 求交集:购物车订单项与核算订单项合并
      * @param flag 是否操作成功
      * @param orderItemVoStatisticsList 可核算订单项
      * @param orderItemVoTemporaryList 购物车订单项
@@ -517,7 +516,6 @@ public class AppletFaceImpl implements AppletFace {
     }
 
     /***
-     * @description 求差集:保存购物车订单项到可核算订单项
      * @param flag 是否操作成功
      * @param orderItemVoStatisticsList 可核算订单项
      * @param orderItemVoTemporaryList 购物车订单项
@@ -575,6 +573,103 @@ public class AppletFaceImpl implements AppletFace {
     @Override
     @Transactional
     public OrderVo placeOrder(Long orderNo) throws ProjectException {
+        //1、锁定订单
+        String key = AppletCacheConstant.ADD_TO_ORDERITEM_LOCK + orderNo;
+        RLock lock = redissonClient.getLock(key);
+        ProjectException projectException = null;
+        OrderVo orderVoResult = null;
+        try {
+            if (lock.tryLock(
+                    AppletCacheConstant.REDIS_WAIT_TIME,
+                    AppletCacheConstant.REDIS_LEASETIME,
+                    TimeUnit.MINUTES)) {
+                boolean flag = true;
+                orderVoResult = orderService.findOrderByOrderNo(orderNo);
+                //2、查询可以核算订单项
+                List<OrderItem> orderItemList = orderItemService.findOrderItemByOrderNo(orderVoResult.getOrderNo());
+                List<OrderItemVo> orderItemVoStatisticsList = BeanConv.toBeanList(orderItemList, OrderItemVo.class);
+                //2.1、处理空集合
+                if (EmptyUtil.isNullOrEmpty(orderItemVoStatisticsList)) {
+                    orderItemVoStatisticsList = new ArrayList<>();
+                }
+                //3、查询购物车订单项
+                key = AppletCacheConstant.ORDERITEMVO_STATISTICS + orderNo;
+                RMapCache<Long, OrderItemVo> orderItemVoRMap = redissonClient.getMapCache(key);
+                List<OrderItemVo> orderItemVoTemporaryList = (List<OrderItemVo>)orderItemVoRMap.readAllValues();
+                //4、购物车订单项不为空才合并
+                if (!EmptyUtil.isNullOrEmpty(orderItemVoTemporaryList)) {
+                    // 构建合并后的订单项
+                    List<OrderItemVo> dbOrderItemVos = new ArrayList<>();
+                    for (OrderItemVo orderItemVo : orderItemVoTemporaryList) { // redis
+                        boolean opertion = false;
+                        if (!EmptyUtil.isNullOrEmpty(orderItemVoStatisticsList)) {
+                            for (OrderItemVo dborderItemVo : orderItemVoStatisticsList) { // mysql
+                                if (dborderItemVo.getDishId().equals(orderItemVo.getDishId())) {
+                                    // 数量
+                                    dborderItemVo.setDishNum(orderItemVo.getDishNum() + dborderItemVo.getDishNum());
+                                    dbOrderItemVos.add(dborderItemVo);
+                                    opertion = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!opertion)
+                            dbOrderItemVos.add(orderItemVo);
+                    }
+                    //5、执行保存或更新操作
+                    List<OrderItem> orderItems = BeanConv
+                            .toBeanList(dbOrderItemVos, OrderItem.class);
+                    flag = orderItemService.saveOrUpdateBatch(orderItems);
+                    if (!flag) {
+                        projectException = new ProjectException(OrderItemEnum.UPDATE_ORDERITEM_FAIL);
+                    }
+                    //6、计算订单金额
+                    List<OrderItem> orderItemListResult = orderItemService
+                            .findOrderItemByOrderNo(orderNo);
+                    BigDecimal sumPrice = orderItemListResult.stream()
+                            .map(n -> {
+                                        BigDecimal price = n.getPrice();
+                                        BigDecimal reducePrice = n.getReducePrice();
+                                        Long dishNum = n.getDishNum();
+                                        //如果有优惠价格以优惠价格计算
+                                        if (EmptyUtil.isNullOrEmpty(reducePrice)) {
+                                            return price.multiply(new BigDecimal(dishNum));
+                                        } else {
+                                            return reducePrice.multiply(new BigDecimal(dishNum));
+                                        }
+                                    }
+                            ).reduce(BigDecimal.ZERO, BigDecimal::add)
+                            .setScale(2,BigDecimal.ROUND_HALF_UP);
+                    //7、更新订单金额信息
+                    OrderVo orderVoHandler = OrderVo.builder()
+                            .id(orderVoResult.getId())
+                            .payableAmountSum(sumPrice)
+                            .build();
+                    flag = orderService.updateById(BeanConv.toBean(orderVoHandler, Order.class));
+                    if (!flag) {
+                        projectException = new ProjectException(OrderItemEnum.SAVE_ORDER_FAIL);
+                    }
+                    //8、清理redis购物车订单项目
+                    orderItemVoTemporaryList.forEach(n->{
+                        orderItemVoRMap.remove(n.getDishId());
+                    });
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            //9、释放锁
+            lock.unlock();
+        }
+        if (!EmptyUtil.isNullOrEmpty(projectException)) {
+            throw projectException;
+        }
+        //10、再次最新查询订单数据
+        return handlerOrderVo(orderVoResult);
+    }
+
+    @Transactional
+    public OrderVo placeOrder2(Long orderNo) throws ProjectException {
         try {
             //1、锁定订单
             String key = AppletCacheConstant.ADD_TO_ORDERITEM_LOCK + orderNo;

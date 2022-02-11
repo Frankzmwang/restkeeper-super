@@ -5,7 +5,6 @@ import com.itheima.restkeeper.pojo.Dish;
 import com.itheima.restkeeper.service.IDishService;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RedissonClient;
-import org.redisson.client.RedisClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +24,7 @@ public class InitDish {
     @Autowired
     RedissonClient redissonClient;
 
-    @PostConstruct
+    @PostConstruct  //当前类实例化之后执行该方法
     public void initDishNumber(){
         //查询所有有效的且起售状态的菜品
         List<Dish> dishList = dishService.findDishVos();

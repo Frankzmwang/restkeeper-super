@@ -125,14 +125,16 @@ public class AppletFaceImpl implements AppletFace {
         try {
             //1、查询桌台信息，是否为使用中
             Table table = tableService.getById(tableId);
-            Boolean flagTableStatus = table.getTableStatus().equals(SuperConstant.USE);
+            Boolean flagTableStatus = table.getTableStatus().equals(SuperConstant.USE);  // true use   false free
             //2、是否已经有【待支付、支付中】订单存在
-            OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
+            OrderVo orderVoResult = orderService.findOrderByTableId(tableId);  // !null use
             Boolean flagOrderVo = !EmptyUtil.isNullOrEmpty(orderVoResult);
-            if (flagTableStatus||flagOrderVo){
+
+            return flagTableStatus || flagOrderVo;
+           /* if (flagTableStatus||flagOrderVo){
                 return true;
             }
-            return false;
+            return false;*/
         }catch (Exception e){
             log.error("查询桌台信息异常：{}", ExceptionsUtil.getStackTraceAsString(e));
             throw new ProjectException(TableEnum.SELECT_TABLE_FAIL);
@@ -196,14 +198,14 @@ public class AppletFaceImpl implements AppletFace {
     public OrderVo openTable(Long tableId,Integer personNumbers) throws ProjectException {
         //1、开台状态定义
         boolean flag = true;
-        //2、锁定桌台，防止并发重复创建订单
+        //2、锁定桌台，防止并发重复创建订单？
         String key = AppletCacheConstant.OPEN_TABLE_LOCK+tableId;
         RLock lock = redissonClient.getLock(key);
         try {
             if(lock.tryLock(AppletCacheConstant.REDIS_WAIT_TIME,
                     AppletCacheConstant.REDIS_LEASETIME,
-                    TimeUnit.SECONDS)){
-                //3、幂等性：再次查询桌台订单情况
+                    TimeUnit.MINUTES)){
+                //3、幂等性：再次查询桌台订单情况？
                 OrderVo orderVoResult = orderService.findOrderByTableId(tableId);
                 //4、未开台,为桌台创建当订单
                 if (EmptyUtil.isNullOrEmpty(orderVoResult)){
@@ -216,15 +218,15 @@ public class AppletFaceImpl implements AppletFace {
                             .storeId(table.getStoreId())
                             .areaId(table.getAreaId())
                             .enterpriseId(table.getEnterpriseId())
-                            .orderNo((Long) identifierGenerator.nextId(tableId))
-                            .orderState(TradingConstant.DFK)
-                            .isRefund(SuperConstant.NO)
-                            .refund(new BigDecimal(0))
-                            .discount(new BigDecimal(10))
-                            .personNumbers(personNumbers)
-                            .reduce(new BigDecimal(0))
-                            .useScore(0)
-                            .acquireScore(0l)
+                            .orderNo((Long) identifierGenerator.nextId(tableId))  // 订单编号*** 雪花算法id
+                            .orderState(TradingConstant.DFK) // 订单状态 DFK
+                            .isRefund(SuperConstant.NO) // 是否退款
+                            .refund(new BigDecimal(0)) //退款金额
+                            .discount(new BigDecimal(10)) //是否折扣
+                            .personNumbers(personNumbers) //就餐人数
+                            .reduce(new BigDecimal(0)) //优惠价格
+                            .useScore(0) //积分
+                            .acquireScore(0l) //累计积分
                             .build();
                     orderService.save(order);
                     //5、修改桌台状态为使用中
@@ -282,12 +284,17 @@ public class AppletFaceImpl implements AppletFace {
                 //2.2、计算可核算订单项总金额
                 reducePriceStatistics = reducePriceHandler(orderItemVoStatisticsList);
             }
+
+
             //3、查询redis:购物车订单项
             String key = AppletCacheConstant.ORDERITEMVO_STATISTICS + orderVo.getOrderNo();
             RMapCache<Long, OrderItemVo> orderItemVoRMap = redissonClient.getMapCache(key);
             List<OrderItemVo> orderItemVoTemporaryList = (List<OrderItemVo>) orderItemVoRMap.readAllValues();
             //3.1、计算购物车订单项总金额
             BigDecimal reducePriceTemporary=reducePriceHandler(orderItemVoTemporaryList);
+
+
+
             //4、构建订单信息
             orderVo.setOrderItemVoStatisticsList(orderItemVoStatisticsList);
             orderVo.setReducePriceStatistics(reducePriceStatistics);
@@ -297,12 +304,18 @@ public class AppletFaceImpl implements AppletFace {
         return orderVo;
     }
 
+    /**
+     * 计算订单明细总金额
+     * @param orderItemVos 需要计算的订单项
+     * @return
+     * @throws ProjectException
+     */
     @Override
     public BigDecimal reducePriceHandler(List<OrderItemVo> orderItemVos )throws ProjectException{
         return orderItemVos.stream().map(orderItemVo -> {
-            BigDecimal price = orderItemVo.getPrice();
-            BigDecimal reducePrice = orderItemVo.getReducePrice();
-            Long dishNum = orderItemVo.getDishNum();
+            BigDecimal price = orderItemVo.getPrice(); //原价
+            BigDecimal reducePrice = orderItemVo.getReducePrice(); //优惠价
+            Long dishNum = orderItemVo.getDishNum(); //数量
             //如果有优惠价格以优惠价格计算
             if (EmptyUtil.isNullOrEmpty(reducePrice)) {
                 return price.multiply(new BigDecimal(dishNum));
@@ -321,10 +334,9 @@ public class AppletFaceImpl implements AppletFace {
             List<DishFlavor> dishFlavors = dishFlavorService.findDishFlavorByDishId(dishId);
             DishVo dishVo = BeanConv.toBean(dish, DishVo.class);
             //3、处理菜品口味【数字字典】
-            List<DishFlavorVo> dishFlavorVos = BeanConv.toBeanList(dishFlavors,DishFlavorVo.class);
-            List<String> DataKeys = dishFlavorVos.stream()
-                    .map(DishFlavorVo::getDataKey).collect(Collectors.toList());
-            List<DataDictVo> valueByDataKeys = dataDictFace.findValueByDataKeys(DataKeys);
+            List<String> dataKeys = dishFlavors.stream()
+                    .map(DishFlavor::getDataKey).collect(Collectors.toList());
+            List<DataDictVo> valueByDataKeys = dataDictFace.findValueByDataKeys(dataKeys);
             dishVo.setDataDictVos(valueByDataKeys);
             //4、处理菜品图片
             List<AffixVo> affixVoListDish = affixFace.findAffixVoByBusinessId(dishVo.getId());

@@ -3,6 +3,7 @@ package com.itheima.restkeeper.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.restkeeper.constant.SuperConstant;
@@ -31,13 +32,22 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public OrderVo findOrderByTableId(Long tableId) {
-        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+      /*  QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Order::getTableId,tableId);
         queryWrapper.lambda().eq(Order::getEnableFlag,SuperConstant.YES);
         queryWrapper.lambda().and(wrapper->wrapper
                 .eq(Order::getOrderState, TradingConstant.DFK)
                 .or()
-                .eq(Order::getOrderState,TradingConstant.FKZ));
+                .eq(Order::getOrderState,TradingConstant.FKZ));*/
+        // s * from order where tid=1 and ef=yes and ( orderstate=DFK or  orderstate=fkz )
+        LambdaQueryWrapper<Order> queryWrapper = Wrappers.<Order>lambdaQuery();
+        queryWrapper.eq(Order::getTableId, tableId)
+                .eq(Order::getEnableFlag,SuperConstant.YES)
+                .and(wrapper ->
+                        wrapper.eq(Order::getOrderState, TradingConstant.DFK)
+                        .or()
+                        .eq(Order::getOrderState, TradingConstant.FKZ)
+                );
         Order order = getOne(queryWrapper);
         return BeanConv.toBean(order,OrderVo.class);
     }

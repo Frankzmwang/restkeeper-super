@@ -15,7 +15,7 @@ public interface AppletFace {
     /***
      * @description 是否开桌,已开台：进入继续点餐流程,未开台：进入开台流程
      * @param tableId 桌台Id
-     * @return Boolean
+     * @return Boolean true已开桌  false未开桌
      */
     Boolean isOpen(Long tableId)throws ProjectException;
 

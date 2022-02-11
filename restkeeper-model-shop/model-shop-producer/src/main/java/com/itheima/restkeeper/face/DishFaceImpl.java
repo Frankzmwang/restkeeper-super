@@ -94,13 +94,24 @@ public class DishFaceImpl implements DishFace {
         }
     }
 
+    /**
+     * 面试题：
+     * 1、假设保存菜品成功，保存redis失败，问是否应该回滚菜品的数据？
+     *  * 需要回滚，在点餐时菜品需要先在Redis中完成预扣，如果redis中没有当前的菜品，则无法完成预扣，菜无法售卖
+     * 变化：假设保存的菜品的口味成功，保存到Redis失败，问是否应该回滚菜品分类的数据？
+     *  * 不需要，保存redis不会影响正常业务逻辑的执行
+     *
+     * 2、更新数据时，应该是先更新redis还是先更新数据库？ 为什么？   双写一致性问题
+     *  * 先更新数据库，考虑redis和mysql的数据时刻保持一致
+     *
+     */
     @Override
     public DishVo createDish(DishVo dishVo) throws ProjectException{
         try {
             //创建菜品
             DishVo dishVoResult = BeanConv.toBean(dishService.createDish(dishVo), DishVo.class);
             dishVoResult.setHasDishFlavor(dishVo.getHasDishFlavor());
-            //构建初始化库存
+            //构建初始化库存****
             String key = AppletCacheConstant.REPERTORY_DISH+dishVoResult.getId();
             RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
             atomicLong.set(dishVoResult.getDishNumber());

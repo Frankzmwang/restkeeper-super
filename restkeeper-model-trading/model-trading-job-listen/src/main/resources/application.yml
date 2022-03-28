@@ -16,7 +16,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.200.129:8848
+        server-addr: 124.221.88.197:8848
         namespace: public
         group: SEATA_GROUP
     alibaba:
@@ -33,14 +33,14 @@ seata:
     #这里的名字与file.conf中vgroup_project_tx_group = "default"相同
     vgroup-mapping:
       project_tx_group: default
-    #这里的名字与file.conf中default.grouplist = "192.168.200.129:8091"相同
+    #这里的名字与file.conf中default.grouplist = "124.221.88.197:8091"相同
     grouplist:
-      default: 192.168.200.129:9200
+      default: 124.221.88.197:9200
   config:
     type: nacos
     nacos:
       group: SEATA_GROUP
-      server-addr: 192.168.200.129:8848
+      server-addr: 124.221.88.197:8848
       username: nacos
       password: nacos
       namespace: a2334a2d-d74b-4bfb-ac6c-2058aa46aa8c
@@ -48,7 +48,7 @@ seata:
     type: nacos
     nacos:
       group: SEATA_GROUP
-      server-addr: 192.168.200.129:8848
+      server-addr: 124.221.88.197:8848
       username: nacos
       password: nacos
       namespace: a2334a2d-d74b-4bfb-ac6c-2058aa46aa8c
@@ -62,7 +62,7 @@ dubbo:
   scan:
     base-packages: com.itheima.restkeeper.job
   registry:
-    address: spring-cloud://192.168.200.129
+    address: spring-cloud://124.221.88.197
   protocol:
     name: dubbo
     port: 28079
@@ -74,7 +74,7 @@ restkeeper:
       executor:
         # 调度中心部署跟地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。
         # 执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册；
-        admin-addresses: http://192.168.200.129:8280/xxl-job-admin/
+        admin-addresses: http://124.221.88.197:8280/xxl-job-admin/
         # 执行器AppName [选填]：执行器心跳注册分组依据；为空则关闭自动注册
         app-name: model-trading-job-listen
         # 执行器IP [选填]：默认为空表示自动获取IP，多网卡时可手动设置指定IP，

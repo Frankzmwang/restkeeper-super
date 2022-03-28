@@ -24,7 +24,7 @@ spring:
   datasource:
     druid:
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://192.168.200.129:3306/restkeeper-shop?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
+      url: jdbc:mysql://124.221.88.197:3306/restkeeper-shop?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
       username: root
       password: pass
 #mybatis配置
@@ -62,14 +62,14 @@ seata:
     #这里的名字与file.conf中vgroup_project_tx_group = "default"相同
     vgroup-mapping:
       project_tx_group: default
-    #这里的名字与file.conf中default.grouplist = "192.168.200.129:8091"相同
+    #这里的名字与file.conf中default.grouplist = "124.221.88.197:8091"相同
     grouplist:
-      default: 192.168.200.129:9200
+      default: 124.221.88.197:9200
   config:
     type: nacos
     nacos:
       group: SEATA_GROUP
-      server-addr: 192.168.200.129:8848
+      server-addr: 124.221.88.197:8848
       username: nacos
       password: nacos
       namespace: a2334a2d-d74b-4bfb-ac6c-2058aa46aa8c
@@ -77,7 +77,7 @@ seata:
     type: nacos
     nacos:
       group: SEATA_GROUP
-      server-addr: 192.168.200.129:8848
+      server-addr: 124.221.88.197:8848
       username: nacos
       password: nacos
       namespace: a2334a2d-d74b-4bfb-ac6c-2058aa46aa8c
@@ -96,7 +96,7 @@ dubbo:
     subscribed-services: model-basic-producer,model-trading-producer,model-shop-user
   registry:
     #注册中心
-    address: spring-cloud://192.168.200.129
+    address: spring-cloud://124.221.88.197
   #服务协议定义
   protocol:
     #服务协议名称

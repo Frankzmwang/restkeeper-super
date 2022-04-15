@@ -14,7 +14,7 @@ spring:
       config: classpath:singleServerConfig.yaml
     host: 124.221.88.197
     port: 6379
-    password: pass
+    password: wa201107027
   cloud:
     stream:
       rabbit:
@@ -51,7 +51,7 @@ spring:
       driver-class-name: com.mysql.jdbc.Driver
       url: jdbc:mysql://124.221.88.197:3306/restkeeper-basic?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
       username: root
-      password: pass
+      password: wa201107027
 #mybatis配置
 mybatis-plus:
   # MyBaits 别名包扫描路径，通过该属性可以给包中的类注册别名

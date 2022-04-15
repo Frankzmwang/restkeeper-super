@@ -18,7 +18,7 @@ spring:
       driver-class-name: com.mysql.jdbc.Driver
       url: jdbc:mysql://124.221.88.197:3306/restkeeper-trading?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
       username: root
-      password: pass
+      password: wa201107027
   cloud:
     nacos:
       discovery:

@@ -8,7 +8,7 @@ singleServerConfig:
   retryInterval: 1500
   reconnectionTimeout: 3000
   failedAttempts: 3
-  password: pass
+  password: wa201107027
   subscriptionsPerConnection: 5
   clientName: null
   address: "redis://124.221.88.197:6379"
